@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Secrets & env
+.env
+.env.*
+!.env.example
+
+# Remember plugin (session tooling, not project content)
+.remember/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Build output
+dist/
+build/
