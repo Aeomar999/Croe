@@ -6,6 +6,7 @@ import type { DisputeReasonCode, DisputeStatus, EscrowState, LedgerEvent } from 
 import { DISPUTE_REASON_CODES } from "../types/domain.js";
 import type { ForensicContext } from "../middleware/forensic.js";
 import { runHeuristics, applyTrustPenalty, freezeDevice } from "./heuristics.js";
+import { runAITriage } from "./ai-triage.js";
 import { logger } from "../config/logger.js";
 
 type DisputeRow = {
@@ -179,8 +180,9 @@ export async function openDispute(p: {
     } else if (heuristicResult.ruleTriggered === "BURNER_ACCOUNT") {
       await applyRule3(dispute);
     } else {
-      // Rule 4: Pass — keep as AI_PROCESSING (Phase 5 will handle LLM)
-      logger.info({ disputeId: dispute.dispute_id }, "Heuristics passed — awaiting AI triage");
+      // Rule 4: Pass — proceed to AI triage (13-Disputes-and-AI-Triage.md §4-5)
+      logger.info({ disputeId: dispute.dispute_id }, "Heuristics passed — running AI triage");
+      await runAITriage(dispute.dispute_id);
     }
 
     // Re-fetch dispute
