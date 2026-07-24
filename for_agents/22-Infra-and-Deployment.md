@@ -1,4 +1,4 @@
-# Croe — Infrastructure & Deployment (`41-Infra-and-Deployment.md`)
+# Croe — Infrastructure & Deployment (`22-Infra-and-Deployment.md`)
 
 > Absorbs the backend/infra parts of the legacy `Techstack.md`. Student-cheap first, scale later. Cost realities in [`03-Business-Model-and-Costs.md`](03-Business-Model-and-Costs.md). Custody phase drives which env is "live".
 
@@ -38,9 +38,9 @@ Everything above runs free on a laptop → the P0 "build for ~0 GHS" path.
 ## 3. Backend Runtime
 
 - **Node.js 20 LTS + TypeScript 5.4** (strict: `noImplicitAny`, `strictNullChecks`).
-- Express/Fastify with raw-body capture for webhook HMAC ([`24`](24-Webhooks-and-Idempotency.md)).
+- Express/Fastify with raw-body capture for webhook HMAC ([`24`](12-Webhooks-and-Idempotency.md)).
 - `pg.Pool` (`max: 20`, `idleTimeoutMillis: 30000`) or pgBouncer transaction pooling.
-- **Migrations:** pin **`node-pg-migrate`** (or Prisma Migrate); one migration per change; never edit shipped migrations ([`11`](11-Data-Model.md) §8).
+- **Migrations:** pin **`node-pg-migrate`** (or Prisma Migrate); one migration per change; never edit shipped migrations ([`11`](05-Data-Model.md) §8).
 
 ## 4. LLM Hosting
 
@@ -59,7 +59,7 @@ Object storage: S3 / Cloudflare R2 (usage-based) for hashed evidence media.
 
 ## 6. CI/CD
 
-- On PR: typecheck, lint, unit/integration tests ([`43`](43-Testing-Strategy.md)), migration dry-run.
+- On PR: typecheck, lint, unit/integration tests ([`43`](24-Testing-Strategy.md)), migration dry-run.
 - On merge to main: build image, run migrations, deploy to staging; promote to prod on approval.
 - Secrets injected from the platform store (never in CI logs).
 

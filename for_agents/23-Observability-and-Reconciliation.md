@@ -1,6 +1,6 @@
-# Croe — Observability & Reconciliation (`42-Observability-and-Reconciliation.md`)
+# Croe — Observability & Reconciliation (`23-Observability-and-Reconciliation.md`)
 
-> The financial-integrity safety net. Reconciliation uses `CustodyProvider.reconcile()` ([`10`](10-Architecture.md)/[`12`](12-Money-Custody-and-Settlement.md)). Custody phase: P1+.
+> The financial-integrity safety net. Reconciliation uses `CustodyProvider.reconcile()` ([`10`](04-Architecture.md)/[`12`](06-Money-Custody-and-Settlement.md)). Custody phase: P1+.
 
 ## 1. Purpose & Boundaries
 
@@ -37,7 +37,7 @@ Plus operational: payout success rate, webhook retry rate, queue depth (human re
 
 ## 5. Daily Reconciliation Job
 
-Runs per currency (detail in [`12`](12-Money-Custody-and-Settlement.md) §4):
+Runs per currency (detail in [`12`](06-Money-Custody-and-Settlement.md) §4):
 1. `pooled = getBalance(currency)`.
 2. `subLedgerSum = SELECT SUM(amount_delta) FROM transaction_ledger WHERE currency=$1`.
 3. `statementSum` = partner/aggregator statement total for the window.
@@ -53,11 +53,11 @@ Runs per currency (detail in [`12`](12-Money-Custody-and-Settlement.md) §4):
 
 - Verify append-only: assert the app role cannot `UPDATE`/`DELETE` `transaction_ledger` (a scheduled check + a failed-attempt alert).
 - Optional hardening: hash-chain rows (`prev_hash`) for tamper-evidence.
-- Invariant check I1 ([`12`](12-Money-Custody-and-Settlement.md)) runs with reconciliation.
+- Invariant check I1 ([`12`](06-Money-Custody-and-Settlement.md)) runs with reconciliation.
 
 ## 7. Retention/Deletion Enforcement
 
-A scheduled job enforces the data-protection retention policy ([`40`](40-Security-Threat-Model.md)/[`02`](02-Market-and-Regulatory.md)) — purge/anonymize beyond the required window **[verify duration]**, preserving what regulation requires to keep.
+A scheduled job enforces the data-protection retention policy ([`40`](21-Security-Threat-Model.md)/[`02`](02-Market-and-Regulatory.md)) — purge/anonymize beyond the required window **[verify duration]**, preserving what regulation requires to keep.
 
 ## 8. Acceptance Criteria
 

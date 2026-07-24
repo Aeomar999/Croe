@@ -1,10 +1,10 @@
-# Croe — Testing Strategy (`43-Testing-Strategy.md`)
+# Croe — Testing Strategy (`24-Testing-Strategy.md`)
 
 > Every NFR/KPI in [`01-PRD.md`](01-PRD.md) maps to a test here. Custody phase: tests run against P0 sandbox.
 
 ## 1. Test Pyramid
 
-| Level | Scope | Tools (pin in [`41`](41-Infra-and-Deployment.md)) |
+| Level | Scope | Tools (pin in [`41`](22-Infra-and-Deployment.md)) |
 | :--- | :--- | :--- |
 | **Unit** | pure logic: money math, state guards, heuristic rules, JSON-schema validation | Jest / Vitest |
 | **Integration** | service + real Postgres/Redis (test containers): transactions, locks, idempotency | Jest + Testcontainers |
@@ -57,7 +57,7 @@ Fire **50 concurrent identical deposit webhooks** for one `transaction_id`:
 
 - Seed users across KYC tiers/trust scores; seed evidence with known hashes for recycled tests.
 - Aggregator **sandbox** for all payment contract tests; never hit live in CI.
-- CI runs unit + integration + contract on every PR ([`41`](41-Infra-and-Deployment.md)).
+- CI runs unit + integration + contract on every PR ([`41`](22-Infra-and-Deployment.md)).
 
 ## 5. Acceptance Criteria
 

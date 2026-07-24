@@ -1,10 +1,10 @@
-# Croe — Identity, Auth & Sessions (`20-Identity-Auth.md`)
+# Croe — Identity, Auth & Sessions (`08-Identity-Auth.md`)
 
-> Tables: `users`, `otp_challenges`, `auth_sessions` ([`11-Data-Model.md`](11-Data-Model.md)). No passwords — phone-OTP only. Custody phase: all.
+> Tables: `users`, `otp_challenges`, `auth_sessions` ([`05-Data-Model.md`](05-Data-Model.md)). No passwords — phone-OTP only. Custody phase: all.
 
 ## 1. Purpose & Boundaries
 
-Establish who a user is (phone-number-first), issue sessions, and bind devices for forensics. **Does not** do KYC/identity verification (that's [`21`](21-KYC-and-AML.md)) — a session only proves control of a phone number.
+Establish who a user is (phone-number-first), issue sessions, and bind devices for forensics. **Does not** do KYC/identity verification (that's [`21`](09-KYC-and-AML.md)) — a session only proves control of a phone number.
 
 ## 2. Auth Model
 
@@ -13,7 +13,7 @@ Establish who a user is (phone-number-first), issue sessions, and bind devices f
 - **Session:** short-lived **access token** (JWT, ~15 min) + long-lived **refresh token** (opaque, hashed in `auth_sessions`, ~30 days). Access token carries `user_id`, `kyc_tier`, `session_id`.
 - **Device binding:** every session records `device_id` (from `X-Device-Fingerprint`); mismatch on refresh is flagged (SIM-swap/hijack signal).
 
-## 3. Endpoints (contracts in [`30-API-Reference.md`](30-API-Reference.md))
+## 3. Endpoints (contracts in [`18-API-Reference.md`](18-API-Reference.md))
 
 | Endpoint | Purpose |
 | :--- | :--- |
@@ -55,7 +55,7 @@ sequenceDiagram
 
 - OTP codes are stored **hashed** (`code_hash`), never plaintext; compared in constant time.
 - Refresh tokens stored hashed; rotated on every use (reuse of an old refresh token → revoke the whole chain).
-- Access-token secret and OTP pepper come from env/secrets ([`40-Security-Threat-Model.md`](40-Security-Threat-Model.md)); never in code.
+- Access-token secret and OTP pepper come from env/secrets ([`21-Security-Threat-Model.md`](21-Security-Threat-Model.md)); never in code.
 - All auth mutations write forensic headers to the ledger where they touch a transaction.
 
 ## 7. Acceptance Criteria

@@ -1,10 +1,10 @@
-# Croe — Admin & Reviewer Console (`28-Admin-Console.md`)
+# Croe — Admin & Reviewer Console (`16-Admin-Console.md`)
 
 > Reads across `dispute_cases`, `transaction_ledger`, `evidence_artifacts`, `users`. The `Human Reviewer (L3)` surface. Custody phase: all.
 
 ## 1. Purpose & Boundaries
 
-Give L3 reviewers everything needed to adjudicate escalated disputes in minutes, and give ops the tools to manage fraud/reconciliation — all with a full audit trail. **Does not** make automated decisions ([`25`](25-Disputes-and-AI-Triage.md)); it's the human-in-the-loop.
+Give L3 reviewers everything needed to adjudicate escalated disputes in minutes, and give ops the tools to manage fraud/reconciliation — all with a full audit trail. **Does not** make automated decisions ([`25`](13-Disputes-and-AI-Triage.md)); it's the human-in-the-loop.
 
 ## 2. Human-Review Queue
 
@@ -23,7 +23,7 @@ For one dispute, the reviewer sees:
 
 | Action | Effect |
 | :--- | :--- |
-| **Release to vendor** | Executes `RELEASE_VENDOR` via [`23`](23-Payouts-Refunds.md) → `FUNDS_RELEASED`; writes an audit ledger entry with `reviewer_id` and reason. |
+| **Release to vendor** | Executes `RELEASE_VENDOR` via [`23`](11-Payouts-Refunds.md) → `FUNDS_RELEASED`; writes an audit ledger entry with `reviewer_id` and reason. |
 | **Refund buyer** | Executes `REFUND_BUYER` → `FUNDS_REFUNDED`; audited. |
 | **Freeze / unfreeze user** | Toggles `users.is_frozen`; audited. |
 | **Adjust trust score** | Manual correction with reason; audited. |
@@ -42,7 +42,7 @@ Console auth is separate from the consumer app (admin session, stronger auth, IP
 
 ## 6. Ops Tooling
 
-- **Reconciliation view:** daily `ReconciliationReport` ([`12`](12-Money-Custody-and-Settlement.md)/[`42`](42-Observability-and-Reconciliation.md)); mismatch drill-down.
+- **Reconciliation view:** daily `ReconciliationReport` ([`12`](06-Money-Custody-and-Settlement.md)/[`42`](23-Observability-and-Reconciliation.md)); mismatch drill-down.
 - **KYC review:** approve/reject `kyc_records`, set tier.
 - **Fraud review:** device/IP linkage graph, frozen-account list.
 - **Manual payout retry:** re-trigger a `FAILED` payout after correcting the MSISDN.
@@ -59,5 +59,5 @@ Console auth is separate from the consumer app (admin session, stronger auth, IP
 
 - Every escalated dispute is actionable with full forensic context in one view.
 - Every admin action is authenticated, authorized, reasoned, and audit-logged.
-- No admin action bypasses the payout-ordering rules of [`23`](23-Payouts-Refunds.md).
+- No admin action bypasses the payout-ordering rules of [`23`](11-Payouts-Refunds.md).
 - Reconciliation mismatches are visible and drillable.

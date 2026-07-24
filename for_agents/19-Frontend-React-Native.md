@@ -1,6 +1,6 @@
-# Croe — Frontend: React Native (`31-Frontend-React-Native.md`)
+# Croe — Frontend: React Native (`19-Frontend-React-Native.md`)
 
-> **React Native + TypeScript.** No Flutter/Dart. Consumes [`30-API-Reference.md`](30-API-Reference.md) and [`32-Design-System.md`](32-Design-System.md). Custody phase: all (client is phase-agnostic).
+> **React Native + TypeScript.** No Flutter/Dart. Consumes [`18-API-Reference.md`](18-API-Reference.md) and [`20-Design-System.md`](20-Design-System.md). Custody phase: all (client is phase-agnostic).
 
 ## 1. Purpose & Boundaries
 
@@ -52,7 +52,7 @@ api.interceptors.request.use(async (config) => {
 });
 ```
 
-Header names are **identical** to what [`24`](24-Webhooks-and-Idempotency.md) / [`26`](26-Evidence-and-Forensics.md) expect. A response interceptor handles `401` (refresh-and-retry once) and maps the error catalog ([`30`](30-API-Reference.md)) to friendly copy.
+Header names are **identical** to what [`24`](12-Webhooks-and-Idempotency.md) / [`26`](14-Evidence-and-Forensics.md) expect. A response interceptor handles `401` (refresh-and-retry once) and maps the error catalog ([`30`](18-API-Reference.md)) to friendly copy.
 
 ## 4. Offline / Retry Resilience (emerging-market networks)
 
@@ -70,7 +70,7 @@ Header names are **identical** to what [`24`](24-Webhooks-and-Idempotency.md) / 
 | Pay / Deposit (buyer) | MoMo number + carrier → USSD |
 | Transaction Status | Live state, timeline, actions (ship/confirm/dispute) |
 | Dispute | Reason code, claim, evidence upload |
-| Dispute Status | Progress tracker, calm copy ([`32`](32-Design-System.md)) |
+| Dispute Status | Progress tracker, calm copy ([`32`](20-Design-System.md)) |
 | KYC | Tier upgrade |
 | Wallet/History | Past transactions, payouts |
 

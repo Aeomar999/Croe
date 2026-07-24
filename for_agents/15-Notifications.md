@@ -1,6 +1,6 @@
-# Croe — Notifications (`27-Notifications.md`)
+# Croe — Notifications (`15-Notifications.md`)
 
-> Table: `notifications` ([`11-Data-Model.md`](11-Data-Model.md)). Triggered by lifecycle transitions ([`13`](13-Escrow-Lifecycle.md)). Copy tone from [`32-Design-System.md`](32-Design-System.md). Custody phase: all.
+> Table: `notifications` ([`05-Data-Model.md`](05-Data-Model.md)). Triggered by lifecycle transitions ([`13`](07-Escrow-Lifecycle.md)). Copy tone from [`20-Design-System.md`](20-Design-System.md). Custody phase: all.
 
 ## 1. Purpose & Boundaries
 
@@ -32,11 +32,11 @@ Every notification is queued as a `notifications` row (`QUEUED`) and dispatched 
 | Payout `FAILED` | Recipient | Push + SMS | `payout_failed` |
 | KYC approved/rejected | User | Push | `kyc_result` |
 
-Any state transition in [`13`](13-Escrow-Lifecycle.md) marked "notify" has a row here.
+Any state transition in [`13`](07-Escrow-Lifecycle.md) marked "notify" has a row here.
 
 ## 4. Templates (micro-empathy)
 
-Templates live with the design system copy ([`32`](32-Design-System.md)); calm, non-clinical. Example:
+Templates live with the design system copy ([`32`](20-Design-System.md)); calm, non-clinical. Example:
 - `funds_secured` (Vendor): "Good news — the buyer's payment for Order #{{ref}} is safely secured in Croe. You're cleared to ship. 📦"
 - `dispute_opened` (Both): "We've safely paused Order #{{ref}} while our review checks the details. The funds stay protected for both of you."
 
@@ -62,4 +62,4 @@ Templates support variables (`{{ref}}`, `{{amount}}`, `{{currency}}`) and are lo
 - Every "notify" transition in the lifecycle produces at least one queued notification.
 - Critical money/dispute events are never suppressed by preferences.
 - Failed sends are retried and observable; no silent drops.
-- Copy matches the calm tone in [`32`](32-Design-System.md).
+- Copy matches the calm tone in [`32`](20-Design-System.md).

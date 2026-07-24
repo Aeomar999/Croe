@@ -1,6 +1,6 @@
-# Croe — Trust Score & Anti-Fraud (`29-Trust-Score-and-Anti-Fraud.md`)
+# Croe — Trust Score & Anti-Fraud (`17-Trust-Score-and-Anti-Fraud.md`)
 
-> Fields: `users.trust_score` (`NUMERIC(5,2)`, 0–100), `users.is_frozen`. Works with the dispute heuristics ([`25`](25-Disputes-and-AI-Triage.md)) and forensic ledger ([`26`](26-Evidence-and-Forensics.md)). v1 is **deterministic** (ML is future work). Custody phase: all.
+> Fields: `users.trust_score` (`NUMERIC(5,2)`, 0–100), `users.is_frozen`. Works with the dispute heuristics ([`25`](13-Disputes-and-AI-Triage.md)) and forensic ledger ([`26`](14-Evidence-and-Forensics.md)). v1 is **deterministic** (ML is future work). Custody phase: all.
 
 ## 1. Purpose & Boundaries
 
@@ -13,9 +13,9 @@ Quantify each user's trustworthiness and gate risky behavior, deterministically 
 
 | Event | Δ trust | Source |
 | :--- | :--- | :--- |
-| Recycled evidence detected | −50 | [`25`](25-Disputes-and-AI-Triage.md) Rule 1 |
+| Recycled evidence detected | −50 | [`25`](13-Disputes-and-AI-Triage.md) Rule 1 |
 | Dispute lost (ruled against user) | −10 **[verify]** | dispute resolution |
-| Sybil/velocity tripwire | −50 + freeze | [`25`](25-Disputes-and-AI-Triage.md) Rule 2 |
+| Sybil/velocity tripwire | −50 + freeze | [`25`](13-Disputes-and-AI-Triage.md) Rule 2 |
 | Successful released transaction | +1 (cap 100) **[verify]** | lifecycle |
 | Chargeback/refund fraud pattern | −25 **[verify]** | fraud review |
 
@@ -34,11 +34,11 @@ Freezing never seizes in-escrow funds — those resolve through the normal lifec
 ## 4. Fraud Rules Engine (deterministic)
 
 Runs on dispute open and (lightweight) on escrow create/deposit:
-- **Recycled media** — SHA-256 match across transactions ([`26`](26-Evidence-and-Forensics.md)).
-- **Sybil / velocity** — distinct accounts or disputes per IP/device in 24h over threshold ([`25`](25-Disputes-and-AI-Triage.md) Query B).
+- **Recycled media** — SHA-256 match across transactions ([`26`](14-Evidence-and-Forensics.md)).
+- **Sybil / velocity** — distinct accounts or disputes per IP/device in 24h over threshold ([`25`](13-Disputes-and-AI-Triage.md) Query B).
 - **Burner account** — age < 48h + trust < 50 → human review.
 - **Device linkage** — many accounts sharing one `device_id` → flag to L3.
-- **Structuring** — repeated amounts just under KYC caps ([`21`](21-KYC-and-AML.md)).
+- **Structuring** — repeated amounts just under KYC caps ([`21`](09-KYC-and-AML.md)).
 
 All thresholds are config values, marked **[verify]**, tuned to keep false-positive lockouts < 0.5% (KPI, [`01`](01-PRD.md)).
 
@@ -52,7 +52,7 @@ All thresholds are config values, marked **[verify]**, tuned to keep false-posit
 
 ## 6. Appeals
 
-A frozen/penalized user can request review via the app; routed to L3 ([`28`](28-Admin-Console.md)), who can restore score/unfreeze with an audited reason.
+A frozen/penalized user can request review via the app; routed to L3 ([`28`](16-Admin-Console.md)), who can restore score/unfreeze with an audited reason.
 
 ## 7. Error & Edge Cases
 

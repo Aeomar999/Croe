@@ -1,6 +1,6 @@
 # Croe — Product Requirements Document (`01-PRD.md`)
 
-> Terms in `code font` are defined in [`45-Glossary.md`](45-Glossary.md). Money handling follows the custody phases (P0–P3) defined there.
+> Terms in `code font` are defined in [`26-Glossary.md`](26-Glossary.md). Money handling follows the custody phases (P0–P3) defined there.
 
 ## 1. Executive Summary & Vision
 
@@ -10,7 +10,7 @@ Social commerce suffers a structural trust deficit:
 - **Buyers** fear paying upfront for goods that never arrive or arrive defective/counterfeit.
 - **Vendors** fear dispatching inventory for orders where payment never materializes.
 
-**Croe's solution:** a zero-friction payment-link system integrated with local **Mobile Money (MoMo)** rails. A buyer's funds are held in escrow until delivery is verified; then the vendor is paid out (less commission). Croe does not legally custody funds directly — it orchestrates a licensed custody chain per the phased-custody model (see [`12-Money-Custody-and-Settlement.md`](12-Money-Custody-and-Settlement.md)).
+**Croe's solution:** a zero-friction payment-link system integrated with local **Mobile Money (MoMo)** rails. A buyer's funds are held in escrow until delivery is verified; then the vendor is paid out (less commission). Croe does not legally custody funds directly — it orchestrates a licensed custody chain per the phased-custody model (see [`06-Money-Custody-and-Settlement.md`](06-Money-Custody-and-Settlement.md)).
 
 To operate sustainably without a large support team, disputes flow through a **Three-Tier Forensic & Automated Triage Pipeline**:
 1. **Immutable forensic logging** — cryptographically verifiable audit trails and file hashing.
@@ -55,11 +55,11 @@ To operate sustainably without a large support team, disputes flow through a **T
 - **REQ-DIS-4:** Disputes passing deterministic checks are evaluated by the AI arbitrator, which outputs `REFUND_BUYER` / `RELEASE_VENDOR` / `ESCALATE_HUMAN` with a confidence score.
 
 ### 3.5 Supporting subsystems (full requirements in their own docs)
-- **REQ-AUTH:** phone-OTP identity & sessions ([`20-Identity-Auth.md`](20-Identity-Auth.md)).
-- **REQ-KYC:** tiered KYC gating transaction limits ([`21-KYC-and-AML.md`](21-KYC-and-AML.md)).
-- **REQ-PAYOUT:** vendor payouts, buyer refunds, failure recovery ([`23-Payouts-Refunds.md`](23-Payouts-Refunds.md)).
-- **REQ-NOTIF:** push/SMS notifications per state change ([`27-Notifications.md`](27-Notifications.md)).
-- **REQ-ADMIN:** L3 reviewer console ([`28-Admin-Console.md`](28-Admin-Console.md)).
+- **REQ-AUTH:** phone-OTP identity & sessions ([`08-Identity-Auth.md`](08-Identity-Auth.md)).
+- **REQ-KYC:** tiered KYC gating transaction limits ([`09-KYC-and-AML.md`](09-KYC-and-AML.md)).
+- **REQ-PAYOUT:** vendor payouts, buyer refunds, failure recovery ([`11-Payouts-Refunds.md`](11-Payouts-Refunds.md)).
+- **REQ-NOTIF:** push/SMS notifications per state change ([`15-Notifications.md`](15-Notifications.md)).
+- **REQ-ADMIN:** L3 reviewer console ([`16-Admin-Console.md`](16-Admin-Console.md)).
 
 ## 4. Non-Functional Requirements
 
@@ -86,7 +86,7 @@ To operate sustainably without a large support team, disputes flow through a **T
 - **Multi-currency conversion.** Each transaction is single-currency; no FX in v1.
 - **ML-based trust scoring.** v1 trust score is deterministic rules.
 
-*(These are documented in full across the package but are sequenced later in [`90-Roadmap.md`](90-Roadmap.md); "no MVP carve-out" means every doc is written, not that every feature ships simultaneously.)*
+*(These are documented in full across the package but are sequenced later in [`27-Roadmap.md`](27-Roadmap.md); "no MVP carve-out" means every doc is written, not that every feature ships simultaneously.)*
 
 ## 6. End-to-End User Journeys
 

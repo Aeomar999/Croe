@@ -1,6 +1,6 @@
-# Croe — System Architecture (`10-Architecture.md`)
+# Croe — System Architecture (`04-Architecture.md`)
 
-> Terms per [`45-Glossary.md`](45-Glossary.md). This doc defines the service boundaries and the two provider abstractions (`CustodyProvider`, `PaymentRail`) consumed by [`12`](12-Money-Custody-and-Settlement.md), [`22`](22-Payments-Collection.md), and [`23`](23-Payouts-Refunds.md). Method names here are canonical — reuse them verbatim.
+> Terms per [`26-Glossary.md`](26-Glossary.md). This doc defines the service boundaries and the two provider abstractions (`CustodyProvider`, `PaymentRail`) consumed by [`12`](06-Money-Custody-and-Settlement.md), [`22`](10-Payments-Collection.md), and [`23`](11-Payouts-Refunds.md). Method names here are canonical — reuse them verbatim.
 
 ## 1. Architectural Principles
 
@@ -79,16 +79,16 @@ Each service owns one responsibility and its tables; they communicate via well-d
 
 | Service | Responsibility | Primary tables | Spec |
 | :--- | :--- | :--- | :--- |
-| Identity & Auth | phone-OTP signup/login, sessions, device binding | `users`, `auth_sessions`, `otp_challenges` | [`20`](20-Identity-Auth.md) |
-| KYC/AML | tiered verification, limits, screening | `kyc_records` | [`21`](21-KYC-and-AML.md) |
-| Escrow | contract lifecycle, state transitions | `escrow_transactions`, `transaction_ledger` | [`13`](13-Escrow-Lifecycle.md) |
-| Custody & Settlement | pooled float, sub-ledger, reconciliation | `custody_accounts`, `transaction_ledger` | [`12`](12-Money-Custody-and-Settlement.md) |
-| Payments | deposits (collection), payouts/refunds (disbursement) | `payouts`, `webhook_inbox` | [`22`](22-Payments-Collection.md), [`23`](23-Payouts-Refunds.md) |
-| Evidence | media upload, SHA-256, forensic capture | `evidence_artifacts` | [`26`](26-Evidence-and-Forensics.md) |
-| Dispute & Triage | heuristics + LLM + human routing | `dispute_cases` | [`25`](25-Disputes-and-AI-Triage.md) |
-| Notifications | push/SMS per event | `notifications` | [`27`](27-Notifications.md) |
-| Admin/Reviewer | L3 queue & adjudication | (reads all) | [`28`](28-Admin-Console.md) |
-| Webhook Worker | verify + idempotent ingest of aggregator callbacks | `webhook_inbox`, `idempotency_keys` | [`24`](24-Webhooks-and-Idempotency.md) |
+| Identity & Auth | phone-OTP signup/login, sessions, device binding | `users`, `auth_sessions`, `otp_challenges` | [`20`](08-Identity-Auth.md) |
+| KYC/AML | tiered verification, limits, screening | `kyc_records` | [`21`](09-KYC-and-AML.md) |
+| Escrow | contract lifecycle, state transitions | `escrow_transactions`, `transaction_ledger` | [`13`](07-Escrow-Lifecycle.md) |
+| Custody & Settlement | pooled float, sub-ledger, reconciliation | `custody_accounts`, `transaction_ledger` | [`12`](06-Money-Custody-and-Settlement.md) |
+| Payments | deposits (collection), payouts/refunds (disbursement) | `payouts`, `webhook_inbox` | [`22`](10-Payments-Collection.md), [`23`](11-Payouts-Refunds.md) |
+| Evidence | media upload, SHA-256, forensic capture | `evidence_artifacts` | [`26`](14-Evidence-and-Forensics.md) |
+| Dispute & Triage | heuristics + LLM + human routing | `dispute_cases` | [`25`](13-Disputes-and-AI-Triage.md) |
+| Notifications | push/SMS per event | `notifications` | [`27`](15-Notifications.md) |
+| Admin/Reviewer | L3 queue & adjudication | (reads all) | [`28`](16-Admin-Console.md) |
+| Webhook Worker | verify + idempotent ingest of aggregator callbacks | `webhook_inbox`, `idempotency_keys` | [`24`](12-Webhooks-and-Idempotency.md) |
 
 ## 4. The `CustodyProvider` Abstraction
 
@@ -122,7 +122,7 @@ interface DisbursementResult { payoutId: string; status: 'INITIATED' | 'SUCCESS'
 interface ReconciliationReport { pooled: Money; subLedgerSum: Money; statementSum: Money; matched: boolean; discrepancies: Array<{ transactionId?: string; note: string; delta: Money }>; }
 ```
 
-Behavior of each method per phase is specified in [`12-Money-Custody-and-Settlement.md`](12-Money-Custody-and-Settlement.md).
+Behavior of each method per phase is specified in [`06-Money-Custody-and-Settlement.md`](06-Money-Custody-and-Settlement.md).
 
 ## 5. The `PaymentRail` Abstraction
 
@@ -146,7 +146,7 @@ interface PaymentRail {
 
 ## 6. Concurrency & Double-Spend Engine
 
-When a MoMo webhook arrives, three layered gates prevent double-funding (full detail + code in [`24-Webhooks-and-Idempotency.md`](24-Webhooks-and-Idempotency.md)):
+When a MoMo webhook arrives, three layered gates prevent double-funding (full detail + code in [`12-Webhooks-and-Idempotency.md`](12-Webhooks-and-Idempotency.md)):
 
 ```mermaid
 sequenceDiagram

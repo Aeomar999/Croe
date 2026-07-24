@@ -1,4 +1,4 @@
-# Croe — Glossary & Canonical Vocabulary (`45-Glossary.md`)
+# Croe — Glossary & Canonical Vocabulary (`26-Glossary.md`)
 
 > **This document is the single source of truth for naming.** Every other spec in `for_agents/` must use these exact terms — one canonical name per state, event, actor, action, and phase. No synonyms, no drift. If a term is missing, add it here first, then use it elsewhere.
 
@@ -106,7 +106,7 @@ Valid values for `dispute_cases.ai_recommended_action` and the LLM output field 
 
 | Tier | Requirement | Effect |
 | :--- | :--- | :--- |
-| **Tier 0** | Phone number verified (OTP) only | Low per-transaction / daily limits (values in `21-KYC-and-AML.md`, marked "verify"). |
+| **Tier 0** | Phone number verified (OTP) only | Low per-transaction / daily limits (values in `09-KYC-and-AML.md`, marked "verify"). |
 | **Tier 1** | + Full name + government ID | Higher limits. |
 | **Tier 2** | + Enhanced due diligence | Highest limits; required above threshold amounts. |
 
@@ -128,4 +128,4 @@ Valid values for `dispute_cases.ai_recommended_action` and the LLM output field 
 
 ## 9. Money & currency rule (reference)
 
-All monetary amounts are `NUMERIC(15,2)` with an explicit ISO currency code (`GHS`, `NGN`, `KES`). Never floats. Never cross-currency arithmetic without an audited conversion entry. (Enforced in `44-Engineering-Rules.md`.)
+All monetary amounts are `NUMERIC(15,2)` with an explicit ISO currency code (`GHS`, `NGN`, `KES`). Never floats. Never cross-currency arithmetic without an audited conversion entry. (Enforced in `25-Engineering-Rules.md`.)

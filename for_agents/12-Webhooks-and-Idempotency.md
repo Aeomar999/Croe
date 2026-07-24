@@ -1,6 +1,6 @@
-# Croe — Webhooks & Idempotency (`24-Webhooks-and-Idempotency.md`)
+# Croe — Webhooks & Idempotency (`12-Webhooks-and-Idempotency.md`)
 
-> Tables: `webhook_inbox`, `idempotency_keys` ([`11-Data-Model.md`](11-Data-Model.md)). Implements the concurrency engine from [`10-Architecture.md`](10-Architecture.md) §6. Custody phase: P1+ (real webhooks); P0 uses sandbox webhooks.
+> Tables: `webhook_inbox`, `idempotency_keys` ([`05-Data-Model.md`](05-Data-Model.md)). Implements the concurrency engine from [`04-Architecture.md`](04-Architecture.md) §6. Custody phase: P1+ (real webhooks); P0 uses sandbox webhooks.
 
 ## 1. Purpose & Boundaries
 
@@ -103,5 +103,5 @@ try {
 
 - HMAC is computed over the raw buffer; no parsed-JSON HMAC anywhere.
 - Webhooks ACK `200` in < 500 ms before processing.
-- 50 concurrent identical deposit webhooks → exactly one `FUNDS_DEPOSITED`, zero double-funding (tested in [`43`](43-Testing-Strategy.md)).
+- 50 concurrent identical deposit webhooks → exactly one `FUNDS_DEPOSITED`, zero double-funding (tested in [`43`](24-Testing-Strategy.md)).
 - Idempotency survives process restarts (durable inbox).

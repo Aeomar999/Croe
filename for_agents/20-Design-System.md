@@ -1,6 +1,6 @@
-# Croe — Design System (`32-Design-System.md`)
+# Croe — Design System (`20-Design-System.md`)
 
-> React Native implementation. "Calm over confrontation." Consumed by [`31-Frontend-React-Native.md`](31-Frontend-React-Native.md) and the notification templates ([`27`](27-Notifications.md)).
+> React Native implementation. "Calm over confrontation." Consumed by [`19-Frontend-React-Native.md`](19-Frontend-React-Native.md) and the notification templates ([`27`](15-Notifications.md)).
 
 ## 1. Visual Psychology
 
@@ -67,7 +67,7 @@ Three calm vertical zones: (1) status card (shield, reassurance), (2) vertical p
 
 ## 5. Copywriting — Micro-Empathy
 
-Never show backend enums, stack traces, or punitive warnings. (Shared with [`27-Notifications.md`](27-Notifications.md) templates.)
+Never show backend enums, stack traces, or punitive warnings. (Shared with [`15-Notifications.md`](15-Notifications.md) templates.)
 
 | Scenario | ❌ Avoid | ✅ Croe |
 | :--- | :--- | :--- |
@@ -79,5 +79,5 @@ Never show backend enums, stack traces, or punitive warnings. (Shared with [`27-
 ## 6. Acceptance Criteria
 
 - All code samples are RN/TSX (no Dart).
-- Tokens match usage in [`31`](31-Frontend-React-Native.md); warnings use amber, never crimson.
+- Tokens match usage in [`31`](19-Frontend-React-Native.md); warnings use amber, never crimson.
 - Every user-facing string follows the micro-empathy tone.

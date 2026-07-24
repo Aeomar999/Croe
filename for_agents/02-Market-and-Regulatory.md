@@ -1,11 +1,11 @@
 # Croe — Market & Regulatory Landscape (`02-Market-and-Regulatory.md`)
 
-> **This is not legal advice.** It is an architecture-shaping summary. Every figure or license detail marked **[verify]** must be confirmed with a Ghanaian fintech lawyer or directly with the Bank of Ghana before handling real money. Custody phases (P0–P3) are defined in [`45-Glossary.md`](45-Glossary.md).
+> **This is not legal advice.** It is an architecture-shaping summary. Every figure or license detail marked **[verify]** must be confirmed with a Ghanaian fintech lawyer or directly with the Bank of Ghana before handling real money. Custody phases (P0–P3) are defined in [`26-Glossary.md`](26-Glossary.md).
 
 ## 1. Market Context — Ghana First
 
 - **Mobile Money is the dominant rail.** The primary networks are **MTN MoMo** (largest), **Telecel Cash**, and **AirtelTigo Money**. Most buyers and vendors already transact via MoMo, so Croe meets users where they are.
-- **Aggregators** that expose these rails via API: **Paystack (Ghana)**, **Flutterwave**, **Hubtel**. Croe integrates one or more behind the `PaymentRail` abstraction ([`10-Architecture.md`](10-Architecture.md)).
+- **Aggregators** that expose these rails via API: **Paystack (Ghana)**, **Flutterwave**, **Hubtel**. Croe integrates one or more behind the `PaymentRail` abstraction ([`04-Architecture.md`](04-Architecture.md)).
 - **Currency:** `GHS`. Architecture keeps currency explicit so Kenya (`KES`/M-Pesa) and Nigeria (`NGN`) can be added later as additional `PaymentRail` implementations.
 
 ## 2. Why Escrow Is a Regulated Activity
@@ -31,7 +31,7 @@ Holding a buyer's money between deposit and release is **custody of third-party 
 
 Even riding a partner's licence, Croe must operate KYC/AML controls (the partner will require it):
 
-- **Customer Due Diligence (CDD):** verify identity proportionate to risk. Croe uses **tiered KYC** (Tier 0 phone-only → Tier 2 enhanced) with per-tier transaction limits — see [`21-KYC-and-AML.md`](21-KYC-and-AML.md). Threshold amounts are **[verify]** against BoG/partner requirements.
+- **Customer Due Diligence (CDD):** verify identity proportionate to risk. Croe uses **tiered KYC** (Tier 0 phone-only → Tier 2 enhanced) with per-tier transaction limits — see [`09-KYC-and-AML.md`](09-KYC-and-AML.md). Threshold amounts are **[verify]** against BoG/partner requirements.
 - **Record-keeping:** retain transaction and identity records for the statutory period **[verify duration]**. Croe's append-only `transaction_ledger` and forensic capture support this.
 - **Suspicious-activity handling:** detect and (where required) report suspicious transactions to the **Financial Intelligence Centre (FIC)** **[verify process]**. v1 surfaces flags to the L3 console for manual handling.
 - **Sanctions / PEP screening:** v1 manual; automated screening is future work.
@@ -41,7 +41,7 @@ Even riding a partner's licence, Croe must operate KYC/AML controls (the partner
 Croe captures forensic artifacts (IP, device id, network type, media). Ghana's **Data Protection Act, 2012 (Act 843)** applies:
 - Capture only what's needed for fraud prevention and dispute resolution; document the lawful basis.
 - Secure storage; access limited to L3 review and reconciliation.
-- A retention/deletion policy is defined in [`40-Security-Threat-Model.md`](40-Security-Threat-Model.md) and [`42-Observability-and-Reconciliation.md`](42-Observability-and-Reconciliation.md). Specific obligations **[verify]**.
+- A retention/deletion policy is defined in [`21-Security-Threat-Model.md`](21-Security-Threat-Model.md) and [`23-Observability-and-Reconciliation.md`](23-Observability-and-Reconciliation.md). Specific obligations **[verify]**.
 
 ## 6. Global Expansion Notes (post-Ghana)
 

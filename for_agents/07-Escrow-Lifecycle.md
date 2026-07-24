@@ -1,6 +1,6 @@
-# Croe — Escrow Lifecycle & State Machine (`13-Escrow-Lifecycle.md`)
+# Croe — Escrow Lifecycle & State Machine (`07-Escrow-Lifecycle.md`)
 
-> Uses ONLY the canonical states and ledger events from [`45-Glossary.md`](45-Glossary.md). Every transition names its ledger event, custody action, and notification. Enforced by the `CHECK` constraints in [`11-Data-Model.md`](11-Data-Model.md).
+> Uses ONLY the canonical states and ledger events from [`26-Glossary.md`](26-Glossary.md). Every transition names its ledger event, custody action, and notification. Enforced by the `CHECK` constraints in [`05-Data-Model.md`](05-Data-Model.md).
 
 ## 1. State Machine
 
@@ -52,7 +52,7 @@ stateDiagram-v2
 | `RESOLVED_AUTO`/`UNDER_HUMAN_REVIEW` | resolution = release | payout success | `FUNDS_RELEASED` | `FUNDS_RELEASED` (−amount) | `releaseTo` | both |
 | `RESOLVED_AUTO`/`UNDER_HUMAN_REVIEW` | resolution = refund | payout success | `FUNDS_REFUNDED` | `REFUND_ISSUED` (−amount) | `refundTo` | both |
 
-**Guards enforced in code + DB:** money mutations require `SELECT FOR UPDATE` on the row ([`24`](24-Webhooks-and-Idempotency.md)); the `−amount` ledger event is written only after payout provider `SUCCESS` ([`12`](12-Money-Custody-and-Settlement.md) §6).
+**Guards enforced in code + DB:** money mutations require `SELECT FOR UPDATE` on the row ([`24`](12-Webhooks-and-Idempotency.md)); the `−amount` ledger event is written only after payout provider `SUCCESS` ([`12`](06-Money-Custody-and-Settlement.md) §6).
 
 ## 3. Timeouts & Timers
 
@@ -82,13 +82,13 @@ sequenceDiagram
 ```
 
 ### 5.2 Deposit → secure (concurrency-safe)
-See [`24-Webhooks-and-Idempotency.md`](24-Webhooks-and-Idempotency.md) for the full webhook/lock sequence; net effect: `AWAITING_DEPOSIT` → `FUNDS_SECURED` with a single `FUNDS_DEPOSITED` event.
+See [`12-Webhooks-and-Idempotency.md`](12-Webhooks-and-Idempotency.md) for the full webhook/lock sequence; net effect: `AWAITING_DEPOSIT` → `FUNDS_SECURED` with a single `FUNDS_DEPOSITED` event.
 
 ### 5.3 Dispute triage
-See [`25-Disputes-and-AI-Triage.md`](25-Disputes-and-AI-Triage.md); net effect: `DISPUTE_OPENED` → (`FRAUD_LOCKOUT` | `RESOLVED_AUTO` | `UNDER_HUMAN_REVIEW`) → terminal.
+See [`13-Disputes-and-AI-Triage.md`](13-Disputes-and-AI-Triage.md); net effect: `DISPUTE_OPENED` → (`FRAUD_LOCKOUT` | `RESOLVED_AUTO` | `UNDER_HUMAN_REVIEW`) → terminal.
 
 ## 6. Consistency Checks (for the implementer)
 
-- Every `current_status` value appears in this machine and in the [`11`](11-Data-Model.md) `CHECK`.
+- Every `current_status` value appears in this machine and in the [`11`](05-Data-Model.md) `CHECK`.
 - Every money transition has a matching `payouts` row and a `±amount` ledger event.
-- No transition writes a state outside [`45-Glossary.md`](45-Glossary.md).
+- No transition writes a state outside [`26-Glossary.md`](26-Glossary.md).

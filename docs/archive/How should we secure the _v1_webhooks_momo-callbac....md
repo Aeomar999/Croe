@@ -21,13 +21,15 @@ Here is the exact Express middleware you would use to secure the endpoint.
 
 `// 1. We must grab the raw body before Express parses it into JSON`  
 `app.use(express.json({`  
-  `verify: (req: any, res, buf) => {`  
-    `req.rawBody = buf;`  
+  `verify: (req, res, buf) => {`  
+    `(req as any).rawBody = buf;`  
   `}`  
 `}));`
 
 `// The secret key provided by your Mobile Money gateway dashboard (Store in .env!)`  
-`const MOMO_SECRET_KEY = process.env.MOMO_WEBHOOK_SECRET || 'super_secret_key';`
+`// SEC-01: MUST throw if unset — never fall back to a default`  
+`const MOMO_SECRET_KEY = process.env.MOMO_WEBHOOK_SECRET;`  
+`if (!MOMO_SECRET_KEY) throw new Error('MOMO_WEBHOOK_SECRET is required');`
 
 `export function verifyMoMoWebhook(req: Request, res: Response, next: NextFunction) {`  
   `const signatureHeader = req.headers['x-momo-signature'] as string;`  
@@ -62,7 +64,7 @@ Here is the exact Express middleware you would use to secure the endpoint.
 
   `// Ensure buffers are the same length before comparing to avoid thrown errors`  
   `if (expectedBuffer.length !== computedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, computedBuffer)) {`  
-    `console.error('CRITICAL: Webhook signature mismatch. Possible spoofing attempt.');`  
+    `// logger.warn({ event: 'webhook_signature_mismatch' }, 'Webhook signature mismatch');`  
     `return res.status(401).json({ error: 'Invalid signature' });`  
   `}`
 

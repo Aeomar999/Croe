@@ -1,10 +1,10 @@
-# Croe — Payments: Collection & Deposits (`22-Payments-Collection.md`)
+# Croe — Payments: Collection & Deposits (`10-Payments-Collection.md`)
 
-> Uses `CustodyProvider.collect()` and `PaymentRail.initiateDeposit()`/`parseWebhook()` ([`10-Architecture.md`](10-Architecture.md)). Webhook security in [`24`](24-Webhooks-and-Idempotency.md). Custody phase: P0 sandbox / P1 live / P2 partner.
+> Uses `CustodyProvider.collect()` and `PaymentRail.initiateDeposit()`/`parseWebhook()` ([`04-Architecture.md`](04-Architecture.md)). Webhook security in [`24`](12-Webhooks-and-Idempotency.md). Custody phase: P0 sandbox / P1 live / P2 partner.
 
 ## 1. Purpose & Boundaries
 
-Move a buyer's MoMo funds **into** escrow. Owns the deposit request and the confirmation path. **Does not** own disbursements ([`23`](23-Payouts-Refunds.md)) or webhook signature verification ([`24`](24-Webhooks-and-Idempotency.md)).
+Move a buyer's MoMo funds **into** escrow. Owns the deposit request and the confirmation path. **Does not** own disbursements ([`23`](11-Payouts-Refunds.md)) or webhook signature verification ([`24`](12-Webhooks-and-Idempotency.md)).
 
 ## 2. Deposit Flow
 
@@ -43,10 +43,10 @@ sequenceDiagram
 ## 5. Confirmation & State
 
 The deposit becomes real only when a **verified** webhook with `outcome = PAID` arrives:
-1. Webhook verified + deduped ([`24`](24-Webhooks-and-Idempotency.md)).
+1. Webhook verified + deduped ([`24`](12-Webhooks-and-Idempotency.md)).
 2. `SELECT FOR UPDATE` the transaction row.
 3. `hold()` → append `FUNDS_DEPOSITED` (partial unique index guarantees one), set `FUNDS_SECURED`.
-4. Notify both parties ([`27`](27-Notifications.md)).
+4. Notify both parties ([`27`](15-Notifications.md)).
 
 ## 6. Error & Edge Cases
 
@@ -58,7 +58,7 @@ The deposit becomes real only when a **verified** webhook with `outcome = PAID` 
 | Amount mismatch (paid ≠ contract amount) | Reject the hold; flag to L3; do not mark `FUNDS_SECURED`. |
 | Deposit after window (`EXPIRED`) | Reject/hold for manual refund; never fund an expired contract silently. |
 | Wrong currency | Reject; `422 CURRENCY_MISMATCH`. |
-| Settled-but-not-held (missed webhook) | Reconciliation sweep ([`12`](12-Money-Custody-and-Settlement.md)/[`42`](42-Observability-and-Reconciliation.md)) completes the hold. |
+| Settled-but-not-held (missed webhook) | Reconciliation sweep ([`12`](06-Money-Custody-and-Settlement.md)/[`42`](23-Observability-and-Reconciliation.md)) completes the hold. |
 
 ## 7. Acceptance Criteria
 

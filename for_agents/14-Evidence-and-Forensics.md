@@ -1,10 +1,10 @@
-# Croe — Evidence & Forensics (`26-Evidence-and-Forensics.md`)
+# Croe — Evidence & Forensics (`14-Evidence-and-Forensics.md`)
 
-> Table: `evidence_artifacts` + `idx_evidence_sha256` ([`11-Data-Model.md`](11-Data-Model.md)). Feeds the recycled-photo heuristic in [`25`](25-Disputes-and-AI-Triage.md). Custody phase: all.
+> Table: `evidence_artifacts` + `idx_evidence_sha256` ([`05-Data-Model.md`](05-Data-Model.md)). Feeds the recycled-photo heuristic in [`25`](13-Disputes-and-AI-Triage.md). Custody phase: all.
 
 ## 1. Purpose & Boundaries
 
-Capture tamper-evident media (packaging photos, damaged goods, receipts) and silent forensic artifacts, so disputes can be adjudicated on hard evidence. **Does not** decide disputes ([`25`](25-Disputes-and-AI-Triage.md)).
+Capture tamper-evident media (packaging photos, damaged goods, receipts) and silent forensic artifacts, so disputes can be adjudicated on hard evidence. **Does not** decide disputes ([`25`](13-Disputes-and-AI-Triage.md)).
 
 ## 2. Upload Flow
 
@@ -39,7 +39,7 @@ Before storing, run:
 ```sql
 SELECT EXISTS (SELECT 1 FROM evidence_artifacts WHERE sha256_hash=$1 AND transaction_id!=$2);
 ```
-If TRUE, the exact file was used in another transaction → reject upload with `409 EVIDENCE_RECYCLED`, and if it's attached to a dispute, feed Rule 1 in [`25`](25-Disputes-and-AI-Triage.md) (trust −50). Same file within the *same* transaction is allowed (re-upload).
+If TRUE, the exact file was used in another transaction → reject upload with `409 EVIDENCE_RECYCLED`, and if it's attached to a dispute, feed Rule 1 in [`25`](13-Disputes-and-AI-Triage.md) (trust −50). Same file within the *same* transaction is allowed (re-upload).
 
 ## 5. Silent Forensic Capture
 
@@ -63,7 +63,7 @@ These support the repudiation defense ("my account was hacked") — if device/IP
 
 ## 7. Retention & Privacy
 
-Media and forensic data are retained per [`02-Market-and-Regulatory.md`](02-Market-and-Regulatory.md)/[`40-Security-Threat-Model.md`](40-Security-Threat-Model.md); access restricted to L3 review and reconciliation; deletion policy honors data-protection duties **[verify duration]**.
+Media and forensic data are retained per [`02-Market-and-Regulatory.md`](02-Market-and-Regulatory.md)/[`21-Security-Threat-Model.md`](21-Security-Threat-Model.md); access restricted to L3 review and reconciliation; deletion policy honors data-protection duties **[verify duration]**.
 
 ## 8. Acceptance Criteria
 

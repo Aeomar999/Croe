@@ -1,10 +1,10 @@
-# Croe — KYC & AML (`21-KYC-and-AML.md`)
+# Croe — KYC & AML (`09-KYC-and-AML.md`)
 
-> Tables: `kyc_records`, `users.kyc_tier` ([`11-Data-Model.md`](11-Data-Model.md)). Regulatory context: [`02-Market-and-Regulatory.md`](02-Market-and-Regulatory.md). All thresholds marked **[verify]** against BoG/partner rules. Custody phase: gating matters from P1 (real money).
+> Tables: `kyc_records`, `users.kyc_tier` ([`05-Data-Model.md`](05-Data-Model.md)). Regulatory context: [`02-Market-and-Regulatory.md`](02-Market-and-Regulatory.md). All thresholds marked **[verify]** against BoG/partner rules. Custody phase: gating matters from P1 (real money).
 
 ## 1. Purpose & Boundaries
 
-Verify user identity proportionate to transaction risk, enforce per-tier limits, and support AML obligations (record-keeping, suspicious-activity handling). **Does not** move money or authenticate sessions ([`20`](20-Identity-Auth.md)).
+Verify user identity proportionate to transaction risk, enforce per-tier limits, and support AML obligations (record-keeping, suspicious-activity handling). **Does not** move money or authenticate sessions ([`20`](08-Identity-Auth.md)).
 
 ## 2. KYC Tiers & Limits
 
@@ -31,9 +31,9 @@ sequenceDiagram
     API-->>U: notification (tier upgraded / rejected reason)
 ```
 
-- **v1:** manual review via the admin console ([`28`](28-Admin-Console.md)).
+- **v1:** manual review via the admin console ([`28`](16-Admin-Console.md)).
 - **Later:** integrate an identity provider (Smile ID, Dojah, etc.) — behind an interface so v1 manual and later automated share the same `kyc_records` contract.
-- **Privacy:** store a **hash** of the ID number (`id_number_hash`), not the raw value; ID images in access-restricted storage; retention per [`02`](02-Market-and-Regulatory.md)/[`40`](40-Security-Threat-Model.md).
+- **Privacy:** store a **hash** of the ID number (`id_number_hash`), not the raw value; ID images in access-restricted storage; retention per [`02`](02-Market-and-Regulatory.md)/[`40`](21-Security-Threat-Model.md).
 
 ## 4. AML Controls
 
@@ -45,7 +45,7 @@ sequenceDiagram
 | **Suspicious-activity reporting** | L3 files with the FIC **[verify process]** | Assisted workflow |
 | **Record-keeping** | Append-only ledger + `kyc_records`, retained **[verify duration]** | — |
 
-**Structuring watch:** repeated transactions just under a tier cap from one user/device → flag to L3 (links to [`29-Trust-Score-and-Anti-Fraud.md`](29-Trust-Score-and-Anti-Fraud.md)).
+**Structuring watch:** repeated transactions just under a tier cap from one user/device → flag to L3 (links to [`17-Trust-Score-and-Anti-Fraud.md`](17-Trust-Score-and-Anti-Fraud.md)).
 
 ## 5. Error & Edge Cases
 

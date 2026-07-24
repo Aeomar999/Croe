@@ -1,6 +1,6 @@
-# Croe — Data Model & PostgreSQL Schema (`11-Data-Model.md`)
+# Croe — Data Model & PostgreSQL Schema (`05-Data-Model.md`)
 
-> States, events, reason codes, AI actions, and KYC tiers are the canonical sets from [`45-Glossary.md`](45-Glossary.md) and are enforced here with `CHECK` constraints. Money is `NUMERIC(15,2)`. This DDL targets **PostgreSQL 16+**.
+> States, events, reason codes, AI actions, and KYC tiers are the canonical sets from [`26-Glossary.md`](26-Glossary.md) and are enforced here with `CHECK` constraints. Money is `NUMERIC(15,2)`. This DDL targets **PostgreSQL 16+**.
 
 ## 1. Design Principles
 
@@ -16,7 +16,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Canonical value sets enforced via CHECK constraints (kept inline for clarity;
 -- may be migrated to lookup tables if the admin console needs to manage them).
--- Escrow states, ledger events, reason codes, AI actions, KYC tiers: see 45-Glossary.md.
+-- Escrow states, ledger events, reason codes, AI actions, KYC tiers: see 26-Glossary.md.
 ```
 
 ## 3. Core Tables
@@ -228,7 +228,7 @@ CREATE TABLE notifications (
     user_id         UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     transaction_id  UUID REFERENCES escrow_transactions(transaction_id) ON DELETE SET NULL,
     channel         VARCHAR(10) NOT NULL CHECK (channel IN ('PUSH','SMS')),
-    template_key    VARCHAR(64) NOT NULL,                 -- see 27-Notifications.md matrix
+    template_key    VARCHAR(64) NOT NULL,                 -- see 15-Notifications.md matrix
     status          VARCHAR(20) NOT NULL DEFAULT 'QUEUED' CHECK (status IN ('QUEUED','SENT','FAILED')),
     sent_at         TIMESTAMPTZ,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -245,7 +245,7 @@ SELECT COALESCE(SUM(amount_delta), 0) AS held_balance
 FROM transaction_ledger
 WHERE transaction_id = $1;
 ```
-`FUNDS_DEPOSITED` writes `+amount`; `FUNDS_RELEASED`/`REFUND_ISSUED` write `−amount`. Invariant (checked in [`42`](42-Observability-and-Reconciliation.md)): `SUM(held_balance across all transactions) == custody pooled balance`.
+`FUNDS_DEPOSITED` writes `+amount`; `FUNDS_RELEASED`/`REFUND_ISSUED` write `−amount`. Invariant (checked in [`42`](23-Observability-and-Reconciliation.md)): `SUM(held_balance across all transactions) == custody pooled balance`.
 
 ## 6. Indexes
 
@@ -279,6 +279,6 @@ REVOKE UPDATE, DELETE ON TABLE transaction_ledger FROM app_user;
 
 ## 8. Migrations
 
-- Managed with a migration tool (pinned in [`41-Infra-and-Deployment.md`](41-Infra-and-Deployment.md); recommended: `node-pg-migrate` or Prisma Migrate).
+- Managed with a migration tool (pinned in [`22-Infra-and-Deployment.md`](22-Infra-and-Deployment.md); recommended: `node-pg-migrate` or Prisma Migrate).
 - One migration per logical change; never edit a shipped migration. Seed `custody_accounts` (P0 sandbox row) in a seed script, not a migration.
 - The `REVOKE` and any role setup run in a dedicated migration after `app_user` exists.

@@ -1,10 +1,10 @@
-# Croe — Disputes & AI Triage (`25-Disputes-and-AI-Triage.md`)
+# Croe — Disputes & AI Triage (`13-Disputes-and-AI-Triage.md`)
 
-> Table: `dispute_cases` ([`11-Data-Model.md`](11-Data-Model.md)). States/actions per [`45-Glossary.md`](45-Glossary.md). Custody phase: all (money moves only via [`23`](23-Payouts-Refunds.md)).
+> Table: `dispute_cases` ([`05-Data-Model.md`](05-Data-Model.md)). States/actions per [`26-Glossary.md`](26-Glossary.md). Custody phase: all (money moves only via [`23`](11-Payouts-Refunds.md)).
 
 ## 1. Purpose & Boundaries
 
-Resolve disputes cheaply and fairly: a deterministic SQL firewall first, then a local LLM arbitrator, escalating to L3 only when genuinely ambiguous. **Does not** move money directly — it decides an action; disbursement is [`23`](23-Payouts-Refunds.md).
+Resolve disputes cheaply and fairly: a deterministic SQL firewall first, then a local LLM arbitrator, escalating to L3 only when genuinely ambiguous. **Does not** move money directly — it decides an action; disbursement is [`23`](11-Payouts-Refunds.md).
 
 ## 2. Dispute Lifecycle
 
@@ -68,7 +68,7 @@ FROM users WHERE user_id=$1;
 
 ## 4. Step 2 — Local LLM Arbitrator
 
-- **Model:** a **self-hosted open-weights LLM** served via Ollama/vLLM (pin exact model in [`41-Infra-and-Deployment.md`](41-Infra-and-Deployment.md); the earlier "Gemma 4" label was a placeholder — no such release exists). Store the resolved id in `ai_model_version`.
+- **Model:** a **self-hosted open-weights LLM** served via Ollama/vLLM (pin exact model in [`22-Infra-and-Deployment.md`](22-Infra-and-Deployment.md); the earlier "Gemma 4" label was a placeholder — no such release exists). Store the resolved id in `ai_model_version`.
 - **Text-only:** images are pre-captioned by a lightweight captioner, so the arbitrator reads verified text descriptions (keeps inference < 5 s).
 
 ### System prompt (verbatim)
@@ -102,8 +102,8 @@ Reject and re-request (or escalate) if the response is not valid JSON, `confiden
 
 ## 5. Confidence Gate
 
-- `confidence_score ≥ 0.900` **and** action ∈ {`REFUND_BUYER`,`RELEASE_VENDOR`} → execute via [`23`](23-Payouts-Refunds.md); `RESOLVED_AUTO`.
-- Otherwise (or `ESCALATE_HUMAN`) → `UNDER_HUMAN_REVIEW` ([`28`](28-Admin-Console.md)).
+- `confidence_score ≥ 0.900` **and** action ∈ {`REFUND_BUYER`,`RELEASE_VENDOR`} → execute via [`23`](11-Payouts-Refunds.md); `RESOLVED_AUTO`.
+- Otherwise (or `ESCALATE_HUMAN`) → `UNDER_HUMAN_REVIEW` ([`28`](16-Admin-Console.md)).
 
 ## 6. Prompt-Injection Hardening
 
