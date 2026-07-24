@@ -156,9 +156,9 @@ fix(api): handle 23505 trap in processDepositWebhook
 
 | | |
 |---|---|
-| **Branch** | `phase/1-data-ledger` (combined) |
+| **Branch** | `phase/3-webhooks-payments` |
 | **Spec** | [`10-Payments-Collection.md`](for_agents/10-Payments-Collection.md), [`11-Payouts-Refunds.md`](for_agents/11-Payouts-Refunds.md), [`12-Webhooks-and-Idempotency.md`](for_agents/12-Webhooks-and-Idempotency.md) |
-| **Status** | In progress |
+| **Status** | ✅ Complete (73 tests, 3 commits) |
 | **Started** | 2026-07-24 |
 | **Gate passed** | — |
 | **Depends on** | Phase 2 |
@@ -169,19 +169,19 @@ fix(api): handle 23505 trap in processDepositWebhook
 - [x] Replay defense: reject `|now − timestamp| > 300s` (WH-02)
 - [x] Constant-time compare via `crypto.timingSafeEqual` + length check (WH-03)
 - [x] Fast-200: ACK `< 500ms` before async processing (WH-04)
-- [ ] Redis `SETNX` fast dedup gate (`SETNX idemp:<provider_ref>`, 24h TTL)
+- [x] Redis `SETNX` fast dedup gate (`SETNX idemp:<provider_ref>`, 24h TTL)
 - [x] Durable `webhook_inbox` INSERT with `ON CONFLICT DO NOTHING`
 - [x] Client `Idempotency-Key` validation (UUIDv4, `POST`/`PUT`/`DELETE` only)
-- [ ] `Idempotency-Key` replay → stored response; missing key → `400 IDEMPOTENCY_KEY_REQUIRED`
-- [ ] Collection (deposit) flow: `CustodyProvider.collect()` → webhook → `hold()`
-- [ ] Payout flow: `CustodyProvider.releaseTo()` → provider confirms → ledger write (MONEY-01)
-- [ ] Refund flow: `CustodyProvider.refundTo()` → provider confirms → ledger write
-- [ ] Commission math: `vendor_net + commission == amount` exactly (NUMERIC(15,2))
-- [ ] Payout state machine: `INITIATED` → `SUCCESS`/`FAILED`/`RETRYING`
-- [ ] `idx_single_success_payout` enforced — no double-release per direction
+- [x] `Idempotency-Key` replay → stored response; missing key → `400 IDEMPOTENCY_KEY_REQUIRED`
+- [x] Collection (deposit) flow: `CustodyProvider.collect()` → webhook → `hold()`
+- [x] Payout flow: `CustodyProvider.releaseTo()` → provider confirms → ledger write (MONEY-01)
+- [x] Refund flow: `CustodyProvider.refundTo()` → provider confirms → ledger write
+- [x] Commission math: `vendor_net + commission == amount` exactly (NUMERIC(15,2))
+- [x] Payout state machine: `INITIATED` → `SUCCESS`/`FAILED`/`RETRYING`
+- [x] `idx_single_success_payout` enforced — no double-release per direction
 - [x] Unit tests: HMAC verification, replay rejection, timing-safe comparison
-- [ ] Unit tests: idempotency dedup, conflict detection
-- [ ] Unit tests: commission math precision
+- [x] Unit tests: idempotency dedup, conflict detection
+- [x] Unit tests: commission math precision
 - [x] **Critical test: 50 concurrent identical deposit webhooks → exactly one `FUNDS_DEPOSITED`**
 
 #### Sub-tasks log
@@ -189,6 +189,8 @@ fix(api): handle 23505 trap in processDepositWebhook
 | Date | Commit | Description |
 |---|---|---|
 | 2026-07-24 | `17038c8` | feat(webhook): HMAC verification, durable inbox, fast-200 ack, client idempotency, 64 tests passing |
+| 2026-07-24 | `16d1557` | feat(payout): release/refund flows with MONEY-01 pay-then-ledger, Redis dedup gate, commission math, 67 tests |
+| 2026-07-24 | `9da0f94` | feat(idempotency): full replay guard with stored response, conflict detection, 24h TTL purge, 73 tests |
 
 ---
 

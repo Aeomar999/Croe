@@ -35,9 +35,9 @@ This gate is checked at the end of every phase below, not only at go-live.
 - [ ] `processDepositWebhook` with `SELECT FOR UPDATE` + `23505` trap.
 
 ## Phase 3 — Webhooks & Payments (spec: [`22`](10-Payments-Collection.md), [`23`](11-Payouts-Refunds.md), [`24`](12-Webhooks-and-Idempotency.md))
-- [ ] Raw-body HMAC middleware; replay + timing defenses; fast-200.
-- [ ] Redis `SETNX` + durable `webhook_inbox`; client `Idempotency-Key`.
-- [ ] Collection (deposit) flow; payout/refund with pay-then-ledger ordering.
+- [x] Raw-body HMAC middleware; replay + timing defenses; fast-200.
+- [x] Redis `SETNX` + durable `webhook_inbox`; client `Idempotency-Key`.
+- [x] Collection (deposit) flow; payout/refund with pay-then-ledger ordering.
 
 ## Phase 4 — Evidence & Heuristics (spec: [`26`](14-Evidence-and-Forensics.md), [`25`](13-Disputes-and-AI-Triage.md))
 - [ ] Upload + streaming SHA-256 + object storage; recycled-photo trap.

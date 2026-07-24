@@ -11,6 +11,8 @@ import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
 import healthRoutes from "./routes/health.js";
 import escrowRoutes from "./routes/escrow.js";
 import webhookRoutes from "./routes/webhooks.js";
+import evidenceRoutes from "./routes/evidence.js";
+import disputeRoutes from "./routes/disputes.js";
 
 const app: Application = express();
 
@@ -39,6 +41,8 @@ app.use(requestLogger);
 app.use("/v1", healthRoutes);
 app.use("/v1", escrowRoutes);
 app.use("/v1", webhookRoutes);
+app.use("/v1", evidenceRoutes);
+app.use("/v1", disputeRoutes);
 
 // 404 and error handling
 app.use(notFoundHandler);

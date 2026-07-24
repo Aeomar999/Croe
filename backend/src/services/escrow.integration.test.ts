@@ -15,10 +15,23 @@ const VENDOR_ID = "11111111-1111-1111-1111-111111111111";
 const BUYER_ID = "22222222-2222-2222-2222-222222222222";
 
 beforeEach(async () => {
-  await pool.query("DELETE FROM transaction_ledger");
-  await pool.query("DELETE FROM payouts");
-  await pool.query("DELETE FROM escrow_transactions");
-  await pool.query("DELETE FROM users");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM evidence_artifacts");
+    await client.query("DELETE FROM dispute_cases");
+    await client.query("DELETE FROM idempotency_keys");
+    await client.query("DELETE FROM transaction_ledger");
+    await client.query("DELETE FROM payouts");
+    await client.query("DELETE FROM escrow_transactions");
+    await client.query("DELETE FROM users");
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
   await pool.query(
     `INSERT INTO users (user_id, phone_number, full_name)
      VALUES ($1, '+233240000001', 'Test Vendor'),
