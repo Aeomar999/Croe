@@ -9,6 +9,7 @@ import {
   shipEscrow,
   confirmDelivery,
   cancelEscrow,
+  releaseFunds,
 } from "../services/escrow.js";
 import type { Currency, Carrier } from "../types/domain.js";
 import { CURRENCIES } from "../types/domain.js";
@@ -165,6 +166,23 @@ router.post("/escrow/:id/cancel", requireIdempotencyKey, async (req: Request, re
   const tx = await cancelEscrow({
     transactionId: id,
     vendorId: "00000000-0000-0000-0000-000000000000", // placeholder until auth
+    forensic: req.forensic,
+  });
+
+  res.json({
+    transaction_id: tx.transaction_id,
+    current_status: tx.current_status,
+  });
+});
+
+/**
+ * POST /v1/escrow/:id/release — Release funds to vendor
+ * Guard: must be in DELIVERED_CONFIRMED. MONEY-01: pay then ledger.
+ */
+router.post("/escrow/:id/release", requireIdempotencyKey, async (req: Request, res: Response) => {
+  const id = validateId(req.params["id"] as string);
+  const tx = await releaseFunds({
+    transactionId: id,
     forensic: req.forensic,
   });
 

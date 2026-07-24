@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
 import { checkDatabaseConnection, closeDatabasePool } from "./db/pool.js";
+import { closeRedis } from "./config/redis.js";
 import { requestLogger } from "./middleware/request-logger.js";
 import { forensicCapture } from "./middleware/forensic.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
@@ -60,6 +61,7 @@ async function start(): Promise<void> {
       logger.info({ signal }, "Received shutdown signal");
       server.close(async () => {
         await closeDatabasePool();
+        await closeRedis();
         process.exit(0);
       });
 

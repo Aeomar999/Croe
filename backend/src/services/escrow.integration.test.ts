@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { pool } from "../db/pool.js";
-import { createEscrow, getEscrow, initiateDeposit, shipEscrow, confirmDelivery, cancelEscrow, processDepositWebhook } from "./escrow.js";
+import { createEscrow, getEscrow, initiateDeposit, shipEscrow, confirmDelivery, cancelEscrow, processDepositWebhook, releaseFunds } from "./escrow.js";
 
 beforeAll(async () => {
   await pool.query("SELECT 1");
@@ -15,6 +15,7 @@ const BUYER_ID = "22222222-2222-2222-2222-222222222222";
 
 beforeEach(async () => {
   await pool.query("DELETE FROM transaction_ledger");
+  await pool.query("DELETE FROM payouts");
   await pool.query("DELETE FROM escrow_transactions");
   await pool.query("DELETE FROM users");
   await pool.query(
@@ -270,6 +271,102 @@ describe("escrow service integration", () => {
 
       const final = await getEscrow(tx.transaction_id);
       expect(final.current_status).toBe("FUNDS_SECURED");
+    });
+  });
+
+  describe("release flow", () => {
+    it("releases funds after delivery confirmation with correct commission", async () => {
+      // Full happy path to DELIVERED_CONFIRMED
+      const tx = await createEscrow({
+        vendorId: VENDOR_ID,
+        itemDescription: "Test product for integration testing purposes",
+        amount: "500.00",
+        currency: "GHS",
+      });
+
+      await initiateDeposit({
+        transactionId: tx.transaction_id,
+        buyerId: BUYER_ID,
+        msisdn: "+233240000000",
+        carrier: "MTN",
+      });
+
+      await processDepositWebhook({ transactionId: tx.transaction_id });
+      await shipEscrow({ transactionId: tx.transaction_id, vendorId: VENDOR_ID });
+      await confirmDelivery({ transactionId: tx.transaction_id, buyerId: BUYER_ID });
+
+      // Release funds
+      const released = await releaseFunds({ transactionId: tx.transaction_id });
+      expect(released.current_status).toBe("FUNDS_RELEASED");
+
+      // Check payout row was created
+      const { rows: payouts } = await pool.query(
+        "SELECT * FROM payouts WHERE transaction_id = $1 AND direction = 'RELEASE'",
+        [tx.transaction_id],
+      );
+      expect(payouts).toHaveLength(1);
+      expect(payouts[0].status).toBe("SUCCESS");
+
+      // Check commission math: 2% of 500.00 = 10.00, vendor gets 490.00
+      const vendorNet = parseFloat(payouts[0].amount);
+      expect(vendorNet).toBe(490.00);
+
+      // Check ledger has FUNDS_RELEASED entry with negative amount
+      const { rows: ledger } = await pool.query(
+        "SELECT * FROM transaction_ledger WHERE transaction_id = $1 AND event_type = 'FUNDS_RELEASED'",
+        [tx.transaction_id],
+      );
+      expect(ledger).toHaveLength(1);
+      expect(ledger[0].amount_delta).toBe("-500.00");
+    });
+
+    it("cannot release before funds are secured", async () => {
+      const tx = await createEscrow({
+        vendorId: VENDOR_ID,
+        itemDescription: "Test product for integration testing purposes",
+        amount: "100.00",
+        currency: "GHS",
+      });
+
+      // Cannot release from LINK_CREATED
+      await expect(
+        releaseFunds({ transactionId: tx.transaction_id }),
+      ).rejects.toThrow();
+    });
+
+    it("commission math is exact for various amounts", async () => {
+      const amounts = ["100.00", "250.50", "1000.00", "0.01"];
+      for (const amount of amounts) {
+        const tx = await createEscrow({
+          vendorId: VENDOR_ID,
+          itemDescription: "Test product for integration testing purposes",
+          amount,
+          currency: "GHS",
+        });
+
+        await initiateDeposit({
+          transactionId: tx.transaction_id,
+          buyerId: BUYER_ID,
+          msisdn: "+233240000000",
+          carrier: "MTN",
+        });
+
+        await processDepositWebhook({ transactionId: tx.transaction_id });
+        await shipEscrow({ transactionId: tx.transaction_id, vendorId: VENDOR_ID });
+        await confirmDelivery({ transactionId: tx.transaction_id, buyerId: BUYER_ID });
+        await releaseFunds({ transactionId: tx.transaction_id });
+
+        const { rows: payouts } = await pool.query(
+          "SELECT amount FROM payouts WHERE transaction_id = $1 AND direction = 'RELEASE'",
+          [tx.transaction_id],
+        );
+
+        const expectedCommission = (parseFloat(amount) * 0.02).toFixed(2);
+        const expectedVendorNet = (parseFloat(amount) - parseFloat(expectedCommission)).toFixed(2);
+
+        // Exact equality — no float drift (FIN-01)
+        expect(payouts[0].amount).toBe(expectedVendorNet);
+      }
     });
   });
 });

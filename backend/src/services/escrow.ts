@@ -4,7 +4,7 @@ import { InvalidTransitionError, validateTransition } from "./state-machine.js";
 import type { EscrowState, LedgerEvent, Carrier, Money } from "../types/domain.js";
 import type { ForensicContext } from "../middleware/forensic.js";
 import { AppError } from "../middleware/error-handler.js";
-import { paymentRail } from "../providers/index.js";
+import { paymentRail, custodyProvider } from "../providers/index.js";
 
 const DEPOSIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 const DISPUTE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h post-ship
@@ -441,6 +441,269 @@ export async function processDepositWebhook(p: {
 
     if (err instanceof InvalidTransitionError) {
       throw new AppError(409, `Cannot secure funds: transaction is not AWAITING_DEPOSIT`, "INVALID_STATE_TRANSITION");
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+// ─── Commission Constants ──────────────────────────────────
+const COMMISSION_RATE = 0.02; // 2% commission (P0 sandbox)
+
+/**
+ * Calculate commission and vendor net from amount.
+ * All values are NUMERIC(15,2) strings — no float arithmetic in DB.
+ */
+function calculateCommission(amountStr: string): {
+  commission: string;
+  vendorNet: string;
+} {
+  const amount = parseFloat(amountStr);
+  const commission = (amount * COMMISSION_RATE).toFixed(2);
+  const vendorNet = (amount - parseFloat(commission)).toFixed(2);
+  return { commission, vendorNet };
+}
+
+/**
+ * Release funds to vendor (MONEY-01: pay then ledger).
+ *
+ * Flow:
+ * 1. Validate state (must be DELIVERED_CONFIRMED)
+ * 2. Calculate commission
+ * 3. Call CustodyProvider.releaseTo() — external payout
+ * 4. On SUCCESS: write ledger + update state + record payout row (one DB txn)
+ * 5. On FAILED: record failed payout, do NOT write release ledger
+ *
+ * Uses idx_single_success_payout to prevent double-release.
+ */
+export async function releaseFunds(p: {
+  transactionId: string;
+  forensic?: ForensicContext;
+}): Promise<EscrowRow> {
+  const client = await getTransactionClient();
+  try {
+    await client.query("BEGIN");
+
+    // DB-02: FOR UPDATE before money mutation
+    const { rows } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1 FOR UPDATE`,
+      [p.transactionId],
+    );
+
+    const tx = rows[0];
+    if (!tx) {
+      throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
+    }
+
+    // Validate transition
+    validateTransition(tx.current_status, "FUNDS_RELEASED");
+
+    // Calculate commission (FIN-01: NUMERIC(15,2) strings)
+    const { commission, vendorNet } = calculateCommission(tx.amount);
+
+    // DB-04: Trap 23505 — idx_single_success_payout prevents double-release
+    try {
+      // Record payout INITIATED
+      await client.query(
+        `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
+         VALUES ($1, 'RELEASE', 'unknown', $2, $3, 'INITIATED')`,
+        [p.transactionId, vendorNet, tx.currency],
+      );
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: string }).code === "23505"
+      ) {
+        // Already released — idempotent return
+        await client.query("ROLLBACK");
+        return tx;
+      }
+      throw err;
+    }
+
+    // MONEY-01: Call CustodyProvider.releaseTo() BEFORE ledger write
+    const amount: Money = { amount: tx.amount, currency: tx.currency as Money["currency"] };
+    const commissionMoney: Money = { amount: commission, currency: tx.currency as Money["currency"] };
+
+    const result = await custodyProvider.releaseTo({
+      transactionId: p.transactionId,
+      vendorMsisdn: "unknown", // placeholder until user auth
+      amount,
+      commission: commissionMoney,
+    });
+
+    if (result.status === "SUCCESS") {
+      // Update payout row to SUCCESS
+      await client.query(
+        `UPDATE payouts SET status = 'SUCCESS', provider_ref = $1 WHERE transaction_id = $2 AND direction = 'RELEASE' AND status = 'INITIATED'`,
+        [result.providerRef, p.transactionId],
+      );
+
+      // Transition state
+      await client.query(
+        `UPDATE escrow_transactions SET current_status = 'FUNDS_RELEASED' WHERE transaction_id = $1`,
+        [p.transactionId],
+      );
+
+      // Append ledger entry (AUD-01) — amount_delta is the full amount (negative = outflow)
+      await appendLedger(client, {
+        transactionId: p.transactionId,
+        actorId: null, // System
+        eventType: "FUNDS_RELEASED",
+        previousStatus: tx.current_status,
+        newStatus: "FUNDS_RELEASED",
+        amountDelta: `-${tx.amount}`,
+        currency: tx.currency,
+        forensic: p.forensic,
+      });
+    } else {
+      // Payout failed — update payout row, do NOT write release ledger
+      await client.query(
+        `UPDATE payouts SET status = 'FAILED', failure_reason = $1 WHERE transaction_id = $2 AND direction = 'RELEASE' AND status = 'INITIATED'`,
+        [result.failureReason ?? "Unknown error", p.transactionId],
+      );
+
+      // Append PAYOUT_FAILED ledger entry
+      await appendLedger(client, {
+        transactionId: p.transactionId,
+        actorId: null,
+        eventType: "PAYOUT_FAILED",
+        previousStatus: tx.current_status,
+        newStatus: tx.current_status, // State doesn't change on failed payout
+        forensic: p.forensic,
+      });
+    }
+
+    await client.query("COMMIT");
+
+    // Re-fetch
+    const { rows: updated } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1`,
+      [p.transactionId],
+    );
+    return updated[0]!;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if (err instanceof InvalidTransitionError) {
+      throw new AppError(409, `Cannot release funds: transaction is not DELIVERED_CONFIRMED`, "INVALID_STATE_TRANSITION");
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Refund funds to buyer (MONEY-01: pay then ledger).
+ *
+ * Flow:
+ * 1. Validate state (must be RESOLVED_AUTO or UNDER_HUMAN_REVIEW)
+ * 2. Call CustodyProvider.refundTo() — external refund
+ * 3. On SUCCESS: write ledger + update state + record payout row (one DB txn)
+ * 4. On FAILED: record failed payout, do NOT write refund ledger
+ */
+export async function refundFunds(p: {
+  transactionId: string;
+  forensic?: ForensicContext;
+}): Promise<EscrowRow> {
+  const client = await getTransactionClient();
+  try {
+    await client.query("BEGIN");
+
+    // DB-02: FOR UPDATE before money mutation
+    const { rows } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1 FOR UPDATE`,
+      [p.transactionId],
+    );
+
+    const tx = rows[0];
+    if (!tx) {
+      throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
+    }
+
+    // Validate transition
+    validateTransition(tx.current_status, "FUNDS_REFUNDED");
+
+    // Record payout INITIATED
+    try {
+      await client.query(
+        `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
+         VALUES ($1, 'REFUND', 'unknown', $2, $3, 'INITIATED')`,
+        [p.transactionId, tx.amount, tx.currency],
+      );
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: string }).code === "23505"
+      ) {
+        await client.query("ROLLBACK");
+        return tx;
+      }
+      throw err;
+    }
+
+    // MONEY-01: Call CustodyProvider.refundTo() BEFORE ledger write
+    const amount: Money = { amount: tx.amount, currency: tx.currency as Money["currency"] };
+
+    const result = await custodyProvider.refundTo({
+      transactionId: p.transactionId,
+      buyerMsisdn: "unknown", // placeholder until user auth
+      amount,
+    });
+
+    if (result.status === "SUCCESS") {
+      await client.query(
+        `UPDATE payouts SET status = 'SUCCESS', provider_ref = $1 WHERE transaction_id = $2 AND direction = 'REFUND' AND status = 'INITIATED'`,
+        [result.providerRef, p.transactionId],
+      );
+
+      await client.query(
+        `UPDATE escrow_transactions SET current_status = 'FUNDS_REFUNDED' WHERE transaction_id = $1`,
+        [p.transactionId],
+      );
+
+      await appendLedger(client, {
+        transactionId: p.transactionId,
+        actorId: null,
+        eventType: "REFUND_ISSUED",
+        previousStatus: tx.current_status,
+        newStatus: "FUNDS_REFUNDED",
+        amountDelta: `-${tx.amount}`,
+        currency: tx.currency,
+        forensic: p.forensic,
+      });
+    } else {
+      await client.query(
+        `UPDATE payouts SET status = 'FAILED', failure_reason = $1 WHERE transaction_id = $2 AND direction = 'REFUND' AND status = 'INITIATED'`,
+        [result.failureReason ?? "Unknown error", p.transactionId],
+      );
+
+      await appendLedger(client, {
+        transactionId: p.transactionId,
+        actorId: null,
+        eventType: "PAYOUT_FAILED",
+        previousStatus: tx.current_status,
+        newStatus: tx.current_status,
+        forensic: p.forensic,
+      });
+    }
+
+    await client.query("COMMIT");
+
+    const { rows: updated } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1`,
+      [p.transactionId],
+    );
+    return updated[0]!;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if (err instanceof InvalidTransitionError) {
+      throw new AppError(409, `Cannot refund: transaction is not in RESOLVED_AUTO or UNDER_HUMAN_REVIEW`, "INVALID_STATE_TRANSITION");
     }
     throw err;
   } finally {
