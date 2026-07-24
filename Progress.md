@@ -236,30 +236,30 @@ fix(api): handle 23505 trap in processDepositWebhook
 |---|---|
 | **Branch** | `phase/5-ai-triage` |
 | **Spec** | [`13-Disputes-and-AI-Triage.md`](for_agents/13-Disputes-and-AI-Triage.md) (Step 2), [`22-Infra-and-Deployment.md`](for_agents/22-Infra-and-Deployment.md) |
-| **Status** | Not started |
-| **Started** | — |
+| **Status** | ✅ Complete (111 tests, 1 commit) |
+| **Started** | 2026-07-24 |
 | **Gate passed** | — |
 | **Depends on** | Phase 4 |
 
 #### Checklist
 
-- [ ] Local LLM setup: Ollama (dev) / vLLM (prod)
-- [ ] Pin exact model id → `ai_model_version` column in `dispute_cases`
-- [ ] System prompt implemented verbatim (from `13-Disputes-and-AI-Triage.md` §4)
-- [ ] Strict JSON output validation (AI-02): reject/re-request on malformed output
-- [ ] Image pre-captioning pipeline (text-only to LLM, keeps inference < 5s)
-- [ ] Confidence gate (AI-03): `≥ 0.900` → auto-execute via `23`; `< 0.900` → `UNDER_HUMAN_REVIEW`
-- [ ] LLM output stored in `dispute_cases.ai_reasoning_payload` (GIN-indexed)
-- [ ] Prompt-injection hardening (AI-04): user text isolated in JSON fields, never concatenated into instructions
-- [ ] LLM never directly triggers payout — only code can execute `23` methods
-- [ ] Unit tests: schema validation, confidence threshold logic, repair/escalation
-- [ ] Integration tests: malformed output → repair, low confidence → human, high confidence → auto
+- [x] Local LLM setup: Ollama (dev) / vLLM (prod)
+- [x] Pin exact model id → `ai_model_version` column in `dispute_cases`
+- [x] System prompt implemented verbatim (from `13-Disputes-and-AI-Triage.md` §4)
+- [x] Strict JSON output validation (AI-02): reject/re-request on malformed output
+- [x] Image pre-captioning pipeline (text-only to LLM, keeps inference < 5s)
+- [x] Confidence gate (AI-03): `≥ 0.900` → auto-execute via `23`; `< 0.900` → `UNDER_HUMAN_REVIEW`
+- [x] LLM output stored in `dispute_cases.ai_reasoning_payload` (GIN-indexed)
+- [x] Prompt-injection hardening (AI-04): user text isolated in JSON fields, never concatenated into instructions
+- [x] LLM never directly triggers payout — only code can execute `23` methods
+- [x] Unit tests: schema validation, confidence threshold logic, repair/escalation
+- [x] Integration tests: malformed output → repair, low confidence → human, high confidence → auto
 
 #### Sub-tasks log
 
 | Date | Commit | Description |
 |---|---|---|
-| — | — | _No commits yet_ |
+| 2026-07-24 | `d8cc3b4` | feat(ai-triage): LLM client, system prompt, schema validation, confidence gate, 111 tests |
 
 ---
 
