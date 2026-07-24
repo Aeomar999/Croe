@@ -138,7 +138,7 @@ fix(api): handle 23505 trap in processDepositWebhook
 - [x] `processDepositWebhook` with SELECT FOR UPDATE + 23505 trap
 - [x] Money is always NUMERIC(15,2) — zero float arithmetic
 - [x] Unit tests: state transitions, guard clauses, CustodyProvider methods
-- [ ] Integration tests: full escrow lifecycle happy path, invalid transition rejection
+- [x] Integration tests: full escrow lifecycle happy path, invalid transition rejection, concurrent webhook race (50)
 
 #### Sub-tasks log
 
@@ -148,6 +148,7 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 2026-07-24 | `12bb92d` | feat(escrow): state machine, escrow service, REST routes (create, get, ship, confirm, cancel, deposit webhook) |
 | 2026-07-24 | `eee59c3` | feat(escrow): add initiateDeposit endpoint with PaymentRail integration |
 | 2026-07-24 | `16f7093` | test(state-machine,money): add state transition guards and money precision tests (44 passing) |
+| 2026-07-24 | `016eed1` | test(escrow): add integration tests against real Postgres (54 tests total passing) |
 
 ---
 
