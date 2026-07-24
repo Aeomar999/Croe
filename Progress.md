@@ -97,7 +97,9 @@ fix(api): handle 23505 trap in processDepositWebhook
 
 | Date | Commit | Description |
 |---|---|---|
-| 2026-07-24 | — | Backend scaffold: pnpm + TypeScript + Express + pg.Pool + 3 migrations (schema, indexes/triggers, seed) |
+| 2026-07-24 | `cfebe4c` | docs: rename spec files to sequential numbering, archive legacy brainstorm docs |
+| 2026-07-24 | `f7d0ea7` | docs: add AGENTS.md, Progress.md, Production_manual.md, .env.example, design system |
+| 2026-07-24 | `6c9c294` | feat(backend): scaffold pnpm + TypeScript + Express + pg with Phase 1-2 foundations |
 
 ---
 
@@ -139,7 +141,7 @@ fix(api): handle 23505 trap in processDepositWebhook
 
 | Date | Commit | Description |
 |---|---|---|
-| 2026-07-24 | — | Backend scaffold: CustodyProvider + PaymentRail interfaces, P0 sandbox impls, Express server, middleware stack |
+| 2026-07-24 | `6c9c294` | feat(backend): CustodyProvider + PaymentRail interfaces, P0 sandbox impls, Express server, middleware stack |
 
 ---
 
