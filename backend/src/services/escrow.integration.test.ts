@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { pool } from "../db/pool.js";
 import { createEscrow, getEscrow, initiateDeposit, shipEscrow, confirmDelivery, cancelEscrow, processDepositWebhook, releaseFunds } from "./escrow.js";
+import { checkIdempotencyKey, storeIdempotencyResponse, hashRequestBody, purgeExpiredIdempotencyKeys } from "./idempotency.js";
 
 beforeAll(async () => {
   await pool.query("SELECT 1");
@@ -367,6 +368,79 @@ describe("escrow service integration", () => {
         // Exact equality — no float drift (FIN-01)
         expect(payouts[0].amount).toBe(expectedVendorNet);
       }
+    });
+  });
+
+  describe("idempotency replay", () => {
+    const KEY = "aaaa1111-bbbb-cccc-dddd-eeeeeeeeeeee";
+
+    beforeEach(async () => {
+      await pool.query("DELETE FROM idempotency_keys");
+    });
+
+    it("returns null for a new key", async () => {
+      const result = await checkIdempotencyKey(KEY, "POST", "/v1/escrow", null, "abc123");
+      expect(result).toBeNull();
+    });
+
+    it("stores and replays a response", async () => {
+      const body = { transaction_id: "test-123", current_status: "LINK_CREATED" };
+      const bodyHash = hashRequestBody(body);
+
+      await storeIdempotencyResponse(KEY, "POST", "/v1/escrow", null, bodyHash, 201, body);
+
+      const replayed = await checkIdempotencyKey(KEY, "POST", "/v1/escrow", null, bodyHash);
+      expect(replayed).toEqual({ status: 201, body });
+    });
+
+    it("detects same key, different body → conflict", async () => {
+      const bodyV1 = { item: "A" };
+      const bodyV2 = { item: "B" };
+      const hashV1 = hashRequestBody(bodyV1);
+      const hashV2 = hashRequestBody(bodyV2);
+
+      await storeIdempotencyResponse(KEY, "POST", "/v1/escrow", null, hashV1, 201, bodyV1);
+
+      await expect(
+        checkIdempotencyKey(KEY, "POST", "/v1/escrow", null, hashV2),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it("detects same key, different method → conflict", async () => {
+      const body = { item: "A" };
+      const bodyHash = hashRequestBody(body);
+
+      await storeIdempotencyResponse(KEY, "POST", "/v1/escrow", null, bodyHash, 201, body);
+
+      await expect(
+        checkIdempotencyKey(KEY, "GET", "/v1/escrow", null, bodyHash),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it("detects same key, different path → conflict", async () => {
+      const body = { item: "A" };
+      const bodyHash = hashRequestBody(body);
+
+      await storeIdempotencyResponse(KEY, "POST", "/v1/escrow", null, bodyHash, 201, body);
+
+      await expect(
+        checkIdempotencyKey(KEY, "POST", "/v1/escrow/other", null, bodyHash),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it("purges expired keys", async () => {
+      const expiredHash = hashRequestBody({});
+      await pool.query(
+        `INSERT INTO idempotency_keys (idempotency_key, method, path, response_status, response_body, expires_at)
+         VALUES ($1, 'POST', '/v1/escrow', 201, '{}', NOW() - INTERVAL '1 hour')`,
+        [KEY],
+      );
+
+      const purged = await purgeExpiredIdempotencyKeys();
+      expect(purged).toBeGreaterThanOrEqual(1);
+
+      const result = await checkIdempotencyKey(KEY, "POST", "/v1/escrow", null, expiredHash);
+      expect(result).toBeNull();
     });
   });
 });
