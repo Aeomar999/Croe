@@ -1,0 +1,108 @@
+<!-- @dsCard group="Screens" name="Transaction Status" subtitle="Vendor mid-flow — ship, track, or raise a concern" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Transaction Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--trust-accent:#3B82F6;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-review-bg:#FEF3C7;--status-review-text:#92400E;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-card:0 1px 2px rgba(15,23,42,.05),0 4px 12px rgba(15,23,42,.04);--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-light);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;gap:10px;padding:0 var(--sp-xl);}
+.nav-back{width:36px;height:36px;border-radius:var(--r-pill);background:var(--surface-card);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;}
+.nav-title{font-family:var(--font-display);font-size:16px;font-weight:600;}
+.pill-blue{background:var(--status-secured-bg);color:var(--status-secured-text);display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:var(--r-pill);font-size:11px;font-weight:600;margin-left:auto;}
+.pill-blue .d{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.body{flex:1;display:flex;flex-direction:column;gap:var(--sp-lg);padding:var(--sp-sm) var(--sp-xl) var(--sp-xxl);}
+.card-hero{background:linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#60A5FA 100%);border-radius:var(--r-card);padding:var(--sp-xxl);color:#fff;box-shadow:var(--shadow-raised);}
+.hero-cap{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.hero-amt{font-family:var(--font-display);font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;}
+.hero-foot{font-size:12px;color:rgba(255,255,255,.85);margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);}
+.tl-card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:20px 16px;box-shadow:var(--shadow-card);}
+.htrack{display:flex;align-items:flex-start;}
+.hstep{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;}
+.hnode{width:24px;height:24px;border-radius:50%;border:2px solid var(--border-subtle);background:#fff;display:flex;align-items:center;justify-content:center;z-index:1;}
+.hnode.done{background:var(--primary-blue);border-color:var(--primary-blue);}
+.hnode.current{border-color:var(--primary-blue);background:var(--status-secured-bg);}
+.hnode .d{width:8px;height:8px;border-radius:50%;background:var(--primary-blue);}
+.hline{position:absolute;top:12px;left:50%;width:100%;height:2px;background:var(--border-subtle);z-index:0;}
+.hline.done{background:var(--primary-blue);}
+.hlabel{font-size:10.5px;font-weight:600;margin-top:8px;text-align:center;}
+.hlabel.pending{color:var(--text-muted);font-weight:500;}
+.notif{display:flex;gap:12px;align-items:flex-start;background:var(--surface-light);border-radius:var(--r-card);padding:14px 16px;}
+.notif .icon-tile{width:38px;height:38px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--status-secured-bg);}
+.notif .nt{font-size:13px;line-height:19px;color:var(--text-body);}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;}
+.btn-primary{background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.btn-secondary{background:var(--surface-card);color:var(--primary-blue);border:1.5px solid var(--border-subtle);margin-top:10px;}
+.divider{height:1px;background:var(--border-subtle);border:none;margin:4px 0;}
+.dispute{display:flex;gap:10px;align-items:flex-start;padding:2px;}
+.dispute .dt{font-size:14px;font-weight:600;color:var(--status-review-text);}
+.dispute .dc{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.spacer{flex:1;}
+.tabbar{flex:none;background:var(--surface-card);border-top:1px solid var(--border-subtle);display:flex;padding:var(--sp-sm) var(--sp-lg) 0;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--text-muted);}
+.tab.active{color:var(--primary-blue);}
+.tab .tl{font-size:10px;font-weight:600;}
+.fab{width:46px;height:46px;border-radius:50%;background:var(--primary-blue);box-shadow:var(--shadow-raised);display:flex;align-items:center;justify-content:center;margin-top:-14px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><div class="nav-back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></div><span class="nav-title">Order #CR-89201</span><span class="pill-blue"><span class="d"></span>Funds secured</span></div>
+
+  <div class="body">
+    <div class="card-hero">
+      <div class="hero-cap">Locked in escrow for this order</div>
+      <div class="hero-amt">GHS 450.00</div>
+      <div class="hero-foot">Buyer: Kwame O. · Paid today 13:58</div>
+    </div>
+
+    <div class="tl-card">
+      <div class="htrack">
+        <div class="hstep"><div class="hline done"></div><div class="hnode done"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div class="hlabel">Paid</div></div>
+        <div class="hstep"><div class="hline done"></div><div class="hnode current"><div class="d"></div></div><div class="hlabel">Secured</div></div>
+        <div class="hstep"><div class="hline"></div><div class="hnode"></div><div class="hlabel pending">Shipped</div></div>
+        <div class="hstep"><div class="hnode"></div><div class="hlabel pending">Delivered</div></div>
+      </div>
+    </div>
+
+    <div class="notif">
+      <div class="icon-tile"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg></div>
+      <div class="nt">Good news — the buyer's payment for Order #CR-89201 is safely secured in Croe. You're cleared to ship. 📦</div>
+    </div>
+
+    <div>
+      <button class="btn btn-primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>Mark as shipped</button>
+      <button class="btn btn-secondary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Message buyer on WhatsApp</button>
+    </div>
+
+    <div class="spacer"></div>
+    <hr class="divider">
+    <div class="dispute">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      <div><div class="dt">Something wrong? Open a dispute</div><div class="dc">Free · resolved in minutes by our impartial review</div></div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="tl">Home</span></div>
+    <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="tl">Escrows</span></div>
+    <div class="tab"><div class="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div></div>
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><span class="tl">Wallet</span></div>
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="tl">Profile</span></div>
+  </div>
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

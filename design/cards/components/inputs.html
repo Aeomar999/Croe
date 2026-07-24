@@ -1,0 +1,78 @@
+<!-- @dsCard group="Components" name="Inputs" subtitle="Text, phone, amount, OTP and carrier picker" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Inputs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--sp-md:12px;--sp-lg:16px;--r-button:12px;--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:460px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.rlabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:26px 0 12px;}
+.label{font-size:13px;font-weight:600;color:var(--text-headline);margin-bottom:6px;display:block;}
+.input{width:100%;height:52px;padding:0 var(--sp-lg);border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);font-size:16px;color:var(--text-headline);display:flex;align-items:center;gap:var(--sp-md);}
+.input.focus{border-color:var(--primary-blue);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.input .prefix{color:var(--text-muted);font-weight:600;padding-right:var(--sp-md);border-right:1px solid var(--border-subtle);}
+.ph{color:var(--text-muted);font-weight:400;}
+.amt{font-family:var(--font-display);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;}
+.textarea{min-height:96px;padding:var(--sp-lg);align-items:flex-start;font-size:15px;line-height:21px;}
+.helper{font-size:12px;line-height:17px;color:var(--text-muted);margin-top:6px;}
+.otp-row{display:flex;gap:10px;}
+.otp-box{width:48px;height:56px;border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:700;}
+.otp-box.filled{border-color:var(--primary-blue);}
+.otp-box.active{border-color:var(--primary-blue);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.caret{width:2px;height:24px;background:var(--primary-blue);display:inline-block;border-radius:1px;}
+.seg-group{display:flex;gap:var(--sp-md);}
+.seg{flex:1;height:64px;border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:13px;font-weight:600;color:var(--text-body);}
+.seg.selected{border-color:var(--primary-blue);background:var(--status-secured-bg);color:var(--status-secured-text);}
+.seg .seg-dot{width:10px;height:10px;border-radius:50%;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Inputs</div>
+  <div class="sub">Large 52px targets for thumbs on the move. Focus is a soft blue ring, never a harsh outline.</div>
+
+  <div class="rlabel">Text</div>
+  <label class="label">Item description</label>
+  <div class="input"><span class="ph">e.g. Nike Air Max 270 — size 43</span></div>
+  <div class="helper">Buyers see this exactly as you write it.</div>
+
+  <div class="rlabel">Phone — default &amp; focus</div>
+  <label class="label">Mobile Money number</label>
+  <div class="input"><span class="prefix">+233</span><span class="ph">24 000 0000</span></div>
+  <div class="input focus" style="margin-top:12px;"><span class="prefix">+233</span><span>24 123<span class="caret"></span></span></div>
+
+  <div class="rlabel">Amount</div>
+  <label class="label">Sale amount</label>
+  <div class="input"><span class="prefix">GHS</span><span class="amt">450.00</span></div>
+
+  <div class="rlabel">Long text</div>
+  <label class="label">What happened?</label>
+  <div class="input textarea"><span class="ph">Tell us what went wrong…</span></div>
+  <div class="helper">Facts help our review resolve this faster.</div>
+
+  <div class="rlabel">One-time code</div>
+  <div class="otp-row">
+    <div class="otp-box filled">4</div>
+    <div class="otp-box filled">7</div>
+    <div class="otp-box active"><span class="caret"></span></div>
+    <div class="otp-box"></div>
+    <div class="otp-box"></div>
+    <div class="otp-box"></div>
+  </div>
+
+  <div class="rlabel">Carrier</div>
+  <div class="seg-group">
+    <div class="seg selected"><span class="seg-dot" style="background:#FFCC00;"></span>MTN MoMo</div>
+    <div class="seg"><span class="seg-dot" style="background:#E60000;"></span>Telecel</div>
+    <div class="seg"><span class="seg-dot" style="background:#004F9F;"></span>AT Money</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!-- @dsCard group="Screens" name="Sign in — OTP" subtitle="Six-digit code, with a patient fallback" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Sign in (OTP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-card);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;padding:0 var(--sp-xl);}
+.nav-back{width:36px;height:36px;border-radius:var(--r-pill);background:var(--surface-light);display:flex;align-items:center;justify-content:center;}
+.body{flex:1;display:flex;flex-direction:column;padding:var(--sp-lg) var(--sp-xxl) var(--sp-sm);}
+h1{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.02em;}
+.lead{font-size:15px;line-height:22px;color:var(--text-body);margin-top:10px;}
+.lead a{color:var(--primary-blue);font-weight:600;}
+.otp-row{display:flex;gap:10px;justify-content:space-between;margin-top:32px;}
+.otp-box{width:48px;height:58px;border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:24px;font-weight:700;}
+.otp-box.filled{border-color:var(--primary-blue);}
+.otp-box.active{border-color:var(--primary-blue);box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+.caret{width:2px;height:26px;background:var(--primary-blue);display:inline-block;border-radius:1px;}
+.countdown{text-align:center;font-size:13px;color:var(--text-muted);margin-top:20px;}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);margin-top:24px;}
+.hint{display:flex;gap:var(--sp-md);align-items:center;background:var(--surface-light);border-radius:var(--r-card);padding:14px 16px;margin-top:20px;}
+.hint .hx{font-size:12px;line-height:17px;color:var(--text-body);}
+.spacer{flex:1;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><div class="nav-back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></div></div>
+
+  <div class="body">
+    <h1>Enter the 6-digit code</h1>
+    <p class="lead">Sent to +233 24 123 4567 · <a>Wrong number?</a></p>
+
+    <div class="otp-row">
+      <div class="otp-box filled">4</div>
+      <div class="otp-box filled">7</div>
+      <div class="otp-box filled">2</div>
+      <div class="otp-box active"><span class="caret"></span></div>
+      <div class="otp-box"></div>
+      <div class="otp-box"></div>
+    </div>
+
+    <div class="countdown">Resend code in <span style="color:var(--text-body);font-weight:600;">0:42</span></div>
+
+    <button class="btn">Verify</button>
+
+    <div class="hint">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="hx">Didn't get it? Busy networks can delay SMS by a minute — hang tight before resending.</div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

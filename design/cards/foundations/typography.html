@@ -1,0 +1,47 @@
+<!-- @dsCard group="Foundations" name="Typography" subtitle="Outfit for display, Inter for UI — a clear five-step scale" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Typography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:760px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.fams{display:flex;gap:16px;margin:28px 0;}
+.fam{flex:1;border:1px solid var(--border-subtle);border-radius:12px;padding:20px;}
+.fam .big{font-size:34px;line-height:1;}
+.fam .nm{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-top:14px;}
+.fam .role{font-size:13px;color:var(--text-body);margin-top:4px;}
+.row{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:22px 0;border-top:1px solid var(--border-subtle);}
+.row .anno{font-family:'SF Mono','Cascadia Code',Consolas,monospace;font-size:11px;color:var(--text-muted);text-align:right;flex:none;white-space:nowrap;}
+.d{font-family:var(--font-display);font-size:32px;line-height:38px;font-weight:700;letter-spacing:-.02em;}
+.h{font-family:var(--font-display);font-size:20px;line-height:26px;font-weight:600;letter-spacing:-.01em;}
+.tt{font-family:var(--font-body);font-size:16px;line-height:22px;font-weight:700;}
+.b{font-family:var(--font-body);font-size:14px;line-height:21px;font-weight:400;color:var(--text-body);max-width:420px;}
+.c{font-family:var(--font-body);font-size:12px;line-height:17px;font-weight:500;color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Typography</div>
+  <div class="sub">Outfit gives headlines a warm, geometric confidence; Inter keeps dense UI legible at small sizes on cheap displays. Tabular numerals everywhere money appears.</div>
+
+  <div class="fams">
+    <div class="fam"><div class="big" style="font-family:var(--font-display);font-weight:700;">Ag</div><div class="nm">Outfit</div><div class="role">Display &amp; headlines · 500 / 600 / 700</div></div>
+    <div class="fam"><div class="big" style="font-family:var(--font-body);font-weight:600;">Ag</div><div class="nm">Inter</div><div class="role">UI, body &amp; captions · 400 / 500 / 600 / 700</div></div>
+  </div>
+
+  <div class="row"><div class="d">Escrow that keeps everyone honest</div><div class="anno">Display L<br>Outfit · 32/38 · 700</div></div>
+  <div class="row"><div class="h">Your money is held safely</div><div class="anno">Headline M<br>Outfit · 20/26 · 600</div></div>
+  <div class="row"><div class="tt">Funds Safely Locked</div><div class="anno">Title M<br>Inter · 16/22 · 700</div></div>
+  <div class="row"><div class="b">Croe holds the buyer's Mobile Money until delivery is confirmed — so nobody has to just trust a stranger.</div><div class="anno">Body M<br>Inter · 14/21 · 400</div></div>
+  <div class="row"><div class="c">Median resolution: under 10 seconds</div><div class="anno">Caption S<br>Inter · 12/17 · 500</div></div>
+</div>
+</body>
+</html>

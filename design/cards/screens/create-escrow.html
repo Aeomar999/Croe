@@ -1,0 +1,90 @@
+<!-- @dsCard group="Screens" name="Create Escrow Link" subtitle="Vendor builds a shareable, protected checkout" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Create Escrow Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-review-bg:#FEF3C7;--status-review-text:#92400E;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-light);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 var(--sp-xl);}
+.nav-back{width:36px;height:36px;border-radius:var(--r-pill);background:var(--surface-card);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;}
+.nav-title{font-family:var(--font-display);font-size:17px;font-weight:600;}
+.body{flex:1;display:flex;flex-direction:column;gap:var(--sp-lg);padding:var(--sp-sm) var(--sp-xl) var(--sp-xxl);}
+.label{font-size:13px;font-weight:600;margin-bottom:7px;display:block;}
+.input{width:100%;height:52px;padding:0 var(--sp-lg);border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);font-size:15px;display:flex;align-items:center;gap:var(--sp-md);}
+.prefix{color:var(--text-muted);font-weight:600;padding-right:var(--sp-md);border-right:1px solid var(--border-subtle);}
+.amt{font-family:var(--font-display);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums;}
+.helper{font-size:12px;line-height:17px;color:var(--text-muted);margin-top:7px;}
+.seg-group{display:flex;gap:var(--sp-md);}
+.seg{flex:1;height:52px;border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600;color:var(--text-body);}
+.seg.selected{border-color:var(--primary-blue);background:var(--status-secured-bg);color:var(--status-secured-text);}
+.rowcard{display:flex;align-items:center;gap:12px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:14px 16px;}
+.icon-tile{width:40px;height:40px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--status-secured-bg);}
+.rowcard .rt{font-size:14px;font-weight:600;}
+.rowcard .rc{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.banner{display:flex;gap:var(--sp-md);align-items:flex-start;border-radius:var(--r-card);padding:var(--sp-lg);background:var(--status-review-bg);}
+.banner .bt{font-size:13px;font-weight:700;color:var(--status-review-text);}
+.banner .bx{font-size:12px;line-height:18px;color:var(--text-body);margin-top:2px;}
+.banner .up{font-size:12px;font-weight:700;color:var(--status-review-text);margin-top:8px;display:inline-block;}
+.spacer{flex:1;}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.foot{font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><div class="nav-back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></div><span class="nav-title">New escrow link</span></div>
+
+  <div class="body">
+    <div>
+      <label class="label">Item description</label>
+      <div class="input"><span>Nike Air Max 270 — size 43, white/volt</span></div>
+    </div>
+
+    <div>
+      <label class="label">Sale amount</label>
+      <div class="input"><span class="prefix">GHS</span><span class="amt">450.00</span></div>
+      <div class="helper">Croe fee 2.5% (GHS 11.25) comes out of your payout — buyers always pay the sticker price.</div>
+    </div>
+
+    <div>
+      <label class="label">Delivery</label>
+      <div class="seg-group">
+        <div class="seg"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Meet-up</div>
+        <div class="seg selected"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>Courier</div>
+      </div>
+    </div>
+
+    <div class="rowcard">
+      <div class="icon-tile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div style="flex:1;"><div class="rt">Buyer protection window</div><div class="rc">24 hours after delivery</div></div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+
+    <div class="banner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+      <div><div class="bt">Heads up</div><div class="bx">Links above GHS 5,000.00 need Tier 2 verification.</div><span class="up">Upgrade now →</span></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn">Create secure link</button>
+    <div class="foot">You'll get a link to share in WhatsApp, Instagram or anywhere.</div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

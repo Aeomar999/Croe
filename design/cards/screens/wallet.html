@@ -1,0 +1,112 @@
+<!-- @dsCard group="Screens" name="Wallet & History" subtitle="Available, in-escrow, and every movement of money" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--trust-accent:#3B82F6;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-success-bg:#DCFCE7;--status-success-text:#166534;--status-neutral-bg:#F1F5F9;--status-neutral-text:#475569;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-card:0 1px 2px rgba(15,23,42,.05),0 4px 12px rgba(15,23,42,.04);--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-light);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;padding:0 var(--sp-xl);}
+.nav-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-.01em;}
+.body{flex:1;display:flex;flex-direction:column;gap:var(--sp-lg);padding:var(--sp-sm) var(--sp-xl) var(--sp-xxl);}
+.card-hero{background:linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#60A5FA 100%);border-radius:var(--r-card);padding:var(--sp-xxl);color:#fff;box-shadow:var(--shadow-raised);position:relative;}
+.hero-cap{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.hero-amt{font-family:var(--font-display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;}
+.hero-foot{font-size:12px;color:rgba(255,255,255,.85);margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);}
+.wicon{position:absolute;top:22px;right:22px;opacity:.9;}
+.qa{display:flex;gap:12px;}
+.btn-sm{flex:1;height:46px;border-radius:var(--r-button);font-size:14px;font-weight:600;border:none;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-primary{background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.btn-secondary{background:var(--surface-card);color:var(--primary-blue);border:1.5px solid var(--border-subtle);}
+.seclabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-top:2px;}
+.hist{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:4px 16px;box-shadow:var(--shadow-card);}
+.hrow{display:flex;align-items:center;gap:12px;padding:13px 0;}
+.hrow+.hrow{border-top:1px solid var(--border-subtle);}
+.hc{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;}
+.hc.green{background:var(--status-success-bg);}
+.hc.blue{background:var(--status-secured-bg);}
+.hc.gray{background:var(--status-neutral-bg);}
+.hrow .hn{font-size:13.5px;font-weight:600;}
+.hrow .hcap{font-size:11px;color:var(--text-muted);margin-top:1px;}
+.hrow .ha{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;font-family:var(--font-display);}
+.pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:var(--r-pill);font-size:10px;font-weight:600;margin-top:3px;}
+.pill-green{background:var(--status-success-bg);color:var(--status-success-text);}
+.pill-blue{background:var(--status-secured-bg);color:var(--status-secured-text);}
+.pill-gray{background:var(--status-neutral-bg);color:var(--status-neutral-text);}
+.foot{font-size:11px;color:var(--text-muted);text-align:center;}
+.spacer{flex:1;}
+.tabbar{flex:none;background:var(--surface-card);border-top:1px solid var(--border-subtle);display:flex;padding:var(--sp-sm) var(--sp-lg) 0;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--text-muted);}
+.tab.active{color:var(--primary-blue);}
+.tab .tl{font-size:10px;font-weight:600;}
+.fab{width:46px;height:46px;border-radius:50%;background:var(--primary-blue);box-shadow:var(--shadow-raised);display:flex;align-items:center;justify-content:center;margin-top:-14px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><span class="nav-title">Wallet</span></div>
+
+  <div class="body">
+    <div class="card-hero">
+      <div class="wicon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+      <div class="hero-cap">Available to withdraw</div>
+      <div class="hero-amt">GHS 2,340.00</div>
+      <div class="hero-foot">In escrow: GHS 1,635.00 · Lifetime sales: GHS 18,450.00</div>
+    </div>
+
+    <div class="qa">
+      <button class="btn-sm btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>Withdraw to MoMo</button>
+      <button class="btn-sm btn-secondary">Statement</button>
+    </div>
+
+    <div class="seclabel">This week</div>
+    <div class="hist">
+      <div class="hrow">
+        <div class="hc green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/><path d="M12 3v12"/></svg></div>
+        <div style="flex:1;"><div class="hn">Payout — Nike Air Max 270</div><div class="hcap">Yesterday · MTN ···4567</div></div>
+        <div><div class="ha" style="color:var(--status-success-text);">+GHS 438.75</div><span class="pill pill-green">Paid out</span></div>
+      </div>
+      <div class="hrow">
+        <div class="hc blue"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div style="flex:1;"><div class="hn">Escrow locked — JBL Flip 6</div><div class="hcap">Yesterday</div></div>
+        <div><div class="ha">GHS 780.00</div><span class="pill pill-blue">Held</span></div>
+      </div>
+      <div class="hrow">
+        <div class="hc green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v3"/></svg></div>
+        <div style="flex:1;"><div class="hn">Refund sent — Phone case</div><div class="hcap">Mon · to buyer</div></div>
+        <div><div class="ha">−GHS 85.00</div><span class="pill pill-green">Refunded</span></div>
+      </div>
+      <div class="hrow">
+        <div class="hc gray"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div style="flex:1;"><div class="hn">Link expired — Ankara dress</div><div class="hcap">Sun</div></div>
+        <div><div class="ha" style="color:var(--text-muted);">GHS 320.00</div><span class="pill pill-gray">Expired</span></div>
+      </div>
+    </div>
+    <div class="foot">Payouts arrive in minutes. Croe fee 2.5% is already deducted.</div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span class="tl">Home</span></div>
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="tl">Escrows</span></div>
+    <div class="tab"><div class="fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div></div>
+    <div class="tab active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><span class="tl">Wallet</span></div>
+    <div class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="tl">Profile</span></div>
+  </div>
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!-- @dsCard group="Components" name="Ledger Timeline" subtitle="Diamond ticks on a 1px rail — the past in ink, the present in cobalt" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Ledger Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CROE DESIGN TOKENS v2 — "THE LEDGER"
+   Editorial minimalism. Escrow as a beautifully-set financial
+   document: warm paper, ink type, hairline rules, one cobalt
+   accent. No gradients. No shadows. No noise.
+   ============================================================ */
+
+:root {
+  /* Paper & ink */
+  --paper: #F7F6F3;          /* app canvas — warm bone */
+  --card: #FFFFFF;           /* raised sheet */
+  --ink: #191714;            /* primary text, primary buttons */
+  --ink-soft: #4A463F;       /* strong secondary */
+  --gray: #787268;           /* secondary text, warm */
+  --faint: #A8A196;          /* captions, placeholders */
+  --hairline: #E8E5DF;       /* every border. 1px. always. */
+  --hairline-ink: #191714;   /* the escrow-note border */
+
+  /* The single vivid accent — used small and seldom */
+  --cobalt: #2547F4;
+
+  /* Semantic states — washed, calm (never red anywhere) */
+  --secure-bg: #E9F0F8; --secure-text: #23538F;
+  --hold-bg:   #FBF3DB; --hold-text:   #8A5A00;   /* warm ochre, not alarm */
+  --done-bg:   #EDF3EC; --done-text:   #346538;
+  --idle-bg:   #EFEDE8; --idle-text:   #6B6558;
+
+  /* Kente strip colors (flat blocks, used once per key moment) */
+  --kente-gold: #D9A441;
+
+  /* Shape — crisp, printed */
+  --r-tag: 4px; --r-ctl: 8px; --r-sheet: 12px;
+
+  /* Space — 8pt grid, generous */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+
+  /* Type */
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Schibsted Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #EBE9E4; }
+body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* ============ TYPE ============ */
+.t-display { font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 40px; letter-spacing: -0.01em; }
+.t-headline{ font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 28px; letter-spacing: -0.005em; }
+.t-title   { font-weight: 600; font-size: 16px; line-height: 22px; }
+.t-body    { font-weight: 400; font-size: 14px; line-height: 22px; color: var(--gray); }
+.t-cap     { font-weight: 600; font-size: 11px; line-height: 16px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+.t-mono    { font-family: var(--mono); font-weight: 400; font-size: 12px; line-height: 18px; color: var(--gray); }
+.t-amount  { font-family: var(--serif); font-weight: 500; font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.01em; }
+
+/* ============ PHONE ARTBOARD 390×844 ============ */
+.phone { width: 390px; min-height: 844px; margin: 0 auto; background: var(--paper);
+  display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.statusbar { height: 44px; flex: none; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 var(--sp-6);
+  font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink); }
+.sb-icons { display: flex; gap: 6px; align-items: center; }
+.navheader { height: 52px; flex: none; display: flex; align-items: center;
+  gap: var(--sp-3); padding: 0 var(--sp-6); }
+.nav-title { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+.nav-back { width: 32px; height: 32px; border: 1px solid var(--hairline);
+  border-radius: 50%; background: var(--card);
+  display: flex; align-items: center; justify-content: center; }
+.screen-body { flex: 1; display: flex; flex-direction: column;
+  padding: var(--sp-2) var(--sp-6) var(--sp-6); gap: var(--sp-5); }
+.home-indicator { height: 20px; flex: none; display: flex; align-items: center; justify-content: center; }
+.home-indicator::after { content: ''; width: 120px; height: 4px; border-radius: 2px; background: #D6D2CA; }
+
+/* ============ RULES & LEADERS ============ */
+.rule { height: 1px; background: var(--hairline); border: none; }
+.rule-ink { height: 1px; background: var(--ink); border: none; }
+.leader { display: flex; align-items: baseline; gap: 8px; }
+.leader .l { font-size: 13px; color: var(--gray); flex: none; }
+.leader .dots { flex: 1; border-bottom: 1px dotted #C9C4BA; transform: translateY(-3px); }
+.leader .v { font-size: 13px; font-weight: 600; color: var(--ink); flex: none;
+  font-variant-numeric: tabular-nums; }
+
+/* ============ THE ESCROW NOTE ============ */
+.note { background: var(--card); border: 1.5px solid var(--ink);
+  border-radius: var(--r-sheet); padding: var(--sp-6); position: relative; }
+.note .no { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray); }
+.note .amt { font-family: var(--serif); font-weight: 500; font-size: 52px;
+  line-height: 1.05; letter-spacing: -0.02em; margin-top: 10px;
+  font-variant-numeric: lining-nums tabular-nums; }
+.note .amt .cur { font-size: 22px; vertical-align: 22px; letter-spacing: 0; margin-right: 2px; color: var(--ink-soft); }
+.perf { display: flex; align-items: center; height: 1px; margin: var(--sp-5) -24px; position: relative; }
+.perf::before { content: ''; flex: 1; border-top: 1.5px dashed var(--hairline); }
+.perf .n1, .perf .n2 { width: 14px; height: 14px; border-radius: 50%;
+  background: var(--paper); flex: none; }
+.perf .n1 { margin-left: -7px; } .perf .n2 { margin-right: -7px; }
+
+/* ============ STAMPS (status) ============ */
+.stamp { display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: var(--r-tag); border: 1px solid currentColor; }
+.stamp-secure { color: var(--secure-text); background: var(--secure-bg); }
+.stamp-hold   { color: var(--hold-text);   background: var(--hold-bg); }
+.stamp-done   { color: var(--done-text);   background: var(--done-bg); }
+.stamp-idle   { color: var(--idle-text);   background: var(--idle-bg); }
+.stamp-cobalt { color: var(--cobalt); background: var(--card); }
+/* circular rubber stamp — the SECURED seal */
+.seal { width: 84px; height: 84px; border: 1.5px solid var(--cobalt); border-radius: 50%;
+  color: var(--cobalt); display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; text-align: center; line-height: 1.5;
+  transform: rotate(-8deg); }
+
+/* ============ BUTTONS ============ */
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 var(--sp-6); width: 100%;
+  border: none; border-radius: var(--r-ctl);
+  font-family: var(--sans); font-size: 15px; font-weight: 600; }
+.btn .arr { font-family: var(--serif); font-weight: 400; font-size: 18px; }
+.btn-ink { background: var(--ink); color: #FFFFFF; }
+.btn-line { background: var(--card); color: var(--ink); border: 1px solid var(--ink); }
+.btn-quiet { background: transparent; color: var(--gray); }
+.btn-hold { background: var(--hold-bg); color: var(--hold-text); }
+.btn-sm { height: 42px; font-size: 13.5px; padding: 0 var(--sp-4); width: auto; }
+
+/* ============ FIELDS ============ */
+.cap-label { font-weight: 600; font-size: 11px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 8px; }
+.input { width: 100%; height: 54px; padding: 0 var(--sp-4);
+  border: 1px solid var(--hairline); border-radius: var(--r-ctl);
+  background: var(--card); font-family: var(--sans); font-size: 16px; color: var(--ink);
+  display: flex; align-items: center; gap: var(--sp-3); }
+.input.focus { border-color: var(--ink); box-shadow: none; }
+.input .prefix { font-family: var(--mono); font-size: 14px; color: var(--gray);
+  padding-right: var(--sp-3); border-right: 1px solid var(--hairline); }
+.input .amt-in { font-family: var(--serif); font-size: 24px; font-weight: 500;
+  font-variant-numeric: tabular-nums; }
+.textarea { height: auto; min-height: 96px; padding: var(--sp-4); align-items: flex-start;
+  font-size: 15px; line-height: 22px; }
+.helper { font-size: 12px; line-height: 18px; color: var(--faint); margin-top: 7px; }
+.placeholder { color: var(--faint); font-weight: 400; }
+.caret { width: 1.5px; height: 22px; background: var(--cobalt); display: inline-block; }
+
+.otp-row { display: flex; gap: 0; border: 1px solid var(--hairline); border-radius: var(--r-ctl);
+  background: var(--card); overflow: hidden; }
+.otp-cell { flex: 1; height: 60px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 26px; font-weight: 500; }
+.otp-cell + .otp-cell { border-left: 1px solid var(--hairline); }
+.otp-cell.active { background: var(--paper); }
+
+.choice { display: flex; align-items: center; gap: 12px; background: var(--card);
+  border: 1px solid var(--hairline); border-radius: var(--r-ctl);
+  padding: 15px var(--sp-4); }
+.choice.sel { border-color: var(--ink); }
+.choice .marker { width: 16px; height: 16px; border: 1.5px solid var(--faint);
+  border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; }
+.choice.sel .marker { border-color: var(--ink); }
+.choice.sel .marker::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+
+/* ============ LEDGER TIMELINE ============ */
+.ledger { display: flex; flex-direction: column; }
+.entry { display: flex; gap: var(--sp-4); }
+.entry-rail { display: flex; flex-direction: column; align-items: center; width: 12px; flex: none; }
+.tick { width: 9px; height: 9px; flex: none; background: var(--card);
+  border: 1.5px solid var(--faint); transform: rotate(45deg); margin-top: 5px; }
+.tick.done { background: var(--ink); border-color: var(--ink); }
+.tick.now { background: var(--cobalt); border-color: var(--cobalt); }
+.entry-line { width: 1px; flex: 1; min-height: 26px; background: var(--hairline); }
+.entry-line.done { background: var(--ink); }
+.entry-main { flex: 1; padding-bottom: var(--sp-5); }
+.entry-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.entry-title.pending { color: var(--faint); font-weight: 500; }
+.entry-sub { font-size: 12.5px; line-height: 19px; color: var(--gray); margin-top: 3px; }
+.entry-time { font-family: var(--mono); font-size: 10.5px; color: var(--faint); flex: none; padding-top: 2px; }
+
+/* ============ ROWS ============ */
+.row { display: flex; align-items: center; gap: var(--sp-3); padding: 14px 0; }
+.row + .row { border-top: 1px solid var(--hairline); }
+.row .rt { font-size: 14px; font-weight: 600; }
+.row .rc { font-size: 12px; color: var(--faint); margin-top: 2px; }
+.row .ra { font-family: var(--serif); font-size: 16px; font-weight: 500;
+  font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ============ GHOST NUMERALS ============ */
+.ghost-num { font-family: var(--serif); font-weight: 300; font-size: 44px; line-height: 1;
+  color: transparent; -webkit-text-stroke: 1px #D6D2CA; flex: none; }
+
+/* ============ KENTE STRIP (flat SVG blocks only) ============ */
+.kente { height: 4px; display: flex; }
+.kente i { flex: 1; }
+
+/* ============ NOTICES ============ */
+.aside { border-left: 2px solid var(--ink); padding: 2px 0 2px var(--sp-4); }
+.aside.hold { border-left-color: var(--kente-gold); }
+.aside.secure { border-left-color: var(--cobalt); }
+.aside .at { font-size: 13.5px; font-weight: 600; }
+.aside .ax { font-size: 13px; line-height: 20px; color: var(--gray); margin-top: 3px; }
+
+/* ============ TAB BAR — text only, editorial ============ */
+.tabbar { flex: none; background: var(--paper); border-top: 1px solid var(--hairline);
+  display: flex; padding: 14px var(--sp-5) 10px; }
+.tab { flex: 1; text-align: center; font-family: var(--mono); font-size: 10px;
+  font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint);
+  position: relative; }
+.tab.active { color: var(--ink); }
+.tab.active::before { content: ''; position: absolute; top: -15px; left: 25%; right: 25%;
+  height: 2px; background: var(--ink); }
+
+/* ============ MISC ============ */
+.avatar { width: 40px; height: 40px; border-radius: 50%; flex: none;
+  border: 1px solid var(--ink); background: var(--card); color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-weight: 600; font-size: 15px; }
+.sheet { background: var(--card); border: 1px solid var(--hairline);
+  border-radius: var(--r-sheet); padding: var(--sp-5); }
+.dashed-tile { border: 1.5px dashed #C9C4BA; border-radius: var(--r-ctl);
+  background: transparent; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--gray); }
+
+/* ============ card-specific — specimen page ============ */
+html, body { background: #FFFFFF; }
+body { padding: 40px; }
+.spec { max-width: 760px; margin: 0 auto; }
+.page-title { font-family: var(--serif); font-weight: 500; font-size: 40px;
+  line-height: 48px; letter-spacing: -0.015em; margin-top: var(--sp-2); }
+.page-sub { margin-top: var(--sp-2); max-width: 480px; }
+.sec { padding: var(--sp-10) 0; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--sp-4); margin-bottom: var(--sp-8); }
+.anno { font-family: var(--mono); font-size: 11px; line-height: 16px;
+  color: var(--faint); letter-spacing: 0.04em; flex: none; }
+.spec-col { max-width: 420px; }
+
+/* horizontal 4-step rail */
+.hrail { display: flex; margin-top: var(--sp-2); }
+.hstep { flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 14px; position: relative; }
+.hstep::before, .hstep::after { content: ''; position: absolute; top: 6px;
+  height: 1px; background: var(--hairline); width: calc(50% - 12px); }
+.hstep::before { left: 0; }
+.hstep::after { right: 0; }
+.hstep:first-child::before, .hstep:last-child::after { content: none; }
+.hstep.done::before, .hstep.done::after, .hstep.now::before { background: var(--ink); }
+.tk { height: 13px; display: flex; align-items: center; justify-content: center; flex: none; }
+.tk .tick { margin-top: 0; }
+.hlabel { font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+.hstep.done .hlabel { color: var(--ink); }
+.hstep.now .hlabel { color: var(--cobalt); }
+
+/* tick-state anatomy rows */
+.state-row { display: flex; align-items: center; gap: var(--sp-4); padding: 14px 0; }
+.state-row + .state-row { border-top: 1px solid var(--hairline); }
+.state-row .sn { font-size: 13.5px; font-weight: 600; width: 96px; flex: none; }
+.state-row .sd { font-size: 13px; line-height: 20px; color: var(--gray); flex: 1; }
+</style>
+</head>
+<body>
+<div class="spec">
+
+  <header>
+    <span class="t-cap">Components</span>
+    <h1 class="page-title">Ledger Timeline</h1>
+    <p class="t-body page-sub">Every escrow is a running ledger. Diamond ticks on a 1px rail — set vertically when each moment needs a sentence, horizontally when four words are enough.</p>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- 01 · VERTICAL — the dispute review -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="t-cap" style="color:var(--gray);">Vertical · The dispute review</span>
+      <span class="anno">.ledger / .entry</span>
+    </div>
+
+    <div class="spec-col">
+      <div class="ledger">
+        <div class="entry">
+          <div class="entry-rail"><div class="tick done"></div><div class="entry-line done"></div></div>
+          <div class="entry-main" style="display:flex; gap:10px;">
+            <div style="flex:1;"><div class="entry-title">Dispute opened</div>
+            <div class="entry-sub">Both of you were notified.</div></div>
+            <span class="entry-time">14:32</span>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-rail"><div class="tick now"></div><div class="entry-line"></div></div>
+          <div class="entry-main" style="display:flex; gap:10px;">
+            <div style="flex:1;"><div class="entry-title" style="color:var(--cobalt);">Automated review</div>
+            <div class="entry-sub">Our impartial review engine is comparing both claims against the original listing…</div></div>
+            <span class="entry-time" style="color:var(--cobalt);">NOW</span>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-rail"><div class="tick"></div></div>
+          <div class="entry-main" style="padding-bottom:4px;"><div class="entry-title pending">Resolution</div>
+          <div class="entry-sub">Usually within 10 seconds — a specialist steps in only if it's genuinely unclear.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- 02 · HORIZONTAL — the shipment rail -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="t-cap" style="color:var(--gray);">Horizontal · The shipment rail</span>
+      <span class="anno">.hrail / .hstep</span>
+    </div>
+
+    <div class="hrail">
+      <div class="hstep done">
+        <span class="tk"><span class="tick done"></span></span>
+        <span class="hlabel">Paid</span>
+      </div>
+      <div class="hstep done">
+        <span class="tk"><span class="tick done"></span></span>
+        <span class="hlabel">Secured</span>
+      </div>
+      <div class="hstep now">
+        <span class="tk"><span class="tick now"></span></span>
+        <span class="hlabel">In transit</span>
+      </div>
+      <div class="hstep">
+        <span class="tk"><span class="tick"></span></span>
+        <span class="hlabel">Delivered</span>
+      </div>
+    </div>
+
+    <p class="t-mono" style="margin-top: var(--sp-8); font-size:11px; color:var(--faint);">RAIL DARKENS TO INK BEHIND EVERY SETTLED TICK · LABELS IN MONO CAPS ONLY</p>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- 03 · TICK STATES -->
+  <section class="sec">
+    <div class="sec-head">
+      <span class="t-cap" style="color:var(--gray);">Tick states</span>
+      <span class="anno">rotated squares · 9px</span>
+    </div>
+
+    <div class="state-row">
+      <span class="tk"><span class="tick done"></span></span>
+      <span class="sn">The past</span>
+      <span class="sd">Filled ink. What happened is settled and set.</span>
+      <span class="anno">.tick.done</span>
+    </div>
+    <div class="state-row">
+      <span class="tk"><span class="tick now"></span></span>
+      <span class="sn">The present</span>
+      <span class="sd">Cobalt — the only vivid thing on the page.</span>
+      <span class="anno">.tick.now</span>
+    </div>
+    <div class="state-row">
+      <span class="tk"><span class="tick"></span></span>
+      <span class="sn">The future</span>
+      <span class="sd">A faint outline, waiting to be filled.</span>
+      <span class="anno">.tick</span>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <p class="t-body" style="padding-top: var(--sp-6); max-width: 480px;">What happened is ink. What's happening is cobalt. What's next is only an outline — the ledger reads like a bank statement, not a progress bar.</p>
+
+</div>
+</body>
+</html>

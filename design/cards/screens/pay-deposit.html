@@ -1,0 +1,88 @@
+<!-- @dsCard group="Screens" name="Buyer — Pay Into Escrow" subtitle="What the buyer sees when they open the link" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Pay Into Escrow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-success-bg:#DCFCE7;--status-success-text:#166534;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-light);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;gap:10px;padding:0 var(--sp-xl);}
+.nav-title{font-family:var(--font-display);font-size:16px;font-weight:600;}
+.body{flex:1;display:flex;flex-direction:column;gap:var(--sp-lg);padding:var(--sp-sm) var(--sp-xl) var(--sp-xxl);}
+.seller{display:flex;align-items:center;gap:12px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:14px 16px;}
+.avatar{width:44px;height:44px;border-radius:50%;flex:none;background:var(--status-secured-bg);color:var(--status-secured-text);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;font-family:var(--font-display);}
+.seller .sn{font-size:14px;font-weight:700;}
+.seller .sc{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.pill-green{background:var(--status-success-bg);color:var(--status-success-text);display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border-radius:var(--r-pill);font-size:11px;font-weight:600;}
+.item{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:16px;display:flex;gap:14px;align-items:center;}
+.thumb{width:52px;height:52px;border-radius:12px;flex:none;background:var(--surface-light);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;}
+.item .inm{font-size:14px;font-weight:600;line-height:19px;}
+.item .amt{font-family:var(--font-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;}
+.banner{display:flex;gap:var(--sp-md);align-items:flex-start;border-radius:var(--r-card);padding:var(--sp-lg);background:var(--status-secured-bg);}
+.banner .bt{font-size:13px;font-weight:700;color:var(--status-secured-text);}
+.banner .bx{font-size:12px;line-height:18px;color:var(--text-body);margin-top:2px;}
+.label{font-size:13px;font-weight:600;margin-bottom:8px;display:block;}
+.seg-group{display:flex;gap:var(--sp-md);}
+.seg{flex:1;height:60px;border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;color:var(--text-body);}
+.seg.selected{border-color:var(--primary-blue);background:var(--status-secured-bg);color:var(--status-secured-text);}
+.seg .sd{width:9px;height:9px;border-radius:50%;}
+.input{width:100%;height:52px;padding:0 var(--sp-lg);border:1.5px solid var(--border-subtle);border-radius:var(--r-button);background:var(--surface-card);font-size:16px;display:flex;align-items:center;gap:var(--sp-md);margin-top:12px;}
+.prefix{color:var(--text-body);font-weight:600;padding-right:var(--sp-md);border-right:1px solid var(--border-subtle);}
+.spacer{flex:1;}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.foot{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--text-muted);margin-top:12px;text-align:center;line-height:16px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span class="nav-title">Croe Secure Payment</span></div>
+
+  <div class="body">
+    <div class="seller">
+      <div class="avatar">AM</div>
+      <div style="flex:1;"><div class="sn">Akosua's Closet</div><div class="sc">Trust score 98 · 214 deliveries</div></div>
+      <span class="pill-green"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Verified</span>
+    </div>
+
+    <div class="item">
+      <div class="thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg></div>
+      <div style="flex:1;"><div class="inm">Nike Air Max 270 — size 43, white/volt</div><div class="amt">GHS 450.00</div></div>
+    </div>
+
+    <div class="banner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><div class="bt">Your money is held safely by Croe</div><div class="bx">The seller is only paid after you confirm delivery.</div></div>
+    </div>
+
+    <div>
+      <label class="label">Pay with Mobile Money</label>
+      <div class="seg-group">
+        <div class="seg selected"><span class="sd" style="background:#FFCC00;"></span>MTN MoMo</div>
+        <div class="seg"><span class="sd" style="background:#E60000;"></span>Telecel</div>
+        <div class="seg"><span class="sd" style="background:#004F9F;"></span>AT Money</div>
+      </div>
+      <div class="input"><span class="prefix">+233</span><span>24 987 6543</span></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn">Send payment prompt</button>
+    <div class="foot"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>You'll approve on your phone with your MoMo PIN. Croe never sees your PIN.</div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!-- @dsCard group="Screens" name="Buyer — Approve on Phone" subtitle="Waiting on the MoMo PIN prompt, calmly" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Approve on Phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-card);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 var(--sp-xl);}
+.nav-back{width:36px;height:36px;border-radius:var(--r-pill);background:var(--surface-light);display:flex;align-items:center;justify-content:center;}
+.nav-title{font-family:var(--font-display);font-size:17px;font-weight:600;}
+.body{flex:1;display:flex;flex-direction:column;padding:var(--sp-sm) var(--sp-xxl) var(--sp-sm);}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:28px;}
+.pulse{position:relative;width:88px;height:88px;display:flex;align-items:center;justify-content:center;}
+.pulse .ring{position:absolute;border-radius:50%;border:2px solid rgba(37,99,235,.22);}
+.pulse .r1{inset:0;}
+.pulse .r2{inset:-14px;border-color:rgba(37,99,235,.12);}
+.pulse .core{width:88px;height:88px;border-radius:50%;background:var(--status-secured-bg);display:flex;align-items:center;justify-content:center;}
+.hero h1{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:22px;}
+.hero p{font-size:14px;line-height:21px;color:var(--text-body);margin-top:10px;max-width:300px;}
+.hero p b{color:var(--text-headline);font-weight:700;}
+.steps{background:var(--surface-light);border-radius:var(--r-card);padding:18px 18px 6px;margin-top:28px;}
+.tracker-step{display:flex;gap:14px;}
+.tracker-rail{display:flex;flex-direction:column;align-items:center;width:22px;flex:none;}
+.tnode{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-subtle);background:var(--surface-card);display:flex;align-items:center;justify-content:center;}
+.tnode.done{background:var(--primary-blue);border-color:var(--primary-blue);}
+.tnode.current{border-color:var(--primary-blue);background:var(--status-secured-bg);}
+.tnode .dot{width:7px;height:7px;border-radius:50%;background:var(--primary-blue);}
+.tline{width:2px;flex:1;min-height:20px;background:var(--border-subtle);}
+.tline.done{background:var(--primary-blue);}
+.tcontent{padding-bottom:16px;flex:1;}
+.tt{font-size:13px;font-weight:600;}
+.tt.pending{color:var(--text-muted);font-weight:500;}
+.spacer{flex:1;}
+.btn-ghost{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border-radius:var(--r-button);font-size:15px;font-weight:600;border:none;width:100%;background:transparent;color:var(--text-body);}
+.foot{font-size:12px;line-height:17px;color:var(--text-muted);text-align:center;margin-top:8px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><div class="nav-back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></div><span class="nav-title">Almost there</span></div>
+
+  <div class="body">
+    <div class="hero">
+      <div class="pulse">
+        <div class="ring r2"></div>
+        <div class="ring r1"></div>
+        <div class="core"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      </div>
+      <h1>Check your phone</h1>
+      <p>We've sent an MTN MoMo prompt to +233 24 987 6543. Enter your PIN to lock <b>GHS 450.00</b> into escrow.</p>
+    </div>
+
+    <div class="steps">
+      <div class="tracker-step">
+        <div class="tracker-rail"><div class="tnode done"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div class="tline done"></div></div>
+        <div class="tcontent"><div class="tt">Prompt sent to your phone</div></div>
+      </div>
+      <div class="tracker-step">
+        <div class="tracker-rail"><div class="tnode current"><div class="dot"></div></div><div class="tline"></div></div>
+        <div class="tcontent"><div class="tt">Waiting for your approval…</div></div>
+      </div>
+      <div class="tracker-step">
+        <div class="tracker-rail"><div class="tnode"></div></div>
+        <div class="tcontent" style="padding-bottom:12px;"><div class="tt pending">Money locked — seller notified</div></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn-ghost"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Didn't get the prompt? Resend</button>
+    <div class="foot">Prompts can take up to a minute on busy networks. Your money never moves without your PIN.</div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

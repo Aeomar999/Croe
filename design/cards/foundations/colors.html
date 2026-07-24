@@ -1,0 +1,83 @@
+<!-- @dsCard group="Foundations" name="Color" subtitle="Calm blues, soft slate, amber caution — never crimson" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Color</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--primary-blue-hover:#1D4ED8;--trust-accent:#3B82F6;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--ink:#0F172A;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-review-bg:#FEF3C7;--status-review-text:#92400E;--status-success-bg:#DCFCE7;--status-success-text:#166534;--status-neutral-bg:#F1F5F9;--status-neutral-text:#475569;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--sp-xxxl:32px;--r-button:12px;--r-card:16px;--r-pill:999px;--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:760px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin:32px 0 14px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.sw{border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden;background:#fff;}
+.sw .chip{height:72px;}
+.sw .meta{padding:12px 14px;}
+.sw .nm{font-size:13px;font-weight:700;}
+.sw .hex{font-family:'SF Mono','Cascadia Code',Consolas,monospace;font-size:11.5px;color:var(--text-body);margin-top:2px;}
+.sw .use{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:15px;}
+.callout{margin-top:32px;display:flex;gap:14px;align-items:flex-start;background:var(--status-secured-bg);border-radius:16px;padding:20px;}
+.callout .ct{font-size:14px;font-weight:700;color:var(--status-secured-text);}
+.callout .cb{font-size:13px;line-height:19px;color:var(--text-body);margin-top:3px;}
+.border-chip{border:1px solid var(--border-subtle);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Color</div>
+  <div class="sub">Trustworthy blues and soft slate carry the interface; warm amber is the strongest signal we ever raise. Users mid-dispute are already anxious — the palette de-escalates.</div>
+
+  <div class="section-label">Core</div>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:#2563EB;"></div><div class="meta"><div class="nm">Primary Blue</div><div class="hex">#2563EB</div><div class="use">Primary actions, links, active states</div></div></div>
+    <div class="sw"><div class="chip" style="background:#1D4ED8;"></div><div class="meta"><div class="nm">Primary Hover</div><div class="hex">#1D4ED8</div><div class="use">Pressed / hover shade</div></div></div>
+    <div class="sw"><div class="chip" style="background:#3B82F6;"></div><div class="meta"><div class="nm">Trust Accent</div><div class="hex">#3B82F6</div><div class="use">Gradients, highlights, escrow cards</div></div></div>
+    <div class="sw"><div class="chip" style="background:#0F172A;"></div><div class="meta"><div class="nm">Ink</div><div class="hex">#0F172A</div><div class="use">Toasts, high-contrast surfaces</div></div></div>
+    <div class="sw"><div class="chip" style="background:#1E293B;"></div><div class="meta"><div class="nm">Headline</div><div class="hex">#1E293B</div><div class="use">Titles, primary text</div></div></div>
+    <div class="sw"><div class="chip" style="background:#64748B;"></div><div class="meta"><div class="nm">Body</div><div class="hex">#64748B</div><div class="use">Paragraph and supporting text</div></div></div>
+  </div>
+
+  <div class="section-label">Surfaces &amp; lines</div>
+  <div class="grid">
+    <div class="sw"><div class="chip border-chip" style="background:#F4F6F9;"></div><div class="meta"><div class="nm">Surface</div><div class="hex">#F4F6F9</div><div class="use">App background, tinted cards</div></div></div>
+    <div class="sw"><div class="chip border-chip" style="background:#FFFFFF;"></div><div class="meta"><div class="nm">Card</div><div class="hex">#FFFFFF</div><div class="use">Raised content surfaces</div></div></div>
+    <div class="sw"><div class="chip border-chip" style="background:#E2E8F0;"></div><div class="meta"><div class="nm">Border</div><div class="hex">#E2E8F0</div><div class="use">Hairlines, input outlines</div></div></div>
+    <div class="sw"><div class="chip" style="background:#94A3B8;"></div><div class="meta"><div class="nm">Muted</div><div class="hex">#94A3B8</div><div class="use">Captions, placeholders</div></div></div>
+  </div>
+
+  <div class="section-label">Status — held safe (blue)</div>
+  <div class="grid">
+    <div class="sw"><div class="chip border-chip" style="background:#EFF6FF;"></div><div class="meta"><div class="nm">Secured BG</div><div class="hex">#EFF6FF</div><div class="use">"Funds secured" pill / banner</div></div></div>
+    <div class="sw"><div class="chip" style="background:#1E40AF;"></div><div class="meta"><div class="nm">Secured Text</div><div class="hex">#1E40AF</div><div class="use">Text on secured surfaces</div></div></div>
+    <div class="sw" style="visibility:hidden;"></div>
+  </div>
+
+  <div class="section-label">Status — being sorted (amber, our only caution)</div>
+  <div class="grid">
+    <div class="sw"><div class="chip border-chip" style="background:#FEF3C7;"></div><div class="meta"><div class="nm">Review BG</div><div class="hex">#FEF3C7</div><div class="use">"In review", warnings</div></div></div>
+    <div class="sw"><div class="chip" style="background:#92400E;"></div><div class="meta"><div class="nm">Review Text</div><div class="hex">#92400E</div><div class="use">Text on amber surfaces</div></div></div>
+    <div class="sw" style="visibility:hidden;"></div>
+  </div>
+
+  <div class="section-label">Status — complete (green)</div>
+  <div class="grid">
+    <div class="sw"><div class="chip border-chip" style="background:#DCFCE7;"></div><div class="meta"><div class="nm">Success BG</div><div class="hex">#DCFCE7</div><div class="use">"Delivered", "Paid out", "Refunded"</div></div></div>
+    <div class="sw"><div class="chip" style="background:#166534;"></div><div class="meta"><div class="nm">Success Text</div><div class="hex">#166534</div><div class="use">Text on success surfaces</div></div></div>
+    <div class="sw" style="visibility:hidden;"></div>
+  </div>
+
+  <div class="callout">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <div>
+      <div class="ct">There is no red in Croe.</div>
+      <div class="cb">Standard error states use sharp crimson, which triggers fight-or-flight. Warnings are always warm amber; stability is deep blue and slate. The palette signals control and safety, never punishment.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

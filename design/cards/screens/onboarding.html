@@ -1,0 +1,69 @@
+<!-- @dsCard group="Screens" name="Onboarding" subtitle="First run — what Croe is, in one calm breath" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--trust-accent:#3B82F6;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-card);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.body{flex:1;display:flex;flex-direction:column;padding:0 var(--sp-xxl) var(--sp-sm);}
+.brand{display:flex;flex-direction:column;align-items:center;margin-top:40px;}
+.logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#2563EB 0%,#3B82F6 70%,#60A5FA 100%);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-raised);}
+.wordmark{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:14px;}
+.tagline{font-size:12px;font-weight:500;color:var(--text-muted);margin-top:2px;}
+.hero{margin-top:44px;}
+.hero h1{font-family:var(--font-display);font-size:30px;line-height:36px;font-weight:700;letter-spacing:-.02em;}
+.hero p{font-size:15px;line-height:22px;color:var(--text-body);margin-top:12px;}
+.features{margin-top:28px;display:flex;flex-direction:column;gap:14px;}
+.frow{display:flex;align-items:center;gap:14px;}
+.icon-tile{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--status-secured-bg);}
+.frow .ft{font-size:14px;font-weight:600;}
+.frow .fc{font-size:12px;color:var(--text-muted);margin-top:1px;}
+.spacer{flex:1;}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;}
+.btn-primary{background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.btn-ghost{background:transparent;color:var(--text-body);margin-top:6px;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="body">
+    <div class="brand">
+      <div class="logo"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <div class="wordmark">croe</div>
+      <div class="tagline">Trust, built into every DM deal</div>
+    </div>
+
+    <div class="hero">
+      <h1>Sell in the DMs. Get paid without the what-ifs.</h1>
+      <p>Croe holds the buyer's Mobile Money until delivery is confirmed — so nobody has to just trust a stranger.</p>
+    </div>
+
+    <div class="features">
+      <div class="frow"><div class="icon-tile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><div class="ft">Money held safely</div><div class="fc">Locked in escrow until delivery is confirmed</div></div></div>
+      <div class="frow"><div class="icon-tile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div><div><div class="ft">Instant MoMo payouts</div><div class="fc">Paid automatically the moment it's delivered</div></div></div>
+      <div class="frow"><div class="icon-tile"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></div><div><div class="ft">Fair, fast dispute review</div><div class="fc">Impartial, resolved in minutes — not days</div></div></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn btn-primary">Get started</button>
+    <button class="btn btn-ghost">I already have an account</button>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

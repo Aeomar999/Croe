@@ -1,0 +1,66 @@
+<!-- @dsCard group="Foundations" name="Spacing & Shape" subtitle="8pt grid, soft 12–16px radii, barely-there elevation" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Spacing &amp; Shape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--shadow-card:0 1px 2px rgba(15,23,42,.05),0 4px 12px rgba(15,23,42,.04);--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:760px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:28px;}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;}
+.sp{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.sp .bar{height:16px;background:var(--primary-blue);border-radius:4px;}
+.sp .lbl{font-family:'SF Mono','Cascadia Code',Consolas,monospace;font-size:12px;color:var(--text-body);white-space:nowrap;}
+.demo{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+.rad{width:104px;height:80px;background:var(--surface-light);border:1.5px solid var(--border-subtle);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;}
+.rad .t{font-family:'SF Mono','Cascadia Code',Consolas,monospace;font-size:11px;color:var(--text-body);}
+.pillp{height:40px;padding:0 20px;border-radius:999px;background:var(--primary-blue);color:#fff;display:inline-flex;align-items:center;font-size:13px;font-weight:600;}
+.elev{display:flex;gap:16px;margin-top:8px;}
+.ecard{flex:1;height:76px;border-radius:16px;background:#fff;border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-body);}
+.note{margin-top:28px;background:var(--surface-light);border-radius:16px;padding:20px;font-size:13px;line-height:20px;color:var(--text-body);}
+.note b{color:var(--text-headline);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Spacing &amp; Shape</div>
+  <div class="sub">Everything sits on an 8-point grid. Corners are soft, shadows are faint — the interface should feel calm and approachable, never clinical.</div>
+
+  <div class="cols">
+    <div>
+      <div class="section-label">Spacing scale · 8pt</div>
+      <div class="sp"><div class="bar" style="width:4px;"></div><div class="lbl">xs · 4</div></div>
+      <div class="sp"><div class="bar" style="width:8px;"></div><div class="lbl">sm · 8</div></div>
+      <div class="sp"><div class="bar" style="width:12px;"></div><div class="lbl">md · 12</div></div>
+      <div class="sp"><div class="bar" style="width:16px;"></div><div class="lbl">lg · 16</div></div>
+      <div class="sp"><div class="bar" style="width:20px;"></div><div class="lbl">xl · 20</div></div>
+      <div class="sp"><div class="bar" style="width:24px;"></div><div class="lbl">xxl · 24</div></div>
+      <div class="sp"><div class="bar" style="width:32px;"></div><div class="lbl">xxxl · 32</div></div>
+    </div>
+    <div>
+      <div class="section-label">Radius</div>
+      <div class="demo">
+        <div class="rad" style="border-radius:12px;"><span class="t">button · 12</span></div>
+        <div class="rad" style="border-radius:16px;"><span class="t">card · 16</span></div>
+      </div>
+      <div style="margin-bottom:24px;"><span class="pillp">pill · 999</span></div>
+
+      <div class="section-label">Elevation</div>
+      <div class="elev">
+        <div class="ecard" style="box-shadow:var(--shadow-card);">card</div>
+        <div class="ecard" style="box-shadow:var(--shadow-raised);border:none;">raised</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><b>Mathematical breathing room.</b> Card padding defaults to 16 / 20 / 24. Crowded screens make anxious users feel trapped; generous whitespace signals that there is nothing to hide and no rush.</div>
+</div>
+</body>
+</html>

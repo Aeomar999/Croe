@@ -1,0 +1,242 @@
+<!-- @dsCard group="Screens" name="Dispute Status" subtitle="Frozen in trust — the review as a calm ledger" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Dispute Status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F7F6F3; --card: #FFFFFF; --ink: #191714; --ink-soft: #4A463F;
+  --gray: #787268; --faint: #A8A196; --hairline: #E8E5DF; --hairline-ink: #191714;
+  --cobalt: #2547F4;
+  --secure-bg: #E9F0F8; --secure-text: #23538F;
+  --hold-bg: #FBF3DB; --hold-text: #8A5A00;
+  --done-bg: #EDF3EC; --done-text: #346538;
+  --idle-bg: #EFEDE8; --idle-text: #6B6558;
+  --kente-gold: #D9A441;
+  --r-tag: 4px; --r-ctl: 8px; --r-sheet: 12px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Schibsted Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #EBE9E4; }
+body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.t-display { font-family: var(--serif); font-weight: 500; font-size: 34px; line-height: 40px; letter-spacing: -0.01em; }
+.t-headline{ font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 28px; letter-spacing: -0.005em; }
+.t-title   { font-weight: 600; font-size: 16px; line-height: 22px; }
+.t-body    { font-weight: 400; font-size: 14px; line-height: 22px; color: var(--gray); }
+.t-cap     { font-weight: 600; font-size: 11px; line-height: 16px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+.t-mono    { font-family: var(--mono); font-weight: 400; font-size: 12px; line-height: 18px; color: var(--gray); }
+.t-amount  { font-family: var(--serif); font-weight: 500; font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.01em; }
+.phone { width: 390px; min-height: 844px; margin: 0 auto; background: var(--paper);
+  display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.statusbar { height: 44px; flex: none; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 var(--sp-6);
+  font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink); }
+.sb-icons { display: flex; gap: 6px; align-items: center; }
+.navheader { height: 52px; flex: none; display: flex; align-items: center;
+  gap: var(--sp-3); padding: 0 var(--sp-6); }
+.nav-title { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+.nav-back { width: 32px; height: 32px; border: 1px solid var(--hairline);
+  border-radius: 50%; background: var(--card);
+  display: flex; align-items: center; justify-content: center; }
+.screen-body { flex: 1; display: flex; flex-direction: column;
+  padding: var(--sp-2) var(--sp-6) var(--sp-6); gap: var(--sp-5); }
+.home-indicator { height: 20px; flex: none; display: flex; align-items: center; justify-content: center; }
+.home-indicator::after { content: ''; width: 120px; height: 4px; border-radius: 2px; background: #D6D2CA; }
+.rule { height: 1px; background: var(--hairline); border: none; }
+.rule-ink { height: 1px; background: var(--ink); border: none; }
+.leader { display: flex; align-items: baseline; gap: 8px; }
+.leader .l { font-size: 13px; color: var(--gray); flex: none; }
+.leader .dots { flex: 1; border-bottom: 1px dotted #C9C4BA; transform: translateY(-3px); }
+.leader .v { font-size: 13px; font-weight: 600; color: var(--ink); flex: none;
+  font-variant-numeric: tabular-nums; }
+.note { background: var(--card); border: 1.5px solid var(--ink);
+  border-radius: var(--r-sheet); padding: var(--sp-6); position: relative; }
+.note .no { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gray); }
+.note .amt { font-family: var(--serif); font-weight: 500; font-size: 52px;
+  line-height: 1.05; letter-spacing: -0.02em; margin-top: 10px;
+  font-variant-numeric: lining-nums tabular-nums; }
+.note .amt .cur { font-size: 22px; vertical-align: 22px; letter-spacing: 0; margin-right: 2px; color: var(--ink-soft); }
+.perf { display: flex; align-items: center; height: 1px; margin: var(--sp-5) -24px; position: relative; }
+.perf::before { content: ''; flex: 1; border-top: 1.5px dashed var(--hairline); }
+.perf .n1, .perf .n2 { width: 14px; height: 14px; border-radius: 50%;
+  background: var(--paper); flex: none; }
+.perf .n1 { margin-left: -7px; } .perf .n2 { margin-right: -7px; }
+.stamp { display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 9px; border-radius: var(--r-tag); border: 1px solid currentColor; }
+.stamp-secure { color: var(--secure-text); background: var(--secure-bg); }
+.stamp-hold   { color: var(--hold-text);   background: var(--hold-bg); }
+.stamp-done   { color: var(--done-text);   background: var(--done-bg); }
+.stamp-idle   { color: var(--idle-text);   background: var(--idle-bg); }
+.stamp-cobalt { color: var(--cobalt); background: var(--card); }
+.seal { width: 84px; height: 84px; border: 1.5px solid var(--cobalt); border-radius: 50%;
+  color: var(--cobalt); display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; text-align: center; line-height: 1.5;
+  transform: rotate(-8deg); }
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 var(--sp-6); width: 100%;
+  border: none; border-radius: var(--r-ctl);
+  font-family: var(--sans); font-size: 15px; font-weight: 600; }
+.btn .arr { font-family: var(--serif); font-weight: 400; font-size: 18px; }
+.btn-ink { background: var(--ink); color: #FFFFFF; }
+.btn-line { background: var(--card); color: var(--ink); border: 1px solid var(--ink); }
+.btn-quiet { background: transparent; color: var(--gray); }
+.btn-hold { background: var(--hold-bg); color: var(--hold-text); }
+.btn-sm { height: 42px; font-size: 13.5px; padding: 0 var(--sp-4); width: auto; }
+.ledger { display: flex; flex-direction: column; }
+.entry { display: flex; gap: var(--sp-4); }
+.entry-rail { display: flex; flex-direction: column; align-items: center; width: 12px; flex: none; }
+.tick { width: 9px; height: 9px; flex: none; background: var(--card);
+  border: 1.5px solid var(--faint); transform: rotate(45deg); margin-top: 5px; }
+.tick.done { background: var(--ink); border-color: var(--ink); }
+.tick.now { background: var(--cobalt); border-color: var(--cobalt); }
+.entry-line { width: 1px; flex: 1; min-height: 26px; background: var(--hairline); }
+.entry-line.done { background: var(--ink); }
+.entry-main { flex: 1; padding-bottom: var(--sp-5); }
+.entry-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.entry-title.pending { color: var(--faint); font-weight: 500; }
+.entry-sub { font-size: 12.5px; line-height: 19px; color: var(--gray); margin-top: 3px; }
+.entry-time { font-family: var(--mono); font-size: 10.5px; color: var(--faint); flex: none; padding-top: 2px; }
+.row { display: flex; align-items: center; gap: var(--sp-3); padding: 14px 0; }
+.row + .row { border-top: 1px solid var(--hairline); }
+.row .rt { font-size: 14px; font-weight: 600; }
+.row .rc { font-size: 12px; color: var(--faint); margin-top: 2px; }
+.row .ra { font-family: var(--serif); font-size: 16px; font-weight: 500;
+  font-variant-numeric: tabular-nums; text-align: right; }
+.ghost-num { font-family: var(--serif); font-weight: 300; font-size: 44px; line-height: 1;
+  color: transparent; -webkit-text-stroke: 1px #D6D2CA; flex: none; }
+.kente { height: 4px; display: flex; }
+.kente i { flex: 1; }
+.aside { border-left: 2px solid var(--ink); padding: 2px 0 2px var(--sp-4); }
+.aside.hold { border-left-color: var(--kente-gold); }
+.aside.secure { border-left-color: var(--cobalt); }
+.aside .at { font-size: 13.5px; font-weight: 600; }
+.aside .ax { font-size: 13px; line-height: 20px; color: var(--gray); margin-top: 3px; }
+.tabbar { flex: none; background: var(--paper); border-top: 1px solid var(--hairline);
+  display: flex; padding: 14px var(--sp-5) 10px; }
+.tab { flex: 1; text-align: center; font-family: var(--mono); font-size: 10px;
+  font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint);
+  position: relative; }
+.tab.active { color: var(--ink); }
+.tab.active::before { content: ''; position: absolute; top: -15px; left: 25%; right: 25%;
+  height: 2px; background: var(--ink); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; flex: none;
+  border: 1px solid var(--ink); background: var(--card); color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-weight: 600; font-size: 15px; }
+.sheet { background: var(--card); border: 1px solid var(--hairline);
+  border-radius: var(--r-sheet); padding: var(--sp-5); }
+.dashed-tile { border: 1.5px dashed #C9C4BA; border-radius: var(--r-ctl);
+  background: transparent; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--gray); }
+
+/* card-specific */
+.nav-ref { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+.note-seal { position: absolute; top: 18px; right: 18px; width: 72px; height: 72px; font-size: 8px; }
+.evrow { display: flex; align-items: center; gap: 12px; padding: 13px 0; }
+.evrow + .evrow { border-top: 1px solid var(--hairline); }
+.evrow .en { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+.evrow .ec { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
+.microlock { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; }
+.microlock p { font-size: 11.5px; line-height: 17px; color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="statusbar">
+    <span>09:41</span>
+    <span class="sb-icons">
+      <svg width="16" height="11" viewBox="0 0 16 11"><rect x="0" y="6.5" width="2.6" height="4.5" fill="#191714"/><rect x="4.2" y="4.5" width="2.6" height="6.5" fill="#191714"/><rect x="8.4" y="2.2" width="2.6" height="8.8" fill="#191714"/><rect x="12.6" y="0" width="2.6" height="11" fill="#191714"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#191714" stroke-width="1.5" stroke-linecap="round"><path d="M2 4a8 8 0 0 1 11 0"/><path d="M4.3 6.8a5 5 0 0 1 6.4 0"/><circle cx="7.5" cy="9.6" r="1.1" fill="#191714" stroke="none"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11"><rect x="0.5" y="0.5" width="19" height="10" rx="2.5" fill="none" stroke="#191714" stroke-opacity="0.35"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#191714"/><path d="M21.5 3.5v4a2 2 0 0 0 0-4z" fill="#191714" fill-opacity="0.35"/></svg>
+    </span>
+  </div>
+
+  <div class="navheader">
+    <div class="nav-back">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191714" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    </div>
+    <span class="nav-ref">NO. CR-89201</span>
+    <span class="stamp stamp-hold" style="margin-left:auto;">In review</span>
+  </div>
+
+  <div class="screen-body">
+
+    <!-- ZONE 1 · the frozen note -->
+    <div class="note">
+      <div class="seal note-seal">Frozen<br>in trust</div>
+      <div class="no">Frozen in trust · No. CR-89201</div>
+      <div class="amt"><span class="cur">GH₵</span>450.00</div>
+      <p class="t-body" style="margin-top:10px; max-width:250px;">Neither party can access it until this review is resolved.</p>
+      <div class="perf"><span class="n1"></span><span class="n2"></span></div>
+      <div class="leader"><span class="l">Item</span><span class="dots"></span><span class="v">Nike Air Max 270</span></div>
+      <div class="leader" style="margin-top:8px;"><span class="l">Opened</span><span class="dots"></span><span class="v">Today · 14:32</span></div>
+    </div>
+
+    <!-- ZONE 2 · the review, as a ledger -->
+    <div>
+      <span class="t-cap" style="display:block; margin-bottom:14px;">The review</span>
+      <div class="ledger">
+        <div class="entry">
+          <div class="entry-rail"><div class="tick done"></div><div class="entry-line done"></div></div>
+          <div class="entry-main" style="display:flex; gap:10px;">
+            <div style="flex:1;"><div class="entry-title">Dispute opened</div>
+            <div class="entry-sub">Both of you were notified.</div></div>
+            <span class="entry-time">14:32</span>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-rail"><div class="tick now"></div><div class="entry-line"></div></div>
+          <div class="entry-main" style="display:flex; gap:10px;">
+            <div style="flex:1;"><div class="entry-title" style="color:var(--cobalt);">Automated review</div>
+            <div class="entry-sub">Our impartial review engine is comparing both claims against the original listing…</div></div>
+            <span class="entry-time" style="color:var(--cobalt);">NOW</span>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-rail"><div class="tick"></div></div>
+          <div class="entry-main" style="padding-bottom:4px;"><div class="entry-title pending">Resolution</div>
+          <div class="entry-sub">Usually within 10 seconds — a specialist steps in only if it's genuinely unclear.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 3 · evidence -->
+    <div>
+      <span class="t-cap" style="display:block; margin-bottom:2px;">Evidence secured</span>
+      <div class="evrow">
+        <div style="flex:1;"><div class="en">IMG_2041.JPG</div><div class="ec">Uploaded 14:31 · timestamped</div></div>
+        <span class="stamp stamp-done">Verified</span>
+      </div>
+      <div class="evrow">
+        <div style="flex:1;"><div class="en">LISTING SNAPSHOT</div><div class="ec">Captured automatically at purchase</div></div>
+        <span class="stamp stamp-done">Logged</span>
+      </div>
+      <div class="microlock">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A8A196" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none; margin-top:2px;"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <p>Photo verified and secured. Your evidence is timestamped and protected against tampering.</p>
+      </div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <button class="btn btn-line">Message support</button>
+
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

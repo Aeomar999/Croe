@@ -1,0 +1,97 @@
+<!-- @dsCard group="Components" name="Cards" subtitle="Escrow hero, dispute status, transaction row, link preview" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--trust-accent:#3B82F6;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-success-bg:#DCFCE7;--status-success-text:#166534;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-card:0 1px 2px rgba(15,23,42,.05),0 4px 12px rgba(15,23,42,.04);--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:460px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.rlabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:26px 0 12px;}
+.card{background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--r-card);padding:var(--sp-xl);box-shadow:var(--shadow-card);}
+.card-hero{background:linear-gradient(135deg,#2563EB 0%,#3B82F6 60%,#60A5FA 100%);border:none;border-radius:var(--r-card);padding:var(--sp-xxl);color:#fff;box-shadow:var(--shadow-raised);}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:var(--r-pill);font-size:12px;font-weight:600;}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.pill-blue{background:var(--status-secured-bg);color:var(--status-secured-text);}
+.pill-white{background:rgba(255,255,255,.2);color:#fff;}
+.hero-cap{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8);}
+.hero-amt{font-family:var(--font-display);font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;}
+.hero-foot{display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2);}
+.hero-foot .l{font-size:12px;color:rgba(255,255,255,.85);}
+.icon-tile{width:44px;height:44px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--status-secured-bg);}
+.thumb{width:44px;height:44px;border-radius:10px;flex:none;background:var(--surface-light);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;}
+.amt{font-family:var(--font-display);font-weight:700;font-variant-numeric:tabular-nums;}
+/* whatsapp link preview */
+.wa{background:#E5DDD5;border-radius:16px;padding:20px;}
+.bubble{background:#fff;border-radius:12px;box-shadow:0 1px 1px rgba(0,0,0,.12);overflow:hidden;max-width:300px;margin-left:auto;}
+.bubble .strip{background:var(--primary-blue);color:#fff;display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;font-weight:700;}
+.bubble .body{padding:12px 14px;}
+.bubble .b-title{font-size:14px;font-weight:700;}
+.bubble .b-sub{font-size:12px;color:var(--text-body);margin-top:3px;line-height:17px;}
+.bubble .b-link{font-size:11px;color:var(--primary-blue);margin-top:8px;font-family:'SF Mono','Cascadia Code',Consolas,monospace;}
+.bubble .b-time{font-size:10px;color:var(--text-muted);text-align:right;padding:0 14px 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Cards</div>
+  <div class="sub">The four containers that carry most of Croe's meaning.</div>
+
+  <div class="rlabel">Escrow hero</div>
+  <div class="card-hero">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div class="hero-cap">Held in escrow</div>
+        <div class="hero-amt">GHS 450.00</div>
+      </div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <div class="hero-foot">
+      <span class="l">Order #CR-89201 · Nike Air Max 270</span>
+      <span class="pill pill-white">Funds secured</span>
+    </div>
+  </div>
+
+  <div class="rlabel">Dispute status</div>
+  <div class="card" style="display:flex;gap:16px;align-items:flex-start;">
+    <div class="icon-tile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:700;">Funds Safely Locked</div>
+      <p style="font-size:14px;line-height:21px;color:var(--text-body);margin-top:6px;">The amount is frozen in escrow. Neither party can access it until this review is resolved.</p>
+    </div>
+  </div>
+
+  <div class="rlabel">Transaction row</div>
+  <div class="card" style="display:flex;gap:12px;align-items:center;">
+    <div class="thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg></div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:700;">Nike Air Max 270</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Kwame O. · 2h ago</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="amt" style="font-size:15px;">GHS 450.00</div>
+      <span class="pill pill-blue" style="margin-top:4px;"><span class="dot"></span>On its way</span>
+    </div>
+  </div>
+
+  <div class="rlabel">Link preview — as seen in WhatsApp</div>
+  <div class="wa">
+    <div class="bubble">
+      <div class="strip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Croe Secure Payment</div>
+      <div class="body">
+        <div class="b-title">Nike Air Max 270 — GHS 450.00</div>
+        <div class="b-sub">Pay safely — your money is held until you confirm delivery.</div>
+        <div class="b-link">croe.app/pay/CR-89201</div>
+      </div>
+      <div class="b-time">14:02 ✓✓</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

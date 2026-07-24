@@ -1,0 +1,70 @@
+<!-- @dsCard group="Components" name="Buttons" subtitle="One primary action per screen · 52px · radius 12" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Buttons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--primary-blue-hover:#1D4ED8;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-review-bg:#FEF3C7;--status-review-text:#92400E;--status-success-bg:#DCFCE7;--status-success-text:#166534;--sp-sm:8px;--sp-lg:16px;--sp-xxl:24px;--r-button:12px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:520px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;margin-bottom:8px;}
+.rlabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:26px 0 12px;}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;padding:0 var(--sp-xxl);border-radius:var(--r-button);font-family:var(--font-body);font-size:16px;font-weight:600;border:none;}
+.full{width:100%;}
+.btn-primary{background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.btn-pressed{background:var(--primary-blue-hover);color:#fff;}
+.btn-secondary{background:var(--surface-card);color:var(--primary-blue);border:1.5px solid var(--border-subtle);}
+.btn-ghost{background:transparent;color:var(--text-body);}
+.btn-amber{background:var(--status-review-bg);color:var(--status-review-text);}
+.btn-success{background:var(--status-success-bg);color:var(--status-success-text);}
+.btn-disabled{background:#E2E8F0;color:var(--text-muted);box-shadow:none;}
+.btn-sm{height:40px;font-size:14px;padding:0 var(--sp-lg);border-radius:10px;}
+.note{margin-top:28px;background:var(--surface-light);border-radius:16px;padding:18px;font-size:13px;line-height:19px;color:var(--text-body);}
+.cap{font-size:11px;color:var(--text-muted);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Buttons</div>
+  <div class="sub">52px tall, radius 12. Exactly one primary action per screen; everything else is quieter.</div>
+
+  <div class="rlabel">Primary — default · pressed · disabled</div>
+  <div class="row">
+    <button class="btn btn-primary">Continue</button>
+    <button class="btn btn-pressed">Continue</button>
+    <button class="btn btn-disabled">Continue</button>
+  </div>
+
+  <div class="rlabel">Secondary &amp; ghost</div>
+  <div class="row">
+    <button class="btn btn-secondary">Withdraw</button>
+    <button class="btn btn-ghost">Not now</button>
+  </div>
+
+  <div class="rlabel">Calm caution &amp; success</div>
+  <div class="row">
+    <button class="btn btn-amber">Open a dispute</button>
+    <button class="btn btn-success">Confirm delivery</button>
+  </div>
+
+  <div class="rlabel">Small</div>
+  <div class="row">
+    <button class="btn btn-primary btn-sm">＋ New link</button>
+    <button class="btn btn-secondary btn-sm">Statement</button>
+  </div>
+
+  <div class="rlabel">Full-width primary with trailing icon</div>
+  <button class="btn btn-primary full">Continue
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  </button>
+
+  <div class="note">The amber caution style is the strongest visual pressure Croe applies — reserved for "Open a dispute" and similar. There is no destructive-red button anywhere in the product.</div>
+</div>
+</body>
+</html>

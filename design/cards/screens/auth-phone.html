@@ -1,0 +1,66 @@
+<!-- @dsCard group="Screens" name="Sign in — Phone" subtitle="Phone-first identity, no passwords ever" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Sign in (Phone)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary-blue:#2563EB;--surface-light:#F4F6F9;--surface-card:#FFFFFF;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--sp-sm:8px;--sp-md:12px;--sp-lg:16px;--sp-xl:20px;--sp-xxl:24px;--r-button:12px;--r-card:16px;--r-pill:999px;--shadow-raised:0 4px 16px rgba(37,99,235,.16);--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#E8ECF2;}
+body{font-family:var(--font-body);color:var(--text-headline);-webkit-font-smoothing:antialiased;}
+.phone{width:390px;min-height:844px;margin:0 auto;background:var(--surface-card);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-xxl);font-size:13px;font-weight:600;}
+.sb-icons{display:flex;gap:5px;align-items:center;}
+.navheader{height:52px;flex:none;display:flex;align-items:center;padding:0 var(--sp-xl);}
+.nav-back{width:36px;height:36px;border-radius:var(--r-pill);background:var(--surface-light);display:flex;align-items:center;justify-content:center;}
+.body{flex:1;display:flex;flex-direction:column;padding:var(--sp-lg) var(--sp-xxl) var(--sp-sm);}
+h1{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.02em;}
+.lead{font-size:15px;line-height:22px;color:var(--text-body);margin-top:10px;}
+.label{font-size:13px;font-weight:600;margin:28px 0 8px;display:block;}
+.input{width:100%;height:56px;padding:0 var(--sp-lg);border:1.5px solid var(--primary-blue);border-radius:var(--r-button);box-shadow:0 0 0 3px rgba(37,99,235,.12);background:var(--surface-card);font-size:17px;display:flex;align-items:center;gap:var(--sp-md);}
+.prefix{color:var(--text-body);font-weight:600;padding-right:var(--sp-md);border-right:1px solid var(--border-subtle);}
+.caret{width:2px;height:24px;background:var(--primary-blue);display:inline-block;border-radius:1px;}
+.helper{font-size:12px;color:var(--text-muted);margin-top:8px;}
+.banner{display:flex;gap:var(--sp-md);align-items:flex-start;border-radius:var(--r-card);padding:var(--sp-lg);background:var(--status-secured-bg);margin-top:24px;}
+.banner .bt{font-size:13px;font-weight:700;color:var(--status-secured-text);}
+.banner .bx{font-size:12px;line-height:18px;color:var(--text-body);margin-top:2px;}
+.spacer{flex:1;}
+.btn{display:flex;align-items:center;justify-content:center;gap:var(--sp-sm);height:52px;border-radius:var(--r-button);font-size:16px;font-weight:600;border:none;width:100%;background:var(--primary-blue);color:#fff;box-shadow:var(--shadow-raised);}
+.legal{font-size:11px;line-height:16px;color:var(--text-muted);text-align:center;margin-top:14px;}
+.legal a{color:var(--text-body);font-weight:600;}
+.home-indicator{height:20px;flex:none;display:flex;align-items:center;justify-content:center;}
+.home-indicator::after{content:'';width:134px;height:5px;border-radius:3px;background:#CBD5E1;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="sb-icons"><svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="7" width="3" height="5" rx="1" fill="#1E293B"/><rect x="4.5" y="5" width="3" height="7" rx="1" fill="#1E293B"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" fill="#1E293B"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#1E293B"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#1E293B" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5a9 9 0 0 1 12 0"/><path d="M4.5 7.5a5.5 5.5 0 0 1 7 0"/><circle cx="8" cy="10.5" r="1.2" fill="#1E293B" stroke="none"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#1E293B" stroke-opacity="0.4"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="#1E293B"/><path d="M23.5 4v4a2 2 0 0 0 0-4z" fill="#1E293B" fill-opacity="0.4"/></svg></span></div>
+
+  <div class="navheader"><div class="nav-back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></div></div>
+
+  <div class="body">
+    <h1>What's your number?</h1>
+    <p class="lead">We'll text you a code. Your number doubles as your MoMo identity — no passwords, ever.</p>
+
+    <label class="label">Mobile number</label>
+    <div class="input"><span class="prefix">+233</span><span>24 123<span class="caret"></span></span></div>
+    <div class="helper">Standard SMS rates may apply.</div>
+
+    <div class="banner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><div class="bt">Croe never sees your MoMo PIN</div><div class="bx">Payments are approved on your phone, by you.</div></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn">Send my code</button>
+    <div class="legal">By continuing you agree to the <a>Terms</a> &amp; <a>Privacy Policy</a>.</div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

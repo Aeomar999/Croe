@@ -1,0 +1,57 @@
+<!-- @dsCard group="Components" name="Status Pills" subtitle="Every lifecycle state, in calm human language" -->
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Croe — Status Pills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--surface-light:#F4F6F9;--border-subtle:#E2E8F0;--text-headline:#1E293B;--text-body:#64748B;--text-muted:#94A3B8;--status-secured-bg:#EFF6FF;--status-secured-text:#1E40AF;--status-review-bg:#FEF3C7;--status-review-text:#92400E;--status-success-bg:#DCFCE7;--status-success-text:#166534;--status-neutral-bg:#F1F5F9;--status-neutral-text:#475569;--r-pill:999px;--font-display:'Outfit','Inter',-apple-system,'Segoe UI',sans-serif;--font-body:'Inter',-apple-system,'Segoe UI',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-body);color:var(--text-headline);background:#fff;padding:32px;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:560px;margin:0 auto;}
+.title{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:-.02em;}
+.sub{font-size:14px;color:var(--text-body);margin-top:6px;}
+.rlabel{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:26px 0 12px;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 12px;border-radius:var(--r-pill);font-size:12px;font-weight:600;letter-spacing:.01em;}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.pill-blue{background:var(--status-secured-bg);color:var(--status-secured-text);}
+.pill-amber{background:var(--status-review-bg);color:var(--status-review-text);}
+.pill-green{background:var(--status-success-bg);color:var(--status-success-text);}
+.pill-gray{background:var(--status-neutral-bg);color:var(--status-neutral-text);}
+.enum{font-family:'SF Mono','Cascadia Code',Consolas,monospace;font-size:10.5px;color:var(--text-muted);margin-left:2px;}
+.item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.note{margin-top:28px;background:var(--surface-light);border-radius:16px;padding:18px;font-size:13px;line-height:19px;color:var(--text-body);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">Status Pills</div>
+  <div class="sub">The backend has fourteen states; the buyer and vendor see plain, calm language. Colour maps to feeling, not severity.</div>
+
+  <div class="rlabel">In motion</div>
+  <div class="item"><span class="pill pill-amber"><span class="dot"></span>Awaiting payment</span><span class="enum">AWAITING_DEPOSIT</span></div>
+  <div class="item"><span class="pill pill-blue"><span class="dot"></span>On its way</span><span class="enum">SHIPPED</span></div>
+
+  <div class="rlabel">Held safe</div>
+  <div class="item"><span class="pill pill-blue"><span class="dot"></span>Funds secured</span><span class="enum">FUNDS_SECURED</span></div>
+  <div class="item"><span class="pill pill-amber"><span class="dot"></span>In review</span><span class="enum">DISPUTE_OPENED · AI_PROCESSING</span></div>
+  <div class="item"><span class="pill pill-amber"><span class="dot"></span>Specialist review</span><span class="enum">UNDER_HUMAN_REVIEW</span></div>
+
+  <div class="rlabel">Complete</div>
+  <div class="item"><span class="pill pill-green"><span class="dot"></span>Delivered</span><span class="enum">DELIVERED_CONFIRMED</span></div>
+  <div class="item"><span class="pill pill-green"><span class="dot"></span>Paid out</span><span class="enum">FUNDS_RELEASED</span></div>
+  <div class="item"><span class="pill pill-green"><span class="dot"></span>Refunded</span><span class="enum">FUNDS_REFUNDED</span></div>
+
+  <div class="rlabel">Closed</div>
+  <div class="item"><span class="pill pill-gray"><span class="dot"></span>Link created</span><span class="enum">LINK_CREATED</span></div>
+  <div class="item"><span class="pill pill-gray"><span class="dot"></span>Expired</span><span class="enum">EXPIRED</span></div>
+  <div class="item"><span class="pill pill-gray"><span class="dot"></span>Cancelled</span><span class="enum">CANCELLED</span></div>
+  <div class="item"><span class="pill pill-amber"><span class="dot"></span>Account restricted</span><span class="enum">FRAUD_LOCKOUT</span></div>
+
+  <div class="note">Amber means "being sorted out," never "you're in trouble." Even an account restriction is framed as a pause, with in-escrow money explicitly protected.</div>
+</div>
+</body>
+</html>
