@@ -1,9 +1,10 @@
 import type { PoolClient } from "pg";
 import { getTransactionClient } from "../db/pool.js";
 import { InvalidTransitionError, validateTransition } from "./state-machine.js";
-import type { EscrowState, LedgerEvent } from "../types/domain.js";
+import type { EscrowState, LedgerEvent, Carrier, Money } from "../types/domain.js";
 import type { ForensicContext } from "../middleware/forensic.js";
 import { AppError } from "../middleware/error-handler.js";
+import { paymentRail } from "../providers/index.js";
 
 const DEPOSIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 const DISPUTE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h post-ship
@@ -273,6 +274,84 @@ export async function cancelEscrow(p: {
     await client.query("ROLLBACK");
     if (err instanceof InvalidTransitionError) {
       throw new AppError(409, `Cannot cancel: transaction is not in LINK_CREATED`, "INVALID_STATE_TRANSITION");
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Initiate deposit — buyer claims the escrow link and triggers USSD push.
+ * LINK_CREATED → AWAITING_DEPOSIT, then calls PaymentRail.initiateDeposit().
+ * Returns 202 {collectionRef, status} per 18-API-Reference.md §2.
+ */
+export async function initiateDeposit(p: {
+  transactionId: string;
+  buyerId: string;
+  msisdn: string;
+  carrier: Carrier;
+  forensic?: ForensicContext;
+}): Promise<{ collectionRef: string; status: "PENDING"; tx: EscrowRow }> {
+  const client = await getTransactionClient();
+  try {
+    await client.query("BEGIN");
+
+    // DB-02: FOR UPDATE before state mutation
+    const { rows } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1 FOR UPDATE`,
+      [p.transactionId],
+    );
+
+    const tx = rows[0];
+    if (!tx) {
+      throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
+    }
+
+    // Set buyer and transition
+    await client.query(
+      `UPDATE escrow_transactions SET buyer_id = $1, current_status = 'AWAITING_DEPOSIT',
+       deposit_expires_at = NOW() + INTERVAL '24 hours'
+       WHERE transaction_id = $2`,
+      [p.buyerId, p.transactionId],
+    );
+
+    // Append ledger entry (AUD-01)
+    await appendLedger(client, {
+      transactionId: p.transactionId,
+      actorId: p.buyerId,
+      eventType: "BUYER_CLAIMED",
+      previousStatus: tx.current_status,
+      newStatus: "AWAITING_DEPOSIT",
+      forensic: p.forensic,
+    });
+
+    await client.query("COMMIT");
+
+    // Call PaymentRail outside the transaction
+    const amount: Money = { amount: tx.amount, currency: tx.currency as Money["currency"] };
+    const { providerRef } = await paymentRail.initiateDeposit({
+      transactionId: p.transactionId,
+      msisdn: p.msisdn,
+      amount,
+      carrier: p.carrier,
+    });
+
+    // Re-fetch
+    const { rows: updated } = await client.query<EscrowRow>(
+      `SELECT * FROM escrow_transactions WHERE transaction_id = $1`,
+      [p.transactionId],
+    );
+
+    return {
+      collectionRef: providerRef,
+      status: "PENDING",
+      tx: updated[0]!,
+    };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if (err instanceof InvalidTransitionError) {
+      throw new AppError(409, `Cannot initiate deposit: transaction is not LINK_CREATED`, "INVALID_STATE_TRANSITION");
     }
     throw err;
   } finally {

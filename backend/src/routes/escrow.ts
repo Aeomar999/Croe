@@ -4,17 +4,20 @@ import { AppError } from "../middleware/error-handler.js";
 import {
   createEscrow,
   getEscrow,
+  initiateDeposit,
   shipEscrow,
   confirmDelivery,
   cancelEscrow,
 } from "../services/escrow.js";
-import type { Currency } from "../types/domain.js";
+import type { Currency, Carrier } from "../types/domain.js";
 import { CURRENCIES } from "../types/domain.js";
 
 const router: RouterType = Router();
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AMOUNT_RE = /^\d{1,13}\.\d{2}$/;
+const E164_RE = /^\+[1-9]\d{6,14}$/;
+const CARRIERS: readonly Carrier[] = ["MTN", "TELECEL", "AIRTELTIGO"];
 const MAX_DESC_LEN = 500;
 const MIN_DESC_LEN = 10;
 
@@ -83,6 +86,36 @@ router.get("/escrow/:id", async (req: Request, res: Response) => {
     dispute_closes_at: tx.dispute_closes_at,
     created_at: tx.created_at,
     updated_at: tx.updated_at,
+  });
+});
+
+/**
+ * POST /v1/escrow/:id/deposit — Initiate deposit (buyer)
+ * Guard: must be in LINK_CREATED. Calls PaymentRail.initiateDeposit().
+ * Returns 202 {collectionRef, status} per 18-API-Reference.md §2.
+ */
+router.post("/escrow/:id/deposit", async (req: Request, res: Response) => {
+  const id = validateId(req.params["id"] as string);
+  const { msisdn, carrier } = req.body as { msisdn?: string; carrier?: string };
+
+  if (!msisdn || !E164_RE.test(msisdn)) {
+    throw new AppError(400, "msisdn must be E.164 format (e.g. +233240000000)", "VALIDATION_ERROR");
+  }
+  if (!carrier || !CARRIERS.includes(carrier as Carrier)) {
+    throw new AppError(400, `carrier must be one of: ${CARRIERS.join(", ")}`, "VALIDATION_ERROR");
+  }
+
+  const { collectionRef, status } = await initiateDeposit({
+    transactionId: id,
+    buyerId: "00000000-0000-0000-0000-000000000001", // placeholder until auth
+    msisdn,
+    carrier: carrier as Carrier,
+    forensic: req.forensic,
+  });
+
+  res.status(202).json({
+    collectionRef,
+    status,
   });
 });
 
