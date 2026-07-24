@@ -40,8 +40,8 @@ This gate is checked at the end of every phase below, not only at go-live.
 - [x] Collection (deposit) flow; payout/refund with pay-then-ledger ordering.
 
 ## Phase 4 — Evidence & Heuristics (spec: [`26`](14-Evidence-and-Forensics.md), [`25`](13-Disputes-and-AI-Triage.md))
-- [ ] Upload + streaming SHA-256 + object storage; recycled-photo trap.
-- [ ] Query A/B/C heuristics + cascading rule engine.
+- [x] Upload + streaming SHA-256 + object storage; recycled-photo trap.
+- [x] Query A/B/C heuristics + cascading rule engine.
 
 ## Phase 5 — AI Triage (spec: [`25`](13-Disputes-and-AI-Triage.md), [`41`](22-Infra-and-Deployment.md))
 - [ ] Local LLM (Ollama/vLLM); pin model id → `ai_model_version`.

@@ -200,33 +200,33 @@ fix(api): handle 23505 trap in processDepositWebhook
 |---|---|
 | **Branch** | `phase/4-evidence-heuristics` |
 | **Spec** | [`14-Evidence-and-Forensics.md`](for_agents/14-Evidence-and-Forensics.md), [`13-Disputes-and-AI-Triage.md`](for_agents/13-Disputes-and-AI-Triage.md) (Step 1 only) |
-| **Status** | Not started |
-| **Started** | — |
+| **Status** | ✅ Complete (87 tests, 1 commit) |
+| **Started** | 2026-07-24 |
 | **Gate passed** | — |
 | **Depends on** | Phase 3 |
 
 #### Checklist
 
-- [ ] Upload endpoint: `POST /v1/evidence/upload` (multipart, max 25 MB)
-- [ ] Streaming SHA-256 hash computed on-the-fly during upload (AUD-03)
-- [ ] Object storage write (S3/R2) with content-addressed path
-- [ ] `409 EVIDENCE_RECYCLED` when same SHA-256 exists for a different transaction
-- [ ] `evidence_artifacts` row written only after successful storage
-- [ ] Forensic metadata capture: `X-Device-Fingerprint`, `X-Network-Type`, `req.ip` from headers (AUD-02)
-- [ ] `POST /v1/disputes` — open dispute with `reason_code`, `claim_description`, `evidence_artifact_ids[]`
-- [ ] `GET /v1/disputes/:id/status` — check dispute status
-- [ ] **Query A — recycled evidence:** `SELECT EXISTS (SELECT 1 FROM evidence_artifacts WHERE sha256_hash=$1 AND transaction_id!=$2)`
-- [ ] **Query B — Sybil velocity:** count distinct accounts/disputes from same IP/device in 24h
-- [ ] **Query C — trust/age:** check `trust_score`, `is_frozen`, account age
-- [ ] Cascading rule engine: recycled media → `FRAUD_LOCKOUT` + trust −50; Sybil → freeze; burner → `UNDER_HUMAN_REVIEW`
-- [ ] Unit tests: SHA-256 hash consistency, recycled detection, rule engine cascading
-- [ ] Integration tests: upload → hash → recycle detection end-to-end
+- [x] Upload endpoint: `POST /v1/evidence/upload` (multipart, max 25 MB)
+- [x] Streaming SHA-256 hash computed on-the-fly during upload (AUD-03)
+- [x] Object storage write (S3/R2) with content-addressed path
+- [x] `409 EVIDENCE_RECYCLED` when same SHA-256 exists for a different transaction
+- [x] `evidence_artifacts` row written only after successful storage
+- [x] Forensic metadata capture: `X-Device-Fingerprint`, `X-Network-Type`, `req.ip` from headers (AUD-02)
+- [x] `POST /v1/disputes` — open dispute with `reason_code`, `claim_description`, `evidence_artifact_ids[]`
+- [x] `GET /v1/disputes/:id/status` — check dispute status
+- [x] **Query A — recycled evidence:** `SELECT EXISTS (SELECT 1 FROM evidence_artifacts WHERE sha256_hash=$1 AND transaction_id!=$2)`
+- [x] **Query B — Sybil velocity:** count distinct accounts/disputes from same IP/device in 24h
+- [x] **Query C — trust/age:** check `trust_score`, `is_frozen`, account age
+- [x] Cascading rule engine: recycled media → `FRAUD_LOCKOUT` + trust −50; Sybil → freeze; burner → `UNDER_HUMAN_REVIEW`
+- [x] Unit tests: SHA-256 hash consistency, recycled detection, rule engine cascading
+- [x] Integration tests: upload → hash → recycle detection end-to-end
 
 #### Sub-tasks log
 
 | Date | Commit | Description |
 |---|---|---|
-| — | — | _No commits yet_ |
+| 2026-07-24 | `612eb44` | feat(evidence): upload with streaming SHA-256, recycled-evidence trap, dispute heuristics, 87 tests |
 
 ---
 
