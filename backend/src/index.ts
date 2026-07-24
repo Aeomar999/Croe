@@ -9,6 +9,7 @@ import { forensicCapture } from "./middleware/forensic.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
 import healthRoutes from "./routes/health.js";
 import escrowRoutes from "./routes/escrow.js";
+import webhookRoutes from "./routes/webhooks.js";
 
 const app: Application = express();
 
@@ -19,8 +20,15 @@ app.use(cors({ origin: env.CORS_ORIGIN }));
 // Forensic capture before body parsing (AUD-02)
 app.use(forensicCapture);
 
-// Body parsing (raw body needed for webhooks — WH-01)
-app.use(express.json());
+// Body parsing — capture raw body for HMAC verification (WH-01)
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (req as any).rawBody = buf;
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: false }));
 
 // Request logging
@@ -29,6 +37,7 @@ app.use(requestLogger);
 // Routes
 app.use("/v1", healthRoutes);
 app.use("/v1", escrowRoutes);
+app.use("/v1", webhookRoutes);
 
 // 404 and error handling
 app.use(notFoundHandler);
