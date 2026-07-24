@@ -156,22 +156,22 @@ fix(api): handle 23505 trap in processDepositWebhook
 
 | | |
 |---|---|
-| **Branch** | `phase/3-webhooks-payments` |
+| **Branch** | `phase/1-data-ledger` (combined) |
 | **Spec** | [`10-Payments-Collection.md`](for_agents/10-Payments-Collection.md), [`11-Payouts-Refunds.md`](for_agents/11-Payouts-Refunds.md), [`12-Webhooks-and-Idempotency.md`](for_agents/12-Webhooks-and-Idempotency.md) |
-| **Status** | Not started |
-| **Started** | — |
+| **Status** | In progress |
+| **Started** | 2026-07-24 |
 | **Gate passed** | — |
 | **Depends on** | Phase 2 |
 
 #### Checklist
 
-- [ ] Raw-body HMAC middleware (WH-01: `req.rawBody`, not parsed JSON)
-- [ ] Replay defense: reject `|now − timestamp| > 300s` (WH-02)
-- [ ] Constant-time compare via `crypto.timingSafeEqual` + length check (WH-03)
-- [ ] Fast-200: ACK `< 500ms` before async processing (WH-04)
+- [x] Raw-body HMAC middleware (WH-01: `req.rawBody`, not parsed JSON)
+- [x] Replay defense: reject `|now − timestamp| > 300s` (WH-02)
+- [x] Constant-time compare via `crypto.timingSafeEqual` + length check (WH-03)
+- [x] Fast-200: ACK `< 500ms` before async processing (WH-04)
 - [ ] Redis `SETNX` fast dedup gate (`SETNX idemp:<provider_ref>`, 24h TTL)
-- [ ] Durable `webhook_inbox` INSERT with `ON CONFLICT DO NOTHING`
-- [ ] Client `Idempotency-Key` validation (UUIDv4, `POST`/`PUT`/`DELETE` only)
+- [x] Durable `webhook_inbox` INSERT with `ON CONFLICT DO NOTHING`
+- [x] Client `Idempotency-Key` validation (UUIDv4, `POST`/`PUT`/`DELETE` only)
 - [ ] `Idempotency-Key` replay → stored response; missing key → `400 IDEMPOTENCY_KEY_REQUIRED`
 - [ ] Collection (deposit) flow: `CustodyProvider.collect()` → webhook → `hold()`
 - [ ] Payout flow: `CustodyProvider.releaseTo()` → provider confirms → ledger write (MONEY-01)
@@ -179,16 +179,16 @@ fix(api): handle 23505 trap in processDepositWebhook
 - [ ] Commission math: `vendor_net + commission == amount` exactly (NUMERIC(15,2))
 - [ ] Payout state machine: `INITIATED` → `SUCCESS`/`FAILED`/`RETRYING`
 - [ ] `idx_single_success_payout` enforced — no double-release per direction
-- [ ] Unit tests: HMAC verification, replay rejection, timing-safe comparison
+- [x] Unit tests: HMAC verification, replay rejection, timing-safe comparison
 - [ ] Unit tests: idempotency dedup, conflict detection
 - [ ] Unit tests: commission math precision
-- [ ] **Critical test: 50 concurrent identical deposit webhooks → exactly one `FUNDS_DEPOSITED`**
+- [x] **Critical test: 50 concurrent identical deposit webhooks → exactly one `FUNDS_DEPOSITED`**
 
 #### Sub-tasks log
 
 | Date | Commit | Description |
 |---|---|---|
-| — | — | _No commits yet_ |
+| 2026-07-24 | `17038c8` | feat(webhook): HMAC verification, durable inbox, fast-200 ack, client idempotency, 64 tests passing |
 
 ---
 
