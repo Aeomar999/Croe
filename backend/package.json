@@ -14,8 +14,8 @@
     "db:migrate:down": "dotenv -- node-pg-migrate down --tsconfig ./tsconfig.json --migrations-dir ./migrations --migrations-table pgmigrations",
     "db:migrate:create": "dotenv -- node-pg-migrate create --tsconfig ./tsconfig.json --migrations-dir ./migrations",
     "db:seed": "dotenv -- tsx src/db/seed.ts",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "dotenv -- vitest run",
+    "test:watch": "dotenv -- vitest"
   },
   "keywords": [
     "escrow",

@@ -100,6 +100,9 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 2026-07-24 | `cfebe4c` | docs: rename spec files to sequential numbering, archive legacy brainstorm docs |
 | 2026-07-24 | `f7d0ea7` | docs: add AGENTS.md, Progress.md, Production_manual.md, .env.example, design system |
 | 2026-07-24 | `6c9c294` | feat(backend): scaffold pnpm + TypeScript + Express + pg with Phase 1-2 foundations |
+| 2026-07-24 | `2e746f9` | feat(infra): add docker-compose for local Postgres 16 + Redis, document Supabase/Docker env split |
+| 2026-07-24 | `debef3b` | fix(db): use dotenv-cli to inject .env into node-pg-migrate and seed scripts |
+| 2026-07-24 | `12bb92d` | feat(escrow): add state machine, escrow service, and REST routes |
 
 ---
 
@@ -124,24 +127,28 @@ fix(api): handle 23505 trap in processDepositWebhook
 - [x] P0 sandbox `CustodyProvider` implementation (mock aggregator calls)
 - [x] P0 sandbox `PaymentRail` implementation (USSD prompt stub)
 - [x] Express server with health check, Pino logging, helmet, CORS, forensic middleware
-- [ ] Escrow lifecycle state machine enforced (all transitions from 07-Escrow-Lifecycle.md)
-- [ ] `POST /v1/escrow` — create escrow contract (vendor)
-- [ ] `GET /v1/escrow/:id` — get escrow status (buyer/vendor)
+- [x] Escrow lifecycle state machine enforced (all transitions from 07-Escrow-Lifecycle.md)
+- [x] `POST /v1/escrow` — create escrow contract (vendor)
+- [x] `GET /v1/escrow/:id` — get escrow status (buyer/vendor)
 - [ ] `POST /v1/escrow/:id/deposit` — initiate deposit (buyer)
-- [ ] `POST /v1/escrow/:id/ship` — mark shipped (vendor)
-- [ ] `POST /v1/escrow/:id/confirm-delivery` — confirm delivery (buyer)
-- [ ] `POST /v1/escrow/:id/cancel` — cancel (vendor)
-- [ ] State-machine guards: no SHIP before FUNDS_SECURED, no CONFIRM_DELIVERY before SHIPPED
-- [ ] `processDepositWebhook` with SELECT FOR UPDATE + 23505 trap
-- [ ] Money is always NUMERIC(15,2) — zero float arithmetic
-- [ ] Unit tests: state transitions, guard clauses, CustodyProvider methods
-- [ ] Integration tests: full escrow lifecycle happy path, invalid transition rejection
+- [x] `POST /v1/escrow/:id/ship` — mark shipped (vendor)
+- [x] `POST /v1/escrow/:id/confirm-delivery` — confirm delivery (buyer)
+- [x] `POST /v1/escrow/:id/cancel` — cancel (vendor)
+- [x] State-machine guards: no SHIP before FUNDS_SECURED, no CONFIRM_DELIVERY before SHIPPED
+- [x] `processDepositWebhook` with SELECT FOR UPDATE + 23505 trap
+- [x] Money is always NUMERIC(15,2) — zero float arithmetic
+- [x] Unit tests: state transitions, guard clauses, CustodyProvider methods
+- [x] Integration tests: full escrow lifecycle happy path, invalid transition rejection, concurrent webhook race (50)
 
 #### Sub-tasks log
 
 | Date | Commit | Description |
 |---|---|---|
 | 2026-07-24 | `6c9c294` | feat(backend): CustodyProvider + PaymentRail interfaces, P0 sandbox impls, Express server, middleware stack |
+| 2026-07-24 | `12bb92d` | feat(escrow): state machine, escrow service, REST routes (create, get, ship, confirm, cancel, deposit webhook) |
+| 2026-07-24 | `eee59c3` | feat(escrow): add initiateDeposit endpoint with PaymentRail integration |
+| 2026-07-24 | `16f7093` | test(state-machine,money): add state transition guards and money precision tests (44 passing) |
+| 2026-07-24 | `016eed1` | test(escrow): add integration tests against real Postgres (54 tests total passing) |
 
 ---
 

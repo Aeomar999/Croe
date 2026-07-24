@@ -8,6 +8,7 @@ import { requestLogger } from "./middleware/request-logger.js";
 import { forensicCapture } from "./middleware/forensic.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
 import healthRoutes from "./routes/health.js";
+import escrowRoutes from "./routes/escrow.js";
 
 const app: Application = express();
 
@@ -27,6 +28,7 @@ app.use(requestLogger);
 
 // Routes
 app.use("/v1", healthRoutes);
+app.use("/v1", escrowRoutes);
 
 // 404 and error handling
 app.use(notFoundHandler);
