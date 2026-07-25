@@ -13,6 +13,9 @@ import escrowRoutes from "./routes/escrow.js";
 import webhookRoutes from "./routes/webhooks.js";
 import evidenceRoutes from "./routes/evidence.js";
 import disputeRoutes from "./routes/disputes.js";
+import authRoutes from "./routes/auth.js";
+import kycRoutes from "./routes/kyc.js";
+import adminRoutes from "./routes/admin.js";
 
 const app: Application = express();
 
@@ -43,6 +46,9 @@ app.use("/v1", escrowRoutes);
 app.use("/v1", webhookRoutes);
 app.use("/v1", evidenceRoutes);
 app.use("/v1", disputeRoutes);
+app.use("/v1", authRoutes);
+app.use("/v1", kycRoutes);
+app.use("/v1", adminRoutes);
 
 // 404 and error handling
 app.use(notFoundHandler);
