@@ -4,12 +4,18 @@ import helmet from "helmet";
 import { env } from "./config/env.js";
 import { logger } from "./config/logger.js";
 import { checkDatabaseConnection, closeDatabasePool } from "./db/pool.js";
+import { closeRedis } from "./config/redis.js";
 import { requestLogger } from "./middleware/request-logger.js";
 import { forensicCapture } from "./middleware/forensic.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
 import healthRoutes from "./routes/health.js";
 import escrowRoutes from "./routes/escrow.js";
 import webhookRoutes from "./routes/webhooks.js";
+import evidenceRoutes from "./routes/evidence.js";
+import disputeRoutes from "./routes/disputes.js";
+import authRoutes from "./routes/auth.js";
+import kycRoutes from "./routes/kyc.js";
+import adminRoutes from "./routes/admin.js";
 
 const app: Application = express();
 
@@ -38,6 +44,11 @@ app.use(requestLogger);
 app.use("/v1", healthRoutes);
 app.use("/v1", escrowRoutes);
 app.use("/v1", webhookRoutes);
+app.use("/v1", evidenceRoutes);
+app.use("/v1", disputeRoutes);
+app.use("/v1", authRoutes);
+app.use("/v1", kycRoutes);
+app.use("/v1", adminRoutes);
 
 // 404 and error handling
 app.use(notFoundHandler);
@@ -60,6 +71,7 @@ async function start(): Promise<void> {
       logger.info({ signal }, "Received shutdown signal");
       server.close(async () => {
         await closeDatabasePool();
+        await closeRedis();
         process.exit(0);
       });
 

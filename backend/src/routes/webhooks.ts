@@ -4,6 +4,7 @@ import { verifyMoMoWebhook } from "../middleware/webhook-hmac.js";
 import { processDepositWebhook } from "../services/escrow.js";
 import { enqueueWebhook, markWebhookProcessed } from "../services/webhook-inbox.js";
 import { paymentRail } from "../providers/index.js";
+import { dedupGate } from "../config/redis.js";
 import { logger } from "../config/logger.js";
 
 const router: RouterType = Router();
@@ -25,7 +26,14 @@ router.post(
       // 2. Parse webhook payload
       const parsed = paymentRail.parseWebhook(req.body);
 
-      // 3. Enqueue in durable inbox (§4)
+      // 3. Redis SETNX fast dedup gate (§4 gate 1)
+      const { isNew } = await dedupGate(`idemp:${parsed.providerRef}`);
+      if (!isNew) {
+        logger.info({ providerRef: parsed.providerRef }, "Redis dedup: already seen, skipping");
+        return;
+      }
+
+      // 4. Enqueue in durable inbox (§4 gate 2)
       const { alreadyProcessed } = await enqueueWebhook({
         provider: "momo",
         providerRef: parsed.providerRef,
@@ -39,7 +47,7 @@ router.post(
         return;
       }
 
-      // 4. Process the deposit if outcome is PAID
+      // 5. Process the deposit if outcome is PAID
       if (parsed.outcome === "PAID") {
         await processDepositWebhook({
           transactionId: parsed.transactionId,

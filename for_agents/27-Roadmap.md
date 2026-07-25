@@ -35,17 +35,17 @@ This gate is checked at the end of every phase below, not only at go-live.
 - [ ] `processDepositWebhook` with `SELECT FOR UPDATE` + `23505` trap.
 
 ## Phase 3 — Webhooks & Payments (spec: [`22`](10-Payments-Collection.md), [`23`](11-Payouts-Refunds.md), [`24`](12-Webhooks-and-Idempotency.md))
-- [ ] Raw-body HMAC middleware; replay + timing defenses; fast-200.
-- [ ] Redis `SETNX` + durable `webhook_inbox`; client `Idempotency-Key`.
-- [ ] Collection (deposit) flow; payout/refund with pay-then-ledger ordering.
+- [x] Raw-body HMAC middleware; replay + timing defenses; fast-200.
+- [x] Redis `SETNX` + durable `webhook_inbox`; client `Idempotency-Key`.
+- [x] Collection (deposit) flow; payout/refund with pay-then-ledger ordering.
 
 ## Phase 4 — Evidence & Heuristics (spec: [`26`](14-Evidence-and-Forensics.md), [`25`](13-Disputes-and-AI-Triage.md))
-- [ ] Upload + streaming SHA-256 + object storage; recycled-photo trap.
-- [ ] Query A/B/C heuristics + cascading rule engine.
+- [x] Upload + streaming SHA-256 + object storage; recycled-photo trap.
+- [x] Query A/B/C heuristics + cascading rule engine.
 
 ## Phase 5 — AI Triage (spec: [`25`](13-Disputes-and-AI-Triage.md), [`41`](22-Infra-and-Deployment.md))
-- [ ] Local LLM (Ollama/vLLM); pin model id → `ai_model_version`.
-- [ ] System prompt + strict JSON validation; confidence gate + auto-execution.
+- [x] Local LLM (Ollama/vLLM); pin model id → `ai_model_version`.
+- [x] System prompt + strict JSON validation; confidence gate + auto-execution.
 
 ## Phase 6 — Identity, KYC, Notifications, Admin (spec: [`20`](08-Identity-Auth.md), [`21`](09-KYC-and-AML.md), [`27`](15-Notifications.md), [`28`](16-Admin-Console.md), [`29`](17-Trust-Score-and-Anti-Fraud.md))
 - [ ] Phone-OTP auth + sessions; KYC tiers + limits.
