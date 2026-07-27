@@ -363,8 +363,8 @@ fix(api): handle 23505 trap in processDepositWebhook
 - [x] Transaction status: timeline rail, status pill, wash banner, actions
 - [x] Dispute: open dispute with reason picker, description, evidence upload
 - [x] Wallet: balance with allocation bar, transaction history
-- [ ] Links: active escrow list with filter/search (placeholder)
-- [ ] Profile: user info, KYC status, settings (placeholder)
+- [x] Links: active escrow list with filter/search (placeholder)
+- [x] Profile: user info, KYC status, settings (placeholder)
 
 **Design system:**
 - [x] Theme tokens applied (Soft Light v3 from tokens.css — no blue, no Inter/Outfit)
@@ -387,6 +387,7 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 2026-07-27 | `5eda84b` | Unit 4: CreateEscrowScreen, LinkCreatedScreen, PayDepositScreen |
 | 2026-07-27 | `86555e7` | Unit 5: WalletScreen, DisputeOpenScreen |
 | 2026-07-27 | `c8b0776` | Unit 6: MainStack navigation wiring, Progress.md |
+| 2026-07-27 | `328f14e` | Unit 7: LinksScreen with search/filter, ProfileScreen with KYC/trust/settings |
 
 ---
 
