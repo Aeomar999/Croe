@@ -158,3 +158,7 @@ export function Filter({ size, color }: IconProps) {
 export function BarChart2({ size, color }: IconProps) {
   return <Feather name="bar-chart-2" size={size} color={color} />;
 }
+
+export function ShoppingBag({ size, color }: IconProps) {
+  return <Feather name="shopping-bag" size={size} color={color} />;
+}

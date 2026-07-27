@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Home, Link, Wallet, User, Search } from '../theme/components/icons';
 import { surfaces, ink as inkColors, shape, layout, space } from '../theme/tokens';
+import { useOnboardingStore } from '../stores/onboarding';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LinksScreen } from '../screens/LinksScreen';
 import { WalletScreen } from '../screens/WalletScreen';
@@ -25,7 +26,14 @@ const tabs: Tab[] = [
 const ICON_SIZE = 21;
 
 export function MainTabs() {
-  const [active, setActive] = React.useState<TabKey>('home');
+  // The onboarding answer decides the landing tab and nothing else. A buyer's
+  // first need is tracking a delivery, which is Links; a seller's is the money
+  // and the deals, which is Home. Skipping onboarding leaves no role, and Home
+  // is the right default for that.
+  const role = useOnboardingStore((s) => s.role);
+  const [active, setActive] = React.useState<TabKey>(
+    role === 'buyer' ? 'links' : 'home'
+  );
 
   return (
     <View style={styles.container}>

@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { ink as inkColors, line, shape, states, space } from '../../theme/tokens';
+import { ink as inkColors, line, shape, states } from '../../theme/tokens';
 
 /** `croe` with a --secure full stop. The only place the wordmark is set in type. */
 export function Wordmark() {
@@ -68,5 +68,3 @@ const styles = StyleSheet.create({
     backgroundColor: inkColors.primary,
   },
 });
-
-export const chromeSpacing = space;
