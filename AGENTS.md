@@ -397,10 +397,11 @@ These files MUST be updated as development progresses:
 | Item | Status |
 |------|--------|
 | Specification phase | Complete (28 docs) |
-| Implementation phase | Not started |
-| Custody phase | P0 (sandbox) |
-| Active branch | main |
-| Git commits | 2 |
+| Implementation phase | **Complete (Phases 1–8)** |
+| Test suite | 275 passing (backend) + 79 frontend |
+| Custody phase | P0 (sandbox) — code ready for P1 Pilot gate |
+| Active branch | `main` |
+| Git commits | 5 (`ffc1fad` → `6d30444`) |
 | Remote | None configured |
 
 The next step is to begin Phase 1 (Data and Ledger) on branch `phase/1-data-ledger`.

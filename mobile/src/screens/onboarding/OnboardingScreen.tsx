@@ -47,7 +47,6 @@ export function OnboardingScreen() {
   // absorb slack against.
   const [carouselHeight, setCarouselHeight] = useState(0);
   const listRef = useRef<FlatList<OnboardingPanel>>(null);
-  const isLast = index === panels.length - 1;
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -63,13 +62,18 @@ export function OnboardingScreen() {
     navigation.replace('PhoneInput');
   }, [complete, navigation]);
 
-  const handleAdvance = useCallback(() => {
-    if (isLast) {
-      navigation.navigate('RoleSelect');
-    } else {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
-    }
-  }, [isLast, index, navigation]);
+  // Takes the panel's own index rather than reading the viewability state, so
+  // the button can never act on a stale index mid-scroll.
+  const handleAdvance = useCallback(
+    (from: number) => {
+      if (from === panels.length - 1) {
+        navigation.navigate('RoleSelect');
+      } else {
+        listRef.current?.scrollToIndex({ index: from + 1, animated: true });
+      }
+    },
+    [navigation]
+  );
 
   const renderPanel = useCallback(
     ({ item, index: i }: { item: OnboardingPanel; index: number }) => (
@@ -110,11 +114,11 @@ export function OnboardingScreen() {
 
         <View style={styles.footer}>
           <Button
-            testID="onboarding-primary"
+            testID={`onboarding-primary-${item.key}`}
             title={i === 0 ? 'Get started' : 'Continue'}
             variant="ink"
             fullWidth
-            onPress={handleAdvance}
+            onPress={() => handleAdvance(i)}
           />
           {i === 0 && (
             <Button
