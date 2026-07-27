@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "phase/*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend — typecheck, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: croe
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: croe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U croe -d croe"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://croe:dev@localhost:5432/croe
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      JWT_SECRET: test-jwt-secret-ci-only-32chars!!
+      OTP_PEPPER: test-pepper-ci-only-32chars!!
+      MOMO_WEBHOOK_SECRET: test-hmac-secret-ci-32chars!!
+      CUSTODY_PHASE: P0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@11 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run migrations
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: postgresql://croe:dev@localhost:5432/croe
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

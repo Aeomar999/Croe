@@ -7,7 +7,10 @@ import { checkDatabaseConnection, closeDatabasePool } from "./db/pool.js";
 import { closeRedis } from "./config/redis.js";
 import { requestLogger } from "./middleware/request-logger.js";
 import { forensicCapture } from "./middleware/forensic.js";
+import { correlationId } from "./middleware/correlation-id.js";
+import { metricsTimer } from "./middleware/metrics-timer.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.js";
+import { startScheduler, stopScheduler } from "./jobs/scheduler.js";
 import healthRoutes from "./routes/health.js";
 import escrowRoutes from "./routes/escrow.js";
 import webhookRoutes from "./routes/webhooks.js";
@@ -23,6 +26,9 @@ const app: Application = express();
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN }));
 
+// Correlation ID — earliest middleware so all downstream code can use it
+app.use(correlationId);
+
 // Forensic capture before body parsing (AUD-02)
 app.use(forensicCapture);
 
@@ -36,6 +42,9 @@ app.use(
   }),
 );
 app.use(express.urlencoded({ extended: false }));
+
+// Metrics timer
+app.use(metricsTimer);
 
 // Request logging
 app.use(requestLogger);
@@ -62,6 +71,8 @@ async function start(): Promise<void> {
     await checkDatabaseConnection();
     logger.info({ custodyPhase: env.CUSTODY_PHASE }, "Croe backend starting");
 
+    startScheduler();
+
     const server = app.listen(env.PORT, () => {
       logger.info({ port: env.PORT }, "Croe API listening");
     });
@@ -70,6 +81,7 @@ async function start(): Promise<void> {
     const shutdown = async (signal: string) => {
       logger.info({ signal }, "Received shutdown signal");
       server.close(async () => {
+        await stopScheduler();
         await closeDatabasePool();
         await closeRedis();
         process.exit(0);

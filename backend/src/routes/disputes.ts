@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import { requireIdempotencyKey, idempotencyGuard } from "../middleware/idempotency.js";
+import { disputeRateLimiter } from "../middleware/rate-limiter.js";
 import { openDispute, getDispute } from "../services/disputes.js";
 import { AppError } from "../middleware/error-handler.js";
 import type { DisputeReasonCode } from "../types/domain.js";
@@ -23,6 +24,7 @@ function validateId(id: string | undefined): string {
  */
 router.post(
   "/disputes",
+  disputeRateLimiter,
   requireIdempotencyKey,
   idempotencyGuard,
   async (req: Request, res: Response) => {

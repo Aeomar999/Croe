@@ -2,6 +2,7 @@ import { pool } from "../db/pool.js";
 import { callLLM } from "../config/llm.js";
 import { logger } from "../config/logger.js";
 import { AppError } from "../middleware/error-handler.js";
+import { recordAIIterationLatency } from "./metrics.js";
 import type { AIAction } from "../types/domain.js";
 import { AI_ACTIONS } from "../types/domain.js";
 
@@ -160,10 +161,12 @@ export async function runAITriage(disputeId: string): Promise<void> {
   let llmResponse: string;
   let model: string;
   try {
+    const llmStart = Date.now();
     const result = await callLLM({
       systemPrompt: SYSTEM_PROMPT,
       userMessage,
     });
+    recordAIIterationLatency(Date.now() - llmStart);
     llmResponse = result.text;
     model = result.model;
   } catch (err) {
@@ -179,10 +182,12 @@ export async function runAITriage(disputeId: string): Promise<void> {
   if (!validated) {
     logger.warn({ disputeId, raw: llmResponse.slice(0, 200) }, "Invalid LLM output — attempting repair");
     try {
+      const repairStart = Date.now();
       const repairResult = await callLLM({
         systemPrompt: SYSTEM_PROMPT,
         userMessage: `${userMessage}\n\n${REPAIR_PROMPT}`,
       });
+      recordAIIterationLatency(Date.now() - repairStart);
       validated = validateLLMOutput(repairResult.text);
     } catch {
       // Repair failed

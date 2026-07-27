@@ -1,5 +1,6 @@
 import { pool } from "../db/pool.js";
 import { logger } from "../config/logger.js";
+import { metrics } from "./metrics.js";
 
 // ── Threshold constants (13-Disputes-and-AI-Triage.md §3) ──
 const SYBIL_ACCOUNT_THRESHOLD = 2;
@@ -86,9 +87,12 @@ export async function runHeuristics(p: {
   ipAddress: string;
   deviceId: string;
 }): Promise<HeuristicResult> {
+  const heuristicsStart = Date.now();
+
   // Rule 1: Recycled media
   const isRecycled = await queryRecycledEvidence(p.sha256Hash, p.transactionId);
   if (isRecycled) {
+    metrics.recordHistogram("heuristic_duration_ms", Date.now() - heuristicsStart, { rule: "RECYCLED_MEDIA" });
     logger.warn(
       { transactionId: p.transactionId, sha256: p.sha256Hash },
       "Heuristic Rule 1 triggered: recycled evidence",
@@ -102,6 +106,7 @@ export async function runHeuristics(p: {
   // Rule 2: Sybil velocity
   const sybil = await querySybilVelocity(p.ipAddress, p.deviceId);
   if (sybil.accounts > SYBIL_ACCOUNT_THRESHOLD || sybil.disputes > SYBIL_DISPUTE_THRESHOLD) {
+    metrics.recordHistogram("heuristic_duration_ms", Date.now() - heuristicsStart, { rule: "SYBIL_VELOCITY" });
     logger.warn(
       { transactionId: p.transactionId, accounts: sybil.accounts, disputes: sybil.disputes },
       "Heuristic Rule 2 triggered: Sybil velocity",
@@ -115,6 +120,7 @@ export async function runHeuristics(p: {
   // Rule 3: Burner account
   const trust = await queryTrustAndAge(p.userId);
   if (trust.ageHours < BURNER_ACCOUNT_AGE_HOURS && trust.trustScore < BURNER_TRUST_THRESHOLD) {
+    metrics.recordHistogram("heuristic_duration_ms", Date.now() - heuristicsStart, { rule: "BURNER_ACCOUNT" });
     logger.warn(
       { transactionId: p.transactionId, ageHours: trust.ageHours, trustScore: trust.trustScore },
       "Heuristic Rule 3 triggered: burner account",
@@ -126,6 +132,7 @@ export async function runHeuristics(p: {
   }
 
   // Rule 4: Pass — proceed to AI
+  metrics.recordHistogram("heuristic_duration_ms", Date.now() - heuristicsStart, { rule: "PASS" });
   return { ruleTriggered: null, details: { passed: true } };
 }
 

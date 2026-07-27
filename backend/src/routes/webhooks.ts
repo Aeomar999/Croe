@@ -6,6 +6,7 @@ import { enqueueWebhook, markWebhookProcessed } from "../services/webhook-inbox.
 import { paymentRail } from "../providers/index.js";
 import { dedupGate } from "../config/redis.js";
 import { logger } from "../config/logger.js";
+import { paymentRateLimiter } from "../middleware/rate-limiter.js";
 
 const router: RouterType = Router();
 
@@ -17,6 +18,7 @@ const router: RouterType = Router();
  */
 router.post(
   "/webhooks/momo-callback",
+  paymentRateLimiter,
   verifyMoMoWebhook,
   async (req: Request, res: Response) => {
     // 1. ACK immediately (< 500ms)

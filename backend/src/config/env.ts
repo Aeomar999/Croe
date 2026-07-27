@@ -29,4 +29,20 @@ export const env = {
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY ?? "",
   S3_SECRET_KEY: process.env.S3_SECRET_KEY ?? "",
   CORS_ORIGIN: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+
+  // Rate limiting
+  RATE_LIMIT_AUTH_MAX: parseInt(process.env.RATE_LIMIT_AUTH_MAX ?? "5", 10),
+  RATE_LIMIT_OTP_MAX: parseInt(process.env.RATE_LIMIT_OTP_MAX ?? "3", 10),
+  RATE_LIMIT_PAYMENT_MAX: parseInt(process.env.RATE_LIMIT_PAYMENT_MAX ?? "10", 10),
+  RATE_LIMIT_EVIDENCE_MAX: parseInt(process.env.RATE_LIMIT_EVIDENCE_MAX ?? "10", 10),
+  RATE_LIMIT_DISPUTE_MAX: parseInt(process.env.RATE_LIMIT_DISPUTE_MAX ?? "5", 10),
+  RATE_LIMIT_ADMIN_MAX: parseInt(process.env.RATE_LIMIT_ADMIN_MAX ?? "20", 10),
+
+  // Data retention
+  RETENTION_NOTIFICATION_DAYS: parseInt(process.env.RETENTION_NOTIFICATION_DAYS ?? "30", 10),
+  RETENTION_MESSAGE_DAYS: parseInt(process.env.RETENTION_MESSAGE_DAYS ?? "90", 10),
+  RETENTION_SESSION_DAYS: parseInt(process.env.RETENTION_SESSION_DAYS ?? "7", 10),
+
+  // Alerting
+  ALERT_WEBHOOK_URL: process.env.ALERT_WEBHOOK_URL ?? "",
 } as const;
