@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuth } from '../hooks/useAuth';
 import { AuthStack } from './AuthStack';
-import { MainTabs } from './MainTabs';
+import { MainStack } from './MainStack';
 import { View, ActivityIndicator } from 'react-native';
 import { surfaces } from '../theme/tokens';
 
@@ -19,7 +19,7 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainTabs /> : <AuthStack />}
+      {isAuthenticated ? <MainStack /> : <AuthStack />}
     </NavigationContainer>
   );
 }

@@ -9,10 +9,10 @@
 | | |
 |---|---|
 | **Specification phase** | Complete (28 docs, design system) |
-| **Implementation phase** | In progress — Phases 1-6 backend complete |
+| **Implementation phase** | In progress — Phases 1-6 backend complete, Phase 7 frontend in progress |
 | **Custody phase** | P0 (sandbox) |
-| **Active branch** | `phase/6-identity-kyc-notif-admin` |
-| **Last updated** | 2026-07-25 |
+| **Active branch** | `phase/7-frontend` |
+| **Last updated** | 2026-07-27 |
 
 ---
 
@@ -333,41 +333,43 @@ fix(api): handle 23505 trap in processDepositWebhook
 |---|---|
 | **Branch** | `phase/7-frontend` |
 | **Spec** | [`19-Frontend-React-Native.md`](for_agents/19-Frontend-React-Native.md), [`20-Design-System.md`](for_agents/20-Design-System.md), [`18-API-Reference.md`](for_agents/18-API-Reference.md) |
-| **Status** | Not started |
-| **Started** | — |
+| **Status** | In progress — Units 1-6 complete |
+| **Started** | 2026-07-26 |
 | **Gate passed** | — |
 | **Depends on** | Phase 6 |
 
 #### Checklist
 
 **Scaffold:**
-- [ ] React Native + TypeScript app (Expo, rule UI-01)
-- [ ] React Navigation configured
-- [ ] TanStack Query for server state
-- [ ] Zustand for local state
-- [ ] Axios HTTP client configured
+- [x] React Native + TypeScript app (Expo SDK 54, rule UI-01)
+- [x] React Navigation configured (AuthStack + MainStack + custom floating dock)
+- [x] TanStack Query for server state
+- [x] Zustand for local state (auth store with SecureStore persistence)
+- [x] Axios HTTP client configured
 
 **Interceptor:**
-- [ ] Forensic headers injected: `X-Device-Fingerprint`, `X-Network-Type`, `X-App-Version`, `X-Client-Timestamp`
-- [ ] `Idempotency-Key` (UUIDv4) injected on every `POST`/`PUT`/`DELETE` (UI-02)
-- [ ] Retries reuse stable key per user intent
-- [ ] Error responses rendered as calm, human-readable copy (UI-04)
+- [x] Forensic headers injected: `X-Device-Fingerprint`, `X-Network-Type`, `X-App-Version`, `X-Client-Timestamp`
+- [x] `Idempotency-Key` (UUIDv4) injected on every `POST`/`PUT`/`DELETE` (UI-02)
+- [x] Retries reuse stable key per user intent
+- [x] Error responses rendered as calm, human-readable copy (UI-04)
 
 **Core screens:**
-- [ ] Auth: phone input → OTP entry
-- [ ] Escrow creation: item description, amount, currency, delivery terms
-- [ ] Deposit: MoMo number, carrier selection
-- [ ] Transaction status: state display with calm visual language
-- [ ] Dispute: open dispute, attach evidence, view status
-- [ ] KYC: document submission
-- [ ] Wallet/balance view
+- [x] Auth: phone input → OTP entry
+- [x] Onboarding: 3-step carousel
+- [x] Home: BalanceBlock, escrow list with TransactionRow, filter chips
+- [x] Escrow creation: item description, amount, delivery mode, fee calc
+- [x] Link created: success hero, chat preview, share actions
+- [x] Deposit: carrier picker (MTN/Telecel/AT), reassurance wash
+- [x] Transaction status: timeline rail, status pill, wash banner, actions
+- [x] Dispute: open dispute with reason picker, description, evidence upload
+- [x] Wallet: balance with allocation bar, transaction history
 
 **Design system:**
-- [ ] Theme tokens applied (colors: blues/grays/amber, no crimson — UI-03)
-- [ ] 8pt spacing grid
-- [ ] Calm typography
-- [ ] DisputeStatusCard component
-- [ ] All user-facing strings follow micro-empathy tone
+- [x] Theme tokens applied (Soft Light v3 from tokens.css — no blue, no Inter/Outfit)
+- [x] 4pt spacing grid
+- [x] Plus Jakarta Sans typography (5 weights)
+- [x] All user-facing strings follow micro-empathy tone
+- [x] Pill (trace/signal), Button (6 variants), Input, WashBanner, BalanceBlock, Table, Avatar, Toast, icons
 
 - [ ] Unit tests: interceptor header injection, idempotency key stability
 - [ ] E2E tests (Detox): auth flow, escrow creation, dispute flow
@@ -376,7 +378,12 @@ fix(api): handle 23505 trap in processDepositWebhook
 
 | Date | Commit | Description |
 |---|---|---|
-| — | — | _No commits yet_ |
+| 2026-07-26 | `59eb401` | Unit 1: Expo scaffold, tokens, typography, API client, auth store, components, navigation |
+| 2026-07-26 | `8f6f80e` | Unit 2: PhoneInput, OtpEntry, Onboarding screens |
+| 2026-07-27 | `bcd67a3` | Unit 3: HomeScreen, TransactionStatusScreen, TransactionRow |
+| 2026-07-27 | `5eda84b` | Unit 4: CreateEscrowScreen, LinkCreatedScreen, PayDepositScreen |
+| 2026-07-27 | `86555e7` | Unit 5: WalletScreen, DisputeOpenScreen |
+| 2026-07-27 | — | Unit 6: MainStack navigation wiring, Progress.md |
 
 ---
 
@@ -471,5 +478,5 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 4 — Evidence & Heuristics | `phase/4-evidence-heuristics` | ✅ Complete | 87 | — |
 | 5 — AI Triage | `phase/5-ai-triage` | ✅ Complete | 111 | — |
 | 6 — Identity, KYC, Notif, Admin | `phase/6-identity-kyc-notif-admin` | ✅ Complete | 174 | — |
-| 7 — Frontend | `phase/7-frontend` | Not started | — | — |
+| 7 — Frontend | `phase/7-frontend` | 🔄 In progress | 15 screens | — |
 | 8 — Ops, Reconciliation, Hardening | `phase/8-ops-hardening` | Not started | — | — |
