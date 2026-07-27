@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Croe — Aperture, resolved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EXPLORATION SHEET — round 2. Token subset only; the full
+   tokens.css is copied verbatim into the card once approved.
+   ============================================================ */
+:root {
+  --page: #E6E6E3; --canvas: #F1F1EF; --surface: #FFFFFF; --sunken: #F5F5F3;
+  --ink: #17181B; --ink-2: #4A4D52; --ink-3: #8E9297; --on-ink: #FFFFFF;
+  --line: #E7E7E4; --line-2: #D9D9D5;
+  --secure: #1FC16B; --secure-wash: #E8F8F0; --secure-deep: #127A45;
+  --caution-wash: #FDF3E1; --caution-deep: #8A5A00;
+  --danger-wash: #FDECEC; --danger-deep: #A62020;
+  --r-2: 16px; --r-3: 20px; --r-4: 24px; --r-full: 999px;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-8: 32px; --s-10: 40px;
+  --font: 'Plus Jakarta Sans', 'Segoe UI Variable Text', 'Segoe UI',
+          -apple-system, system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); color: var(--ink); background: var(--surface);
+  padding: 48px 32px 96px; min-height: 100vh;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.spec { max-width: 900px; margin: 0 auto; }
+.spec-h1 { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+.spec-sub { font-size: 15px; font-weight: 500; color: var(--ink-3); margin-top: 6px; }
+.srow { display: flex; gap: var(--s-8); padding: 30px 0; border-top: 1px solid var(--line); }
+.srow:first-of-type { margin-top: 34px; }
+.slabel { width: 128px; flex: none; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+.sbody { flex: 1; min-width: 0; }
+.snote { font-size: 13px; line-height: 20px; color: var(--ink-3); margin-top: 12px; }
+.snote b { color: var(--ink-2); font-weight: 700; }
+.lede { font-size: 15px; line-height: 23px; font-weight: 500; color: var(--ink-2); }
+
+/* ---------- mark ---------- */
+.mk { display: block; width: 100%; height: 100%; }
+.mk .arc { fill: none; stroke: currentColor; stroke-linecap: round; }
+.mk .dot { fill: var(--secure); }
+.mono .dot { fill: currentColor; }
+
+.ico { background: var(--ink); color: var(--on-ink); flex: none; border-radius: 22.4%; }
+.ico.light { background: var(--canvas); color: var(--ink); }
+.ico.paper { background: var(--surface); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line); }
+.ico.sq { border-radius: 0; }
+.ico.trans { background: repeating-conic-gradient(var(--line) 0% 25%, var(--surface) 0% 50%)
+  50% / 12px 12px; }
+.s160 { width:160px; height:160px } .s120 { width:120px; height:120px }
+.s96 { width:96px; height:96px } .s72 { width:72px; height:72px }
+.s44 { width:44px; height:44px } .s32 { width:32px; height:32px }
+.s24 { width:24px; height:24px } .s20 { width:20px; height:20px }
+.s16 { width:16px; height:16px }
+
+/* ---------- option rows ---------- */
+.opts { display: flex; gap: var(--s-5); align-items: flex-start; }
+.opt { text-align: center; }
+.opt .ot { font-size: 12px; font-weight: 700; margin-top: 10px; }
+.opt .ox { font-size: 11.5px; line-height: 16px; color: var(--ink-3); margin-top: 3px;
+  max-width: 116px; }
+.opt.pick .ot::after { content: ' ✓'; color: var(--secure-deep); }
+.opt.pick .ot { color: var(--secure-deep); }
+.pair { display: flex; align-items: center; gap: 10px; justify-content: center; }
+
+/* ---------- construction ---------- */
+.constr { background: var(--canvas); border-radius: var(--r-4); padding: var(--s-6);
+  display: flex; gap: var(--s-8); align-items: center; }
+.gridsvg { width: 260px; height: 260px; flex: none; }
+.dl { display: flex; flex-direction: column; gap: 9px; }
+.dl div { display: flex; gap: var(--s-3); font-size: 12.5px; line-height: 18px; }
+.dl dt { width: 116px; flex: none; font-weight: 700; color: var(--ink-2); }
+.dl dd { color: var(--ink-3); }
+.dl dd b { color: var(--ink); font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums; }
+
+/* ---------- lockups ---------- */
+.lk { display: inline-flex; align-items: center; gap: 12px; }
+.wm { font-weight: 800; letter-spacing: -.042em; font-size: 30px; }
+.wm i { font-style: normal; }
+.wm .g { color: var(--secure); }
+.wm .k { color: var(--ink); }
+.stackrow { display: flex; gap: var(--s-10); align-items: flex-end; flex-wrap: wrap; }
+.stack { display: inline-flex; flex-direction: column; align-items: center; gap: 12px; }
+.optbox { border-radius: var(--r-3); padding: var(--s-5) var(--s-6);
+  background: var(--canvas); display: inline-flex; align-items: center;
+  justify-content: center; min-height: 96px; }
+.optbox.on { background: var(--secure-wash); }
+
+/* ---------- context ---------- */
+.stage { background: var(--canvas); border-radius: var(--r-4); padding: var(--s-5); }
+.chat { display: flex; gap: 10px; align-items: flex-start; max-width: 348px; }
+.bub { background: var(--surface); border-radius: var(--r-2); padding: 10px 12px;
+  flex: 1; min-width: 0; }
+.bub .ttl { font-size: 13px; font-weight: 700; letter-spacing: -.006em; }
+.bub .sub { font-size: 11.5px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
+.bub .url { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 6px; }
+.home { display: flex; gap: 18px; }
+.app { width: 60px; flex: none; text-align: center; }
+.app .nm { font-size: 10.5px; font-weight: 600; color: var(--ink-2); margin-top: 6px; }
+.faux { width: 60px; height: 60px; border-radius: 22.4%; display: flex;
+  align-items: center; justify-content: center; font-size: 22px; font-weight: 800;
+  color: var(--on-ink); }
+.f-mtn { background:#FFCC00; color: var(--ink) } .f-wa { background:#25D366 }
+.f-ig { background:#C13584 } .f-tel { background:#E60000 }
+
+/* ---------- asset table ---------- */
+.assets { display: flex; flex-wrap: wrap; gap: var(--s-6); }
+.asset { width: 148px; }
+.asset .an { font-size: 12px; font-weight: 700; margin-top: 10px; }
+.asset .ad { font-size: 11px; line-height: 16px; color: var(--ink-3); margin-top: 3px; }
+
+/* ---------- rules ---------- */
+.dodont { display: flex; gap: var(--s-5); flex-wrap: wrap; }
+.dd { width: 128px; }
+.ddbox { height: 96px; border-radius: var(--r-3); display: flex; align-items: center;
+  justify-content: center; }
+.dd .lb { font-size: 11.5px; line-height: 16px; margin-top: 8px; font-weight: 600; }
+.dd.no .ddbox { background: var(--danger-wash) } .dd.no .lb { color: var(--danger-deep) }
+.dd.ok .ddbox { background: var(--secure-wash) } .dd.ok .lb { color: var(--secure-deep) }
+.verdict { background: var(--secure-wash); color: var(--secure-deep);
+  border-radius: var(--r-4); padding: var(--s-4) var(--s-5); }
+.verdict .vt { font-size: 14px; font-weight: 700 }
+.verdict .vx { font-size: 13.5px; line-height: 20px; margin-top: 4px }
+</style>
+</head>
+<body>
+<div class="spec">
+
+  <div class="spec-h1">Aperture — resolved</div>
+  <div class="spec-sub">Round 2 · geometry, lockup, icon set, rules</div>
+
+  <!-- ============ MOUTH ============ -->
+  <div class="srow">
+    <div class="slabel">Mouth angle</div>
+    <div class="sbody">
+      <div class="opts">
+        <div class="opt">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="106.31 50.77" transform="rotate(58.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">90°</div>
+          <div class="ox">Most enclosing. Starts to read as a ring with a nick in it.</div>
+        </div>
+        <div class="opt pick">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">100°</div>
+          <div class="ox">Unmistakably a C, still doing the enclosing.</div>
+        </div>
+        <div class="opt">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="95.41 61.67" transform="rotate(70.7 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">115°</div>
+          <div class="ox">A plainer letter C. The dot starts to look loose in it.</div>
+        </div>
+      </div>
+      <div class="snote">The mouth is the whole argument. Too tight and the C disappears
+        into a ring — which is Between, badly drawn. Too wide and the enclosure stops
+        holding anything and it becomes a bare letterform. <b>100° keeps both readings
+        alive at once</b>, which is the only reason to have picked this concept.</div>
+    </div>
+  </div>
+
+  <!-- ============ STROKE ============ -->
+  <div class="srow">
+    <div class="slabel">Stroke</div>
+    <div class="sbody">
+      <div class="opts">
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="10" stroke-dasharray="103.45 53.63" transform="rotate(61.5 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="10" stroke-dasharray="103.45 53.63" transform="rotate(61.5 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          </div>
+          <div class="ot">10</div>
+          <div class="ox">Elegant large, thin and hesitant at 20 px.</div>
+        </div>
+        <div class="opt pick">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          </div>
+          <div class="ot">11.5</div>
+          <div class="ox">Confident at both ends. 2.3 px at chat size.</div>
+        </div>
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="13" stroke-dasharray="100.45 56.63" transform="rotate(64.9 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="13" stroke-dasharray="100.45 56.63" transform="rotate(64.9 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          </div>
+          <div class="ot">13</div>
+          <div class="ox">Best at 20 px, but crowds the dot when it is large.</div>
+        </div>
+      </div>
+      <div class="snote">Stroke 11.5 on a 100-unit box lands at <b>2.3 px inside a 20 px
+        icon</b> — above the 2 px floor where a stroke starts to grey out on a mid-range
+        Android screen. Stroke 13 wins the 20 px test outright, which is why it comes back
+        below as the micro variant.</div>
+    </div>
+  </div>
+
+  <!-- ============ DOT ============ -->
+  <div class="srow">
+    <div class="slabel">Dot position</div>
+    <div class="sbody">
+      <div class="opts">
+        <div class="opt">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="43.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">Deep (43)</div>
+          <div class="ox">Tucked against the back. Reads as stuck, not held.</div>
+        </div>
+        <div class="opt pick">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">Centred (48)</div>
+          <div class="ox">Even air all round. At rest, not moving anywhere.</div>
+        </div>
+        <div class="opt">
+          <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="54.5" cy="50" r="9"/></g></svg></div>
+          <div class="ot">Forward (54)</div>
+          <div class="ox">Leaning at the exit. Restless — wrong for money at rest.</div>
+        </div>
+      </div>
+      <div class="snote">48, not 50 — the aperture's enclosed area has its centre slightly
+        left of the circle's, because the right side is missing. <b>Sitting the dot at the
+        optical centre of the space it occupies</b> is what makes it look held rather than
+        placed.</div>
+    </div>
+  </div>
+
+  <!-- ============ CONSTRUCTION ============ -->
+  <div class="srow">
+    <div class="slabel">Construction</div>
+    <div class="sbody">
+      <div class="constr">
+        <svg class="gridsvg" viewBox="0 0 100 100">
+          <rect x="0" y="0" width="100" height="100" rx="22.4" fill="var(--surface)"/>
+          <g stroke="var(--line-2)" stroke-width=".4">
+            <line x1="50" y1="0" x2="50" y2="100"/><line x1="0" y1="50" x2="100" y2="50"/>
+            <line x1="19.25" y1="0" x2="19.25" y2="100"/><line x1="80.75" y1="0" x2="80.75" y2="100"/>
+            <line x1="0" y1="19.25" x2="100" y2="19.25"/><line x1="0" y1="80.75" x2="100" y2="80.75"/>
+          </g>
+          <circle cx="51.5" cy="50" r="25" fill="none" stroke="var(--line-2)"
+                  stroke-width=".4" stroke-dasharray="2 2"/>
+          <g transform="translate(1.5,0)">
+            <circle cx="50" cy="50" r="25" fill="none" stroke="var(--ink)" stroke-width="11.5"
+                    stroke-linecap="round" stroke-dasharray="101.95 55.13"
+                    transform="rotate(63.2 50 50)"/>
+            <circle cx="48.5" cy="50" r="9" fill="var(--secure)"/>
+          </g>
+        </svg>
+        <div class="dl">
+          <div><dt>Box</dt><dd><b>100 × 100</b>, mark spans <b>61.5</b> (61.5%)</dd></div>
+          <div><dt>Base circle</dt><dd>r <b>25</b>, centre <b>(51.5, 50)</b></dd></div>
+          <div><dt>Optical nudge</dt><dd>arc <b>+1.5</b> on x — a C is left-heavy, so its
+            geometric centre reads off</dd></div>
+          <div><dt>Stroke</dt><dd><b>11.5</b>, round cap, no join</dd></div>
+          <div><dt>Mouth</dt><dd><b>100.0°</b>, bisector on the horizontal, opening right</dd></div>
+          <div><dt>Dot</dt><dd>r <b>9</b> at <b>(50, 50)</b> — the exact centre of the
+            tile — fill <b>--secure</b></dd></div>
+          <div><dt>Aperture gap</dt><dd>dot to stroke: <b>8.75</b> at the closest point
+            (76% of the stroke)</dd></div>
+          <div><dt>Shapes</dt><dd><b>2.</b> There is no third element, ever</dd></div>
+        </div>
+      </div>
+      <div class="snote">Two facts are load-bearing. <b>The dot sits at the exact centre
+        of the tile and the C is nudged right around it</b> — so the money is what the
+        icon is centred on, and the enclosure moves to suit it. And <b>the aperture gap is
+        8.75, which is 1.75 px inside a 20 px icon</b>: above the ~1.5 px floor where a
+        gap silts up on a mid-range Android screen. Below 24 px that margin is gone, which
+        is what the micro variant exists to fix.<br><br>
+        <span style="color:var(--caution-deep)">Corrected after measuring: an earlier draft
+        of this sheet claimed a 9.75 gap and a "never less than the stroke" rule. Both were
+        wrong — a gap that wide is unreachable without either a 69-unit mark or a dot small
+        enough to vanish. The real constraint is the pixel floor above.</span></div>
+    </div>
+  </div>
+
+  <!-- ============ MICRO VARIANT ============ -->
+  <div class="srow">
+    <div class="slabel">Micro variant</div>
+    <div class="sbody">
+      <div class="opts">
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <div class="ico s24"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <div class="ico s16"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          </div>
+          <div class="ot">Standard, shrunk</div>
+          <div class="ox">Fine at 24. At 16 the mouth silts up.</div>
+        </div>
+        <div class="opt pick">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><g><circle class="arc" cx="50" cy="50" r="26" stroke-width="13" stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/><circle class="dot" cx="50" cy="50" r="10"/></g></svg></div>
+            <div class="ico s24"><svg class="mk" viewBox="0 0 100 100"><g><circle class="arc" cx="50" cy="50" r="26" stroke-width="13" stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/><circle class="dot" cx="50" cy="50" r="10"/></g></svg></div>
+            <div class="ico s16"><svg class="mk" viewBox="0 0 100 100"><g><circle class="arc" cx="50" cy="50" r="26" stroke-width="13" stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/><circle class="dot" cx="50" cy="50" r="10"/></g></svg></div>
+          </div>
+          <div class="ot">Micro — for ≤ 24 px</div>
+          <div class="ox">Stroke 13, r 26, dot 10 dead centre, mouth 95°.</div>
+        </div>
+      </div>
+      <div class="snote">A second drawing for small sizes is standard practice, not a
+        hedge — Apple ships different optical sizes of its own system glyphs for exactly
+        this reason. <b>Use the micro variant for the favicon and the notification icon
+        only.</b> Everything else uses the standard drawing. If you would rather ship one
+        drawing and accept a slightly muddier favicon, that is a legitimate call — say so
+        and I will drop it.</div>
+    </div>
+  </div>
+
+  <!-- ============ THE COLLISION ============ -->
+  <div class="srow">
+    <div class="slabel">The collision</div>
+    <div class="sbody">
+      <p class="lede">The mark holds a green dot. The wordmark ends in a green full stop.
+      Put them side by side and the brand says its one idea twice, six millimetres apart —
+      which reads as indecision, not emphasis. One of them has to give.</p>
+      <div class="stackrow" style="margin-top:22px">
+
+        <div class="stack">
+          <div class="optbox">
+            <div class="lk">
+              <div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+              <span class="wm"><i class="k">croe</i><i class="g">.</i></span>
+            </div>
+          </div>
+          <div class="ox" style="max-width:220px;text-align:center;font-size:11.5px;line-height:16px;color:var(--ink-3)">
+            <b style="color:var(--danger-deep)">A — keep both.</b> Two green dots. The eye
+            bounces between them and neither wins.</div>
+        </div>
+
+        <div class="stack">
+          <div class="optbox on">
+            <div class="lk">
+              <div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+              <span class="wm"><i class="k">croe</i></span>
+            </div>
+          </div>
+          <div class="ox" style="max-width:220px;text-align:center;font-size:11.5px;line-height:16px;color:var(--secure-deep)">
+            <b>B — the mark IS the full stop.</b> Drop the period when the mark is present.
+            One green dot, always.</div>
+        </div>
+
+        <div class="stack">
+          <div class="optbox">
+            <div class="lk">
+              <div class="ico s44 paper mono"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+              <span class="wm"><i class="k">croe</i><i class="g">.</i></span>
+            </div>
+          </div>
+          <div class="ox" style="max-width:220px;text-align:center;font-size:11.5px;line-height:16px;color:var(--ink-3)">
+            <b>C — mark goes mono.</b> Green stays on the word. But the mark loses the
+            money and becomes decoration.</div>
+        </div>
+
+      </div>
+      <div class="verdict" style="margin-top:24px">
+        <div class="vt">The rule: exactly one green dot in any Croe lockup</div>
+        <div class="vx">With the mark present, the wordmark is <b>croe</b> — no period,
+          because the mark is the period. Standing alone with no mark, the wordmark is
+          <b>croe.</b> with the green full stop, exactly as it already appears on
+          onboarding. Nothing else about the logotype changes, and no existing screen
+          needs redrawing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LOCKUPS ============ -->
+  <div class="srow">
+    <div class="slabel">Lockups</div>
+    <div class="sbody">
+      <div class="stackrow">
+        <div class="stack">
+          <div class="optbox" style="background:var(--surface)">
+            <div class="lk">
+              <div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+              <span class="wm" style="font-size:26px">croe</span>
+            </div>
+          </div>
+          <div class="ox" style="font-size:11px;color:var(--ink-3)">Horizontal — the default</div>
+        </div>
+        <div class="stack">
+          <div class="optbox" style="background:var(--surface);flex-direction:column;gap:10px">
+            <div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+            <span class="wm" style="font-size:20px">croe</span>
+          </div>
+          <div class="ox" style="font-size:11px;color:var(--ink-3)">Stacked — splash, share cards</div>
+        </div>
+        <div class="stack">
+          <div class="optbox" style="background:var(--ink)">
+            <span class="wm" style="font-size:30px;color:var(--on-ink)">croe<i class="g">.</i></span>
+          </div>
+          <div class="ox" style="font-size:11px;color:var(--ink-3)">Wordmark alone — keeps the period</div>
+        </div>
+      </div>
+      <div class="snote"><b>Optical alignment:</b> the wordmark's x-height is set to the
+        dot's diameter, and the mark's vertical centre aligns to the x-height centre of
+        <b>croe</b> — not to the cap line, because the word has no ascenders. Gap between
+        mark and word is <b>one dot diameter</b>.</div>
+    </div>
+  </div>
+
+  <!-- ============ CLEAR SPACE ============ -->
+  <div class="srow">
+    <div class="slabel">Clear space</div>
+    <div class="sbody">
+      <div class="stage" style="display:flex;gap:var(--s-8);align-items:center">
+        <svg width="200" height="200" viewBox="0 0 200 200">
+          <rect x="8" y="8" width="184" height="184" fill="var(--surface)" rx="8"/>
+          <rect x="8" y="8" width="184" height="184" fill="none" stroke="var(--line-2)"
+                stroke-width="1" stroke-dasharray="4 4" rx="8"/>
+          <rect x="45" y="45" width="110" height="110" fill="none" stroke="var(--secure)"
+                stroke-width="1" stroke-dasharray="3 3"/>
+          <g transform="translate(45,45) scale(1.1)">
+            <g transform="translate(1.5,0)">
+              <circle cx="50" cy="50" r="25" fill="none" stroke="var(--ink)" stroke-width="11.5"
+                      stroke-linecap="round" stroke-dasharray="101.95 55.13"
+                      transform="rotate(63.2 50 50)"/>
+              <circle cx="48.5" cy="50" r="9" fill="var(--secure)"/>
+            </g>
+          </g>
+          <g fill="var(--ink-3)" font-family="var(--font)" font-size="10" font-weight="700">
+            <text x="20" y="103">◦</text><text x="172" y="103">◦</text>
+            <text x="97" y="30">◦</text><text x="97" y="178">◦</text>
+          </g>
+        </svg>
+        <div class="dl">
+          <div><dt>Unit</dt><dd>one <b>dot diameter</b> = 18 units, <b>29%</b> of the
+            mark's width</dd></div>
+          <div><dt>Clear space</dt><dd><b>1 unit</b> on all four sides, minimum</dd></div>
+          <div><dt>Min size, mark</dt><dd><b>16 px</b> (micro variant below 24)</dd></div>
+          <div><dt>Min size, lockup</dt><dd><b>72 px</b> wide</dd></div>
+          <div><dt>Icon padding</dt><dd>mark at <b>61.5%</b> of the tile, iOS and web</dd></div>
+          <div><dt>Android adaptive</dt><dd>mark at <b>56%</b> of the 108 dp canvas, so it
+            clears the mask</dd></div>
+        </div>
+      </div>
+      <div class="snote">Using the dot as the measuring unit rather than a fixed pixel
+        value means clear space scales with the mark automatically, and anyone laying it
+        out can check it by eye without a ruler.</div>
+    </div>
+  </div>
+
+  <!-- ============ ASSET SET ============ -->
+  <div class="srow">
+    <div class="slabel">Asset set</div>
+    <div class="sbody">
+      <div class="assets">
+        <div class="asset">
+          <div class="ico s120 sq"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="an">iOS · icon.png</div>
+          <div class="ad">1024², square, opaque ink. iOS applies its own mask.</div>
+        </div>
+        <div class="asset">
+          <div class="ico s120 sq trans"><svg class="mk" viewBox="0 0 100 100" style="color:var(--on-ink)"><g transform="translate(1.5,0) scale(0.91) translate(5,5)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="an">Android · foreground</div>
+          <div class="ad">432², transparent, mark at 56% so the mask cannot clip it.</div>
+        </div>
+        <div class="asset">
+          <div class="ico s120 sq"></div>
+          <div class="an">Android · background</div>
+          <div class="ad">432², flat #17181B. No gradient, no texture.</div>
+        </div>
+        <div class="asset">
+          <div class="ico s120 sq trans mono"><svg class="mk" viewBox="0 0 100 100" style="color:var(--ink)"><g transform="translate(1.5,0) scale(0.91) translate(5,5)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="an">Android · monochrome</div>
+          <div class="ad">432², single tone on transparent, for themed icons.</div>
+        </div>
+        <div class="asset">
+          <div class="ico s120 light sq" style="border-radius:var(--r-3)"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0) scale(0.72) translate(19.5,19.5)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="an">splash-icon.png</div>
+          <div class="ad">Ink mark on --canvas. The app opens into its own ground.</div>
+        </div>
+        <div class="asset">
+          <div style="display:flex;gap:12px;align-items:flex-end;height:120px">
+            <div class="ico s32"><svg class="mk" viewBox="0 0 100 100"><g><circle class="arc" cx="50" cy="50" r="26" stroke-width="13" stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/><circle class="dot" cx="50" cy="50" r="10"/></g></svg></div>
+            <div class="ico s16"><svg class="mk" viewBox="0 0 100 100"><g><circle class="arc" cx="50" cy="50" r="26" stroke-width="13" stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/><circle class="dot" cx="50" cy="50" r="10"/></g></svg></div>
+          </div>
+          <div class="an">favicon.png</div>
+          <div class="ad">32² and 16², micro variant.</div>
+        </div>
+      </div>
+      <div class="snote">Six files replace the four Expo placeholders currently in
+        <b>mobile/assets/</b>, which are still the stock blue chevron. Everything is
+        generated from one SVG master, so there is no second drawing to keep in sync — the
+        micro variant is the only intentional exception.</div>
+    </div>
+  </div>
+
+  <!-- ============ IN CONTEXT ============ -->
+  <div class="srow">
+    <div class="slabel">In context</div>
+    <div class="sbody">
+      <div class="stage" style="margin-bottom:16px">
+        <div class="chat">
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div>
+          <div class="bub">
+            <div class="ttl">Nike Air Max 270 — size 43</div>
+            <div class="sub">GH₵ 450.00 · held by Croe until you confirm delivery</div>
+            <div class="url">croe.app/pay/CR-89201</div>
+          </div>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="home">
+          <div class="app"><div class="faux f-wa">✆</div><div class="nm">WhatsApp</div></div>
+          <div class="app"><div class="faux f-mtn">M</div><div class="nm">MyMTN</div></div>
+          <div class="app"><div class="ico" style="width:60px;height:60px"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div><div class="nm">Croe</div></div>
+          <div class="app"><div class="faux f-ig">◎</div><div class="nm">Instagram</div></div>
+          <div class="app"><div class="faux f-tel">T</div><div class="nm">Telecel</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MISUSE ============ -->
+  <div class="srow">
+    <div class="slabel">Never</div>
+    <div class="sbody">
+      <div class="dodont">
+        <div class="dd ok">
+          <div class="ddbox"><div class="ico s72"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div></div>
+          <div class="lb">Correct. Ink ground, green dot, mouth on the horizontal.</div>
+        </div>
+        <div class="dd no">
+          <div class="ddbox"><div class="ico s72" style="background:var(--secure);color:var(--ink)"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9" style="fill:var(--ink)"/></g></svg></div></div>
+          <div class="lb">No green ground. Green means held, not Croe.</div>
+        </div>
+        <div class="dd no">
+          <div class="ddbox"><div class="ico s72" style="transform:rotate(-32deg)"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div></div>
+          <div class="lb">Never rotate. Rotated, it stops being a C.</div>
+        </div>
+        <div class="dd no">
+          <div class="ddbox"><div class="ico s72"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9" style="fill:#F5B02E"/></g></svg></div></div>
+          <div class="lb">The dot is never another state colour.</div>
+        </div>
+        <div class="dd no">
+          <div class="ddbox"><div class="ico s72"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0) scale(1.34) translate(-12.5,-12.5)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div></div>
+          <div class="lb">Never fill the tile. 61.5% is the size.</div>
+        </div>
+        <div class="dd no">
+          <div class="ddbox"><div class="ico s72" style="background:linear-gradient(135deg,#1FC16B,#17181B)"><svg class="mk" viewBox="0 0 100 100"><g transform="translate(1.5,0)"><circle class="arc" cx="50" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.2 50 50)"/><circle class="dot" cx="48.5" cy="50" r="9"/></g></svg></div></div>
+          <div class="lb">No gradients. The system has none, anywhere.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
