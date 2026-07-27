@@ -1,0 +1,84 @@
+{
+  "id": "06-verify-identity",
+  "screen": "KYC — Ghana Card tier",
+  "app_copy": {
+    "tiers": "Phone verified (up to GH₵ 500) → Ghana Card (active) → higher limits"
+  },
+  "job": "Identity as something you hold up, not something taken from you. The user is the one presenting; nobody is scanning them.",
+
+  "output": {
+    "aspect_ratio": "1:1",
+    "resolution": "2048x2048",
+    "ground": "#F1F1EF",
+    "alt_ratio": "4:5 for a full-bleed hero slot"
+  },
+
+  "style": {
+    "reference": "Retro Halftone Editorial Line Illustration v1.0",
+    "medium": "vector illustration emulating screen-print / risograph, flat paper grain, no gradients",
+    "line_work": "heavy hand-inked black outlines 6-10px at 2048px canvas, moderate weight variation (thicker at joints and contact points), confident single-stroke, gently wobbly organic corners, rounded terminals, contours occasionally left open at intersections, minimal interior detail — 1 to 3 crease lines per shape",
+    "shading": "coarse visible round halftone dots, ~45 LPI equivalent, 45 degree angle, ONE flat density per shape, never a gradient ramp",
+    "values": "exactly three readable values — ground, halftone grey, solid black. Midtones are ALWAYS dithered dots, never flat grey.",
+    "palette": {
+      "ground": "#F1F1EF",
+      "ink": "#17181B",
+      "halftone_reads_as": "#B9B5AC",
+      "color": "none"
+    },
+    "figures": "high abstraction, geometric anatomy, exaggerated elongated limbs, oversized hands and feet, mitten-simple fingers, small head relative to body, profile face with ONE curved-line eye, single bold nose and lip contour, no pupils, no nostrils, no ear detail, hair as a solid black graphic mass with a hard silhouette",
+    "value_separation": "the figure reads as a halftone garment against a solid-black garment; the held card is solid black so it separates cleanly from the halftone shirt behind it",
+    "accent_marks": "one small asterisk spark near the top corner of the card. Nothing else.",
+    "ground_line": "one long horizontal ink line anchoring the scene, no drawn floor and no furniture legs",
+    "composition": "flat, no perspective, no horizon, no background scenery, at least 35% empty ground, figure standing and calm",
+    "text_policy": "NO text, letters, numbers or symbols rendered inside the image. The ID card is BLANK — no name lines, no card number, no writing of any kind."
+  },
+
+  "casting": {
+    "context": "Ghanaian social commerce — sellers trading through WhatsApp and Instagram DMs, mobile money, hand-wrapped parcels",
+    "represent": "Ghanaian adults, 20s to 40s, everyday sellers and buyers running a business",
+    "avoid": "tribal-print decoration, huts, drums, wildlife, poverty signifiers, aid imagery, generic 'African' motifs",
+    "tone_rule": "Presenting, not submitting. Upright and unbothered — this is an unlock, not an inspection."
+  },
+
+  "scene": {
+    "subject": "a Ghanaian man with a low fade",
+    "pose": "standing in profile, holding a plain rectangular card up beside his own head at face height with one long elongated arm, free hand resting in a pocket",
+    "wardrobe_values": "shirt halftone, trousers solid black",
+    "props": "the card is a solid black rectangle containing a single smaller halftone rectangle where a portrait would sit — completely blank otherwise, no writing, no lines, no number",
+    "accent_marks": "a single small asterisk spark near the top corner of the card",
+    "placement": "figure centred slightly right, empty ground above and left"
+  },
+
+  "prompt": "Retro mid-century editorial illustration on a flat #F1F1EF ground. A Ghanaian man with a low fade stands in profile, holding up a plain rectangular card beside his own head at face height with one long elongated arm — the card is a solid black rectangle containing a single smaller halftone rectangle where a portrait would sit, and is otherwise completely blank with no writing on it. His shirt is halftone dots, his trousers are solid black. His free hand rests in a pocket. A single small asterisk spark floats near the top corner of the card. Bold uneven hand-inked black outlines, flat solid black fills, coarse visible halftone dot shading, strictly three values, no color, no gradients, no soft shadows. Simplified geometric anatomy, exaggerated elongated limbs, oversized hands and feet, profile face with one curved-line eye and a bold minimal nose, solid black graphic hair. Single horizontal ground line. Square 1:1, generous negative space, screen-print risograph texture. No text, letters or numbers anywhere in the image.",
+
+  "negative_prompt": [
+    "text", "letters", "numbers", "digits", "words", "captions", "watermark", "signature",
+    "color", "gradients", "soft shading", "airbrush", "glow", "drop shadows", "ambient occlusion",
+    "flat grey fills instead of halftone dots", "cross-hatching", "stippling gradients",
+    "3D render", "photorealism", "realistic anatomy", "detailed facial features", "pupils", "eyelashes", "teeth",
+    "background scenery", "furniture", "buildings", "perspective", "horizon line", "sky",
+    "thin uniform line weight", "sketchy multi-stroke lines", "clean digital vector edges",
+    "icons", "emoji", "logos", "brand marks", "national emblem", "coat of arms", "flag",
+    "border frame", "vignette", "cluttered composition", "extra limbs", "extra fingers",
+    "readable ID card", "passport", "driving licence", "name fields", "card number", "barcode", "QR code", "hologram", "chip",
+    "face scan grid", "biometric overlay", "corner brackets", "targeting reticle",
+    "police", "official uniform", "checkpoint", "queue", "hands raised in surrender", "mugshot pose"
+  ],
+
+  "caption_variant": {
+    "when": "social posts, App Store screenshots, landing page — NOT in-app",
+    "ground": "#F7F2E8",
+    "caption": "still you.",
+    "add_to_prompt": "Large lowercase bold Helvetica Neue caption 'still you.' set flush-left in the upper-left with very tight leading, generous margin from the edge, never overlapping the figure.",
+    "remove_from_negative": ["text", "letters", "words", "captions"]
+  },
+
+  "qa_checklist": [
+    "The card is BLANK — no name lines, number, barcode or emblem",
+    "No scanning, targeting or checkpoint imagery",
+    "Posture reads as presenting, not surrendering",
+    "Card (solid black) separates cleanly from the halftone shirt behind it",
+    "Exactly three values present — no fourth grey",
+    "No text of any kind"
+  ]
+}

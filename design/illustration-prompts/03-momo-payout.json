@@ -1,0 +1,90 @@
+{
+  "id": "03-momo-payout",
+  "screen": "Onboarding value 2 — 'Instant MoMo payout'",
+  "app_copy": {
+    "title": "Instant MoMo payout",
+    "caption": "Confirmed delivery releases your money in minutes."
+  },
+  "job": "Speed and quiet relief. The money lands on the phone she already has. Relief, not celebration.",
+
+  "output": {
+    "aspect_ratio": "1:1",
+    "resolution": "2048x2048",
+    "ground": "#F1F1EF",
+    "alt_ratio": "4:5 for a full-bleed hero slot"
+  },
+
+  "style": {
+    "reference": "Retro Halftone Editorial Line Illustration v1.0",
+    "medium": "vector illustration emulating screen-print / risograph, flat paper grain, no gradients",
+    "line_work": "heavy hand-inked black outlines 6-10px at 2048px canvas, moderate weight variation (thicker at joints and contact points), confident single-stroke, gently wobbly organic corners, rounded terminals, contours occasionally left open at intersections, minimal interior detail — 1 to 3 crease lines per shape",
+    "shading": "coarse visible round halftone dots, ~45 LPI equivalent, 45 degree angle, ONE flat density per shape, never a gradient ramp",
+    "values": "exactly three readable values — ground, halftone grey, solid black. Midtones are ALWAYS dithered dots, never flat grey.",
+    "palette": {
+      "ground": "#F1F1EF",
+      "ink": "#17181B",
+      "halftone_reads_as": "#B9B5AC",
+      "color": "none"
+    },
+    "figures": "high abstraction, geometric anatomy, exaggerated elongated limbs, oversized hands and feet, mitten-simple fingers, small head relative to body, profile or three-quarter face with ONE curved-line eye, single bold nose and lip contour, no pupils, no nostrils, no ear detail, hair as a solid black graphic mass with a hard silhouette",
+    "value_separation": "every figure reads as a solid-black garment against a halftone garment — two halftone masses must never touch without a black shape between them",
+    "accent_marks": "small abstract ink marks — 2-3 short motion dashes per moving object. Maximum 2 mark clusters per image.",
+    "ground_line": "one long horizontal ink line anchoring the scene, no drawn floor and no furniture legs",
+    "composition": "flat, no perspective, no horizon, no background scenery, at least 35% empty ground, asymmetric with the weight low",
+    "text_policy": "NO text, letters, numbers or symbols rendered inside the image — the app renders all copy in Plus Jakarta Sans"
+  },
+
+  "casting": {
+    "context": "Ghanaian social commerce — sellers trading through WhatsApp and Instagram DMs, mobile money, hand-wrapped parcels",
+    "represent": "Ghanaian adults, 20s to 40s, everyday sellers and buyers running a business",
+    "avoid": "tribal-print decoration, huts, drums, wildlife, poverty signifiers, aid imagery, generic 'African' motifs",
+    "tone_rule": "Calm is the product. No panic, no celebration, no shouting poses. Bodies are relaxed and confident."
+  },
+
+  "scene": {
+    "subject": "a Ghanaian woman in a headwrap tied with a visible knot",
+    "pose": "standing in three-quarter view, weight on one hip, cupping a slab phone in both oversized hands at chest height, looking down at it with a faint closed-eye curve",
+    "wardrobe_values": "wrapper skirt solid black, top halftone",
+    "props": "three simple rectangular banknotes arcing down out of the air into the phone. The phone is a plain solid black rectangle with no screen content.",
+    "accent_marks": "two short motion dashes behind each falling note",
+    "placement": "figure centred low, empty ground above and to one side"
+  },
+
+  "spot_color_option": {
+    "default": "off — Croe's SPEC states there is no decorative colour, so ship this monochrome unless the green maps to a real --secure state",
+    "if_enabled": "#1FC16B on ONE element only (the leading banknote), as a flat unhalftoned fill with the same black outline. Never on skin, garments or the ground."
+  },
+
+  "prompt": "Retro mid-century editorial illustration on a flat #F1F1EF ground. A Ghanaian woman in a headwrap tied with a visible knot stands in three-quarter view, weight on one hip, cupping a slab phone in both oversized hands at chest height and looking down at it with a faint closed-eye curve. Her wrapper skirt is solid black, her top is halftone dots. Three simple rectangular banknotes arc down out of the air into the phone, each with two short motion dashes behind it. Bold uneven hand-inked black outlines, flat solid black fills, coarse visible halftone dot shading, strictly three values, no color, no gradients, no soft shadows. Simplified geometric anatomy, exaggerated elongated limbs, oversized hands and feet, profile face with one curved-line eye and a bold minimal nose, solid black graphic hair. Single horizontal ground line. Square 1:1, generous negative space, screen-print risograph texture. No text anywhere in the image.",
+
+  "negative_prompt": [
+    "text", "letters", "numbers", "words", "captions", "watermark", "signature",
+    "color", "gradients", "soft shading", "airbrush", "glow", "drop shadows", "ambient occlusion",
+    "flat grey fills instead of halftone dots", "cross-hatching", "stippling gradients",
+    "3D render", "photorealism", "realistic anatomy", "detailed facial features", "pupils", "eyelashes", "teeth",
+    "background scenery", "furniture", "buildings", "perspective", "horizon line", "sky",
+    "thin uniform line weight", "sketchy multi-stroke lines", "clean digital vector edges",
+    "app UI on the phone screen", "notification popup", "icons", "emoji", "logos", "brand marks",
+    "border frame", "vignette", "cluttered composition", "extra limbs", "extra fingers",
+    "coins spraying", "money bag", "cash rain", "confetti", "sparkles everywhere",
+    "celebration pose", "raised fists", "jumping", "wide open mouth", "cheering",
+    "dollar sign", "currency symbols", "denomination numbers on the banknotes"
+  ],
+
+  "caption_variant": {
+    "when": "social posts, App Store screenshots, landing page — NOT in-app",
+    "ground": "#F7F2E8",
+    "caption": "money, minutes.",
+    "add_to_prompt": "Large lowercase bold Helvetica Neue caption 'money, minutes.' set flush-left in the upper-left with very tight leading, generous margin from the edge, never overlapping the figure.",
+    "remove_from_negative": ["text", "letters", "words", "captions"]
+  },
+
+  "qa_checklist": [
+    "Exactly three values present — no fourth grey (unless spot colour is deliberately enabled)",
+    "Every midtone is visibly dotted at 100% zoom, dots individually countable",
+    "Her expression is calm relief, not celebration",
+    "Banknotes are plain rectangles with no denomination or currency mark",
+    "Phone screen is empty black, no UI",
+    "No text of any kind"
+  ]
+}
