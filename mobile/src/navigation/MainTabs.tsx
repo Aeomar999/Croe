@@ -2,6 +2,10 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Home, Link, Wallet, User, Search } from '../theme/components/icons';
 import { surfaces, ink as inkColors, shape, layout, space } from '../theme/tokens';
+import { HomeScreen } from '../screens/HomeScreen';
+import { LinksScreen } from '../screens/LinksScreen';
+import { WalletScreen } from '../screens/WalletScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 
 type TabKey = 'home' | 'links' | 'wallet' | 'profile';
 
@@ -26,11 +30,10 @@ export function MainTabs() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderText}>
-            {tabs.find(t => t.key === active)?.label ?? 'Home'}
-          </Text>
-        </View>
+        {active === 'home' && <HomeScreen />}
+        {active === 'links' && <LinksScreen />}
+        {active === 'wallet' && <WalletScreen />}
+        {active === 'profile' && <ProfileScreen />}
       </View>
 
       <View style={styles.dock}>
@@ -73,17 +76,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  placeholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    fontSize: 17,
-    fontWeight: '600',
-    fontFamily: 'PlusJakartaSans-SemiBold',
-    color: inkColors.tertiary,
   },
   dock: {
     position: 'absolute',
