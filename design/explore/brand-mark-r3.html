@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Croe — Aperture, improved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Exploration sheet — round 3. Token subset; full tokens.css goes in the card. */
+:root {
+  --page:#E6E6E3; --canvas:#F1F1EF; --surface:#FFFFFF; --sunken:#F5F5F3;
+  --ink:#17181B; --ink-2:#4A4D52; --ink-3:#8E9297; --on-ink:#FFFFFF;
+  --line:#E7E7E4; --line-2:#D9D9D5;
+  --secure:#1FC16B; --secure-wash:#E8F8F0; --secure-deep:#127A45;
+  --caution-wash:#FDF3E1; --caution-deep:#8A5A00;
+  --danger-wash:#FDECEC; --danger-deep:#A62020;
+  --r-2:16px; --r-3:20px; --r-4:24px; --r-full:999px;
+  --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px; --s-8:32px; --s-10:40px;
+  --font:'Plus Jakarta Sans','Segoe UI Variable Text','Segoe UI',-apple-system,system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);color:var(--ink);background:var(--surface);
+  padding:48px 32px 96px;min-height:100vh;-webkit-font-smoothing:antialiased}
+.spec{max-width:900px;margin:0 auto}
+.spec-h1{font-size:30px;font-weight:800;letter-spacing:-.03em}
+.spec-sub{font-size:15px;font-weight:500;color:var(--ink-3);margin-top:6px}
+.srow{display:flex;gap:var(--s-8);padding:30px 0;border-top:1px solid var(--line)}
+.srow:first-of-type{margin-top:34px}
+.slabel{width:128px;flex:none;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);padding-top:4px}
+.sbody{flex:1;min-width:0}
+.snote{font-size:13px;line-height:20px;color:var(--ink-3);margin-top:12px}
+.snote b{color:var(--ink-2);font-weight:700}
+.lede{font-size:15px;line-height:23px;font-weight:500;color:var(--ink-2)}
+.lede+.lede{margin-top:12px}
+
+.mk{display:block;width:100%;height:100%}
+.mk .arc{fill:none;stroke:currentColor;stroke-linecap:round}
+.mk .dot{fill:var(--secure)}
+.mono .dot{fill:currentColor}
+.ico{background:var(--ink);color:var(--on-ink);flex:none;border-radius:22.4%}
+.ico.light{background:var(--canvas);color:var(--ink)}
+.ico.paper{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.s112{width:112px;height:112px} .s96{width:96px;height:96px} .s72{width:72px;height:72px}
+.s44{width:44px;height:44px} .s28{width:28px;height:28px} .s20{width:20px;height:20px}
+
+.opts{display:flex;gap:var(--s-5);align-items:flex-start;flex-wrap:wrap}
+.opt{text-align:center}
+.opt .ot{font-size:12px;font-weight:700;margin-top:10px}
+.opt .ox{font-size:11.5px;line-height:16px;color:var(--ink-3);margin-top:3px;max-width:112px}
+.opt.pick .ot{color:var(--secure-deep)} .opt.pick .ot::after{content:' ✓'}
+.opt.bad .ot{color:var(--danger-deep)}
+.pair{display:flex;align-items:center;gap:10px;justify-content:center}
+
+/* glyph comparison */
+.glyphrow{display:flex;gap:var(--s-5);align-items:flex-end}
+.gl{width:112px;height:112px;border-radius:22.4%;background:var(--ink);color:var(--on-ink);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  font-size:74px;font-weight:800;line-height:1}
+.glsm{width:44px;height:44px;border-radius:22.4%;background:var(--ink);color:var(--on-ink);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  font-size:29px;font-weight:800;line-height:1}
+
+/* wordmark */
+.wmbox{background:var(--canvas);border-radius:var(--r-3);padding:var(--s-5) var(--s-6)}
+.wm{font-weight:800;font-size:76px;line-height:1;display:inline-block}
+.wm .g{color:var(--secure)}
+.wm-def{letter-spacing:-.042em}
+.wm-k{letter-spacing:0}
+.wm-k .c{letter-spacing:-.042em}
+.wm-k .r{letter-spacing:-.078em}
+.wm-k .o{letter-spacing:-.05em}
+.wm-k .e{letter-spacing:0}
+.tick{display:flex;gap:var(--s-3);align-items:baseline;margin-top:8px}
+.tick span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3)}
+
+.cmp{display:flex;gap:var(--s-8);flex-wrap:wrap}
+.cmpcol{display:flex;flex-direction:column;gap:12px;align-items:center}
+.cmpcol .cl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-3)}
+.verdict{background:var(--secure-wash);color:var(--secure-deep);border-radius:var(--r-4);
+  padding:var(--s-4) var(--s-5)}
+.verdict.warn{background:var(--caution-wash);color:var(--caution-deep)}
+.verdict .vt{font-size:14px;font-weight:700}
+.verdict .vx{font-size:13.5px;line-height:20px;margin-top:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3);padding:0 12px 8px 0}
+.tbl td{padding:7px 12px 7px 0;border-top:1px solid var(--line);
+  font-variant-numeric:tabular-nums lining-nums;color:var(--ink-2)}
+.tbl td b{color:var(--ink)}
+.tbl tr.on td{color:var(--secure-deep)} .tbl tr.on td b{color:var(--secure-deep)}
+</style>
+</head>
+<body>
+<div class="spec">
+
+  <div class="spec-h1">Aperture — improved</div>
+  <div class="spec-sub">Round 3 · the © problem, a mouth that means something, and a real logotype</div>
+
+  <!-- ===== PROBLEM ===== -->
+  <div class="srow">
+    <div class="slabel">What's wrong</div>
+    <div class="sbody">
+      <p class="lede"><b>1. Its nearest neighbour is the copyright symbol.</b> A heavy C
+      with something dead centre is one glyph away from ©, and closer still to a G. Round 2
+      never tested this.</p>
+      <p class="lede"><b>2. The 100° mouth was chosen by eye.</b> The stroke, the dot and
+      the opening have no relationship to one another — three numbers that happen to sit
+      together. A mark whose proportions mean nothing looks arbitrary even when nobody can
+      say why.</p>
+      <p class="lede"><b>3. The wordmark is a font, not a logotype.</b> Plus Jakarta Sans
+      800 with a single global tracking value, straight off the shelf. This is the weakest
+      part of the identity and round 2 scoped it out too readily.</p>
+    </div>
+  </div>
+
+  <!-- ===== THE © TEST ===== -->
+  <div class="srow">
+    <div class="slabel">The © test</div>
+    <div class="sbody">
+      <div class="glyphrow">
+        <div>
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="ot" style="font-size:12px;font-weight:700;margin-top:10px;text-align:center">Round 2</div>
+        </div>
+        <div><div class="gl">©</div><div class="ot" style="font-size:12px;font-weight:700;margin-top:10px;text-align:center;color:var(--danger-deep)">©</div></div>
+        <div><div class="gl">G</div><div class="ot" style="font-size:12px;font-weight:700;margin-top:10px;text-align:center;color:var(--danger-deep)">G</div></div>
+        <div style="display:flex;gap:10px;align-items:flex-end;padding-bottom:34px">
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="glsm">©</div>
+          <div class="glsm">G</div>
+        </div>
+      </div>
+      <div class="verdict warn" style="margin-top:20px">
+        <div class="vt">Confirmed, and it is worse small than large</div>
+        <div class="vx">At 112 px the green dot separates the mark from © easily. At 44 px
+          the colour is doing nearly all the work — and in <b>Android monochrome, where the
+          dot flattens to one tone, that separation disappears entirely</b>. A mark that
+          depends on colour to avoid being mistaken for a legal glyph is not finished.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MOUTH ===== -->
+  <div class="srow">
+    <div class="slabel">A mouth that<br>means something</div>
+    <div class="sbody">
+      <p class="lede">The fix for both problems is the same move. <b>Tie the opening to the
+      dot.</b> Make the clear gap between the two terminals exactly one dot wide, and the
+      mark stops being three arbitrary numbers — it becomes a vessel with a precisely sized
+      aperture. Tighter also means less C, which is what was making it read as ©.</p>
+
+      <table class="tbl" style="margin-top:20px">
+        <tr><th>Mouth</th><th>Clear opening</th><th>× dot width</th><th>Reads as</th></tr>
+        <tr><td><b>100°</b></td><td>26.80</td><td>1.49</td><td>a C — and a ©</td></tr>
+        <tr><td><b>85°</b></td><td>22.28</td><td>1.24</td><td>still a C, still arbitrary</td></tr>
+        <tr class="on"><td><b>72.3°</b></td><td>18.00</td><td><b>1.00</b></td><td>a vessel with one exact opening</td></tr>
+        <tr><td><b>60°</b></td><td>13.50</td><td>0.75</td><td>a sealed ring with a nick</td></tr>
+        <tr><td><b>53°</b></td><td>10.81</td><td>0.60</td><td>a ring. The aperture is gone</td></tr>
+      </table>
+
+      <div class="opts" style="margin-top:24px">
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">100° — round 2</div>
+          <div class="ox">1.49 dots wide. The money could fall out.</div>
+        </div>
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="108.49 48.59" transform="rotate(55.68 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="108.49 48.59" transform="rotate(55.68 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">85°</div>
+          <div class="ox">Between two ideas, committing to neither.</div>
+        </div>
+        <div class="opt pick">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">72.3°</div>
+          <div class="ox">Opening = one dot, exactly. Nothing else fits.</div>
+        </div>
+        <div class="opt bad">
+          <div class="pair">
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="122.45 34.63" transform="rotate(39.68 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="122.45 34.63" transform="rotate(39.68 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">53°</div>
+          <div class="ox">Now it is a loading spinner.</div>
+        </div>
+      </div>
+
+      <div class="snote"><b>Why one dot wide and not narrower.</b> A gap narrower than the
+        dot says the money can never leave, which is not what Croe does — escrow releases,
+        that is the whole product. A gap exactly one dot wide says <b>this is the only way
+        out, and it is the exact size of the thing leaving</b>. That is the sentence the
+        mark should be saying.</div>
+    </div>
+  </div>
+
+  <!-- ===== ORIENTATION ===== -->
+  <div class="srow">
+    <div class="slabel">Orientation</div>
+    <div class="sbody">
+      <div class="opts">
+        <div class="opt pick">
+          <div class="pair">
+            <div class="ico s96 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">Mouth right — 0°</div>
+          <div class="ox">Keeps the C. Survives monochrome now the gap is tight.</div>
+        </div>
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(19.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(19.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">Mouth up-right — 30°</div>
+          <div class="ox">Kills the © read outright, and the name with it.</div>
+        </div>
+        <div class="opt">
+          <div class="pair">
+            <div class="ico s96 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(-40.67 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s96"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(-40.67 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ot">Mouth up — 90°</div>
+          <div class="ox">A vessel with a lid off. Warm, but anonymous.</div>
+        </div>
+      </div>
+      <div class="verdict warn">
+        <div class="vt">Correction — tightening the mouth does not fix the © read</div>
+        <div class="vx">I expected 72.3° to break the letter enough to kill the
+          resemblance. Looking at the monochrome row above, it does not: at 0° the mark is
+          still plainly a C, and in one tone it is still adjacent to © and G. Tightening
+          the mouth buys <b>internal logic and deliberateness</b> — real gains — but not
+          this one.<br><br>
+          <b>Only rotating the mouth off the horizontal actually kills it</b>, and that
+          costs the letter, which is the entire reason Aperture was chosen over Between.
+          There is no version of this that gets both. The trade is real and it is yours to
+          make.</div>
+      </div>
+      <div class="snote"><b>My read:</b> keep the mouth on the horizontal and accept the
+        resemblance. It is modest in practice — the icon is never encountered unlabelled,
+        the green dot separates it everywhere except Android themed icons, and © is not a
+        glyph anyone expects to find on a home screen. <b>30° is the honest alternative</b>
+        if you would rather the mark be unmistakable than be a C; it is the most
+        distinctive drawing on this page. 90° is a dead end — it reads as a face.</div>
+    </div>
+  </div>
+
+  <!-- ===== DOT POSITION, KILLED BY MEASUREMENT ===== -->
+  <div class="srow">
+    <div class="slabel">Resting dot</div>
+    <div class="sbody">
+      <p class="lede">A dot resting on the floor of the vessel — settled, gravity-bound —
+      would be warmer than one floating dead centre. It is the one idea from
+      <b>Cradle</b> worth stealing. It does not survive measurement.</p>
+      <table class="tbl" style="margin-top:16px;max-width:520px">
+        <tr><th>Dot offset</th><th>Clearance</th><th>At 20 px</th><th></th></tr>
+        <tr class="on"><td><b>0</b> — centred</td><td>8.75</td><td>1.75 px</td><td>ok</td></tr>
+        <tr><td><b>3</b></td><td>6.90</td><td>1.38 px</td><td style="color:var(--danger-deep)">below floor</td></tr>
+        <tr><td><b>6</b></td><td>4.07</td><td>0.81 px</td><td style="color:var(--danger-deep)">fills in</td></tr>
+        <tr><td><b>9</b> — resting</td><td>1.13</td><td>0.23 px</td><td style="color:var(--danger-deep)">gone</td></tr>
+      </table>
+      <div class="snote">Moving the dot even <b>3 units</b> off centre drops the clearance
+        below the 1.5 px floor at chat size. The enclosure is too small to let the dot rest
+        anywhere but the middle without either shrinking the dot to a speck or growing the
+        mark past sensible icon proportions. <b>Dropped on measurement, not on taste.</b></div>
+    </div>
+  </div>
+
+  <!-- ===== WORDMARK ===== -->
+  <div class="srow">
+    <div class="slabel">The logotype</div>
+    <div class="sbody">
+      <p class="lede">Four letters set in a retail font with one global tracking value.
+      Two things are actually wrong with it, and both are fixable without a font editor.</p>
+
+      <div class="wmbox" style="margin-top:18px">
+        <span class="wm wm-def">croe<i class="g" style="font-style:normal">.</i></span>
+        <div class="tick"><span>Before — one global −.042em</span></div>
+      </div>
+      <div class="wmbox" style="margin-top:12px">
+        <span class="wm wm-k"><i class="c" style="font-style:normal">c</i><i class="r" style="font-style:normal">r</i><i class="o" style="font-style:normal">o</i><i class="e" style="font-style:normal">e</i><i class="g" style="font-style:normal">.</i></span>
+        <div class="tick"><span>After — per-pair, and no trailing space</span></div>
+      </div>
+
+      <div class="snote" style="margin-top:18px">
+        <b>1. The r|o pair is the hole.</b> The <b>r</b>'s arm ends in mid-air and the
+        <b>o</b> is a full round, so the default fit leaves a visible gap right in the
+        middle of a four-letter word. It takes −.078em against the c|r pair's −.042em —
+        nearly double — before the four letters read as one object. Uniform tracking cannot
+        fix this by definition: it moves every pair by the same amount, and these pairs do
+        not have the same problem.<br><br>
+        <b>2. Global tracking puts phantom space after the final letter.</b>
+        <code style="font-family:var(--font);font-weight:700">letter-spacing</code> applies
+        <i>after</i> every glyph including the last, so −.042em silently pulls the full stop
+        — and, in a lockup, the gap to the mark — tighter than specified. The last glyph
+        must be set to 0. This is why the round 2 lockup gap looked slightly wrong and I
+        could not say why.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BEFORE / AFTER ===== -->
+  <div class="srow">
+    <div class="slabel">Before / after</div>
+    <div class="sbody">
+      <div class="cmp">
+        <div class="cmpcol">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="pair">
+            <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ico s72 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="101.95 55.13" transform="rotate(63.18 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="cl">Round 2</div>
+        </div>
+        <div class="cmpcol">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="pair">
+            <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+            <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          </div>
+          <div class="ico s72 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="cl" style="color:var(--secure-deep)">Round 3</div>
+        </div>
+        <div class="cmpcol" style="align-items:flex-start;flex:1;min-width:220px">
+          <div class="verdict">
+            <div class="vt">What changed</div>
+            <div class="vx">Mouth <b>100° → 72.3°</b>, so the opening is now exactly one
+              dot wide. Everything else is untouched: same stroke, same dot, same optical
+              nudge, same aperture clearance of 8.75 — so the <b>1.75 px floor at 20 px
+              still holds</b> and nothing in the asset spec moves.<br><br>
+              What this buys is <b>rigor, not disguise</b>. The mark now has a reason for
+              its proportions and looks deliberate at large sizes where round 2 looked
+              approximate. It is still a C, and in monochrome it is still adjacent to © —
+              see the correction in the orientation row above.<br><br>
+              The logotype is the larger gain of the two.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOCKUP ===== -->
+  <div class="srow">
+    <div class="slabel">Lockup</div>
+    <div class="sbody">
+      <div class="wmbox" style="display:inline-flex;align-items:center;gap:18px">
+        <div class="ico s72 paper"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="51.5" cy="50" r="25" stroke-width="11.5" stroke-dasharray="114.03 43.05" transform="rotate(49.33 51.5 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+        <span class="wm wm-k" style="font-size:52px"><i class="c" style="font-style:normal">c</i><i class="r" style="font-style:normal">r</i><i class="o" style="font-style:normal">o</i><i class="e" style="font-style:normal">e</i></span>
+      </div>
+      <div class="snote">Kerned logotype, no full stop — the mark is the full stop. Gap is
+        one dot diameter, now measured correctly because the trailing letter-space is
+        gone.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

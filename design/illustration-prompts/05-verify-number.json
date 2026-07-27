@@ -1,0 +1,83 @@
+{
+  "id": "05-verify-number",
+  "screen": "Auth — phone entry / OTP screens",
+  "app_copy": {
+    "reassurance": "Croe never sees your MoMo PIN. Payments are approved on your phone, by you."
+  },
+  "job": "Private and close to the body. Verification is a small quiet act between you and your own phone, not a security checkpoint someone puts you through.",
+
+  "output": {
+    "aspect_ratio": "1:1",
+    "resolution": "2048x2048",
+    "ground": "#F1F1EF",
+    "alt_ratio": "4:5 for a full-bleed hero slot"
+  },
+
+  "style": {
+    "reference": "Retro Halftone Editorial Line Illustration v1.0",
+    "medium": "vector illustration emulating screen-print / risograph, flat paper grain, no gradients",
+    "line_work": "heavy hand-inked black outlines 6-10px at 2048px canvas, moderate weight variation (thicker at joints and contact points), confident single-stroke, gently wobbly organic corners, rounded terminals, contours occasionally left open at intersections, minimal interior detail — 1 to 3 crease lines per shape",
+    "shading": "coarse visible round halftone dots, ~45 LPI equivalent, 45 degree angle, ONE flat density per shape, never a gradient ramp",
+    "values": "exactly three readable values — ground, halftone grey, solid black. Midtones are ALWAYS dithered dots, never flat grey.",
+    "palette": {
+      "ground": "#F1F1EF",
+      "ink": "#17181B",
+      "halftone_reads_as": "#B9B5AC",
+      "color": "none"
+    },
+    "figures": "high abstraction, geometric anatomy, exaggerated elongated limbs, oversized hands and feet, mitten-simple fingers, small head relative to body, three-quarter or profile face with ONE curved-line eye, single bold nose and lip contour, no pupils, no nostrils, no ear detail, hair as a solid black graphic mass with a hard silhouette",
+    "value_separation": "the figure reads as a solid-black garment against a halftone garment — two halftone masses must never touch without a black shape between them",
+    "accent_marks": "one short arcing swoosh beneath the floating row. Nothing else.",
+    "ground_line": "one long horizontal ink line anchoring the scene, no drawn floor and no furniture legs",
+    "composition": "flat, no perspective, no horizon, no background scenery, at least 35% empty ground, figure compact and low",
+    "text_policy": "NO text, letters, numbers or symbols rendered inside the image. The four floating squares are BLANK — they must not contain digits."
+  },
+
+  "casting": {
+    "context": "Ghanaian social commerce — sellers trading through WhatsApp and Instagram DMs, mobile money, hand-wrapped parcels",
+    "represent": "Ghanaian adults, 20s to 40s, everyday sellers and buyers running a business",
+    "avoid": "tribal-print decoration, huts, drums, wildlife, poverty signifiers, aid imagery, generic 'African' motifs",
+    "tone_rule": "Calm and private. Not furtive, not hunched, not anxious — just absorbed."
+  },
+
+  "scene": {
+    "subject": "a Ghanaian person with bantu knots",
+    "pose": "seated on the ground with knees drawn up, holding a slab phone close to the chest with both oversized hands, head tilted down toward it",
+    "wardrobe_values": "top solid black, trousers halftone",
+    "props": "four small identical squares floating in a neat evenly spaced horizontal row above the phone — the first three solid black fills, the fourth an open outline only. This mirrors the app's .otp-row. The phone itself is a plain solid black rectangle with no screen content.",
+    "accent_marks": "one short arcing swoosh curving beneath the row of squares",
+    "placement": "figure low and centred, squares floating in the upper third"
+  },
+
+  "prompt": "Retro mid-century editorial illustration on a flat #F1F1EF ground. A Ghanaian person with bantu knots sits on the ground with knees drawn up, holding a slab phone close to their chest with both oversized hands, head tilted down toward it. Their top is solid black, their trousers are halftone dots. Four small identical blank squares float in a neat evenly spaced horizontal row above the phone — the first three filled solid black, the fourth drawn as an open outline. One short arcing swoosh curves beneath the row. Bold uneven hand-inked black outlines, flat solid black fills, coarse visible halftone dot shading, strictly three values, no color, no gradients, no soft shadows. Simplified geometric anatomy, exaggerated elongated limbs, oversized hands and feet, profile face with one curved-line eye and a bold minimal nose, solid black graphic hair. Single horizontal ground line. Square 1:1, generous negative space, screen-print risograph texture. No text, digits or numerals anywhere in the image.",
+
+  "negative_prompt": [
+    "text", "letters", "numbers", "digits", "numerals", "words", "captions", "watermark", "signature",
+    "color", "gradients", "soft shading", "airbrush", "glow", "drop shadows", "ambient occlusion",
+    "flat grey fills instead of halftone dots", "cross-hatching", "stippling gradients",
+    "3D render", "photorealism", "realistic anatomy", "detailed facial features", "pupils", "eyelashes", "teeth",
+    "background scenery", "furniture", "buildings", "perspective", "horizon line", "sky",
+    "thin uniform line weight", "sketchy multi-stroke lines", "clean digital vector edges",
+    "app UI on the phone screen", "keypad", "dial pad", "SMS bubble", "chat bubble", "icons", "emoji", "logos", "brand marks",
+    "border frame", "vignette", "cluttered composition", "extra limbs", "extra fingers",
+    "padlock icon", "shield icon", "key", "fingerprint", "face scan grid", "biometric overlay",
+    "surveillance", "camera", "eye symbol", "hooded figure", "hacker imagery", "hunched furtive posture"
+  ],
+
+  "caption_variant": {
+    "when": "social posts, App Store screenshots, landing page — NOT in-app",
+    "ground": "#F7F2E8",
+    "caption": "just your number.",
+    "add_to_prompt": "Large lowercase bold Helvetica Neue caption 'just your number.' set flush-left in the upper-left with very tight leading, generous margin from the edge, never overlapping the figure.",
+    "remove_from_negative": ["text", "letters", "words", "captions"]
+  },
+
+  "qa_checklist": [
+    "The four squares are BLANK — no digits rendered inside them",
+    "Row is evenly spaced and horizontally aligned, fourth square is outline-only",
+    "Posture reads absorbed and private, not furtive or fearful",
+    "Exactly three values present — no fourth grey",
+    "Every midtone is visibly dotted at 100% zoom",
+    "No text of any kind"
+  ]
+}

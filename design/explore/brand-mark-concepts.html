@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Croe — Brand Mark Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EXPLORATION SHEET — not a design-system card.
+   Token subset only (the full tokens.css gets copied verbatim
+   into design/cards/foundations/brand.html once a direction is
+   chosen). Values are lifted unchanged from design/src/tokens.css.
+   ============================================================ */
+:root {
+  --page: #E6E6E3; --canvas: #F1F1EF; --surface: #FFFFFF; --sunken: #F5F5F3;
+  --ink: #17181B; --ink-2: #4A4D52; --ink-3: #8E9297; --on-ink: #FFFFFF;
+  --line: #E7E7E4; --line-2: #D9D9D5;
+  --secure: #1FC16B; --secure-wash: #E8F8F0; --secure-deep: #127A45;
+  --caution-deep: #8A5A00; --danger-deep: #A62020;
+  --r-2: 16px; --r-4: 24px; --r-full: 999px;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-8: 32px; --s-10: 40px;
+  --elev: 0 8px 24px rgba(20,22,26,.08), 0 2px 6px rgba(20,22,26,.04);
+  --font: 'Plus Jakarta Sans', 'Segoe UI Variable Text', 'Segoe UI',
+          -apple-system, system-ui, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); color: var(--ink); background: var(--surface);
+  padding: 48px 32px 96px; min-height: 100vh;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.spec { max-width: 860px; margin: 0 auto; }
+.spec-h1 { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+.spec-sub { font-size: 15px; font-weight: 500; color: var(--ink-3); margin-top: 6px; }
+.srow { display: flex; gap: var(--s-8); padding: 30px 0; border-top: 1px solid var(--line); }
+.srow:first-of-type { margin-top: 34px; }
+.slabel { width: 132px; flex: none; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+.sbody { flex: 1; min-width: 0; }
+.snote { font-size: 13px; line-height: 20px; color: var(--ink-3); margin-top: 12px; }
+.snote b { color: var(--ink-2); font-weight: 700; }
+.lede { font-size: 15px; line-height: 23px; font-weight: 500; color: var(--ink-2); }
+.lede + .lede { margin-top: 12px; }
+
+/* ---------- the mark itself ---------- */
+.mk { display: block; width: 100%; height: 100%; }
+.mk .arc { fill: none; stroke: currentColor; stroke-width: 11;
+  stroke-linecap: round; stroke-linejoin: round; }
+.mk .dot { fill: var(--secure); }
+
+/* ---------- icon tiles ---------- */
+.ico { background: var(--ink); color: var(--on-ink); flex: none;
+  border-radius: 22.4%; /* the iOS squircle approximation */ }
+.ico.light { background: var(--canvas); color: var(--ink); }
+.ico.paper { background: var(--surface); color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line); }
+.mono .dot { fill: currentColor; }
+
+.s112 { width: 112px; height: 112px; }
+.s64  { width: 64px;  height: 64px; }
+.s44  { width: 44px;  height: 44px; }
+.s28  { width: 28px;  height: 28px; }
+.s20  { width: 20px;  height: 20px; }
+
+/* ---------- concept grid ---------- */
+.grid { display: flex; gap: var(--s-4); }
+.cell { flex: 1; min-width: 0; }
+.cell .cap { font-size: 13.5px; font-weight: 700; letter-spacing: -.006em; margin-top: 14px; }
+.cell .rat { font-size: 12px; line-height: 17px; color: var(--ink-3); margin-top: 4px; }
+.cell .idx { font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  color: var(--ink-3); margin-bottom: 10px; }
+
+/* ---------- size ladder ---------- */
+.ladder { display: flex; flex-direction: column; gap: 14px; }
+.lrow { display: flex; align-items: center; gap: var(--s-5); }
+.lname { width: 76px; flex: none; font-size: 12.5px; font-weight: 700; }
+.lsizes { display: flex; align-items: center; gap: var(--s-4); }
+.szlabel { display: flex; gap: var(--s-4); margin-left: 96px; }
+.szlabel span { font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); text-align: center; }
+.szlabel .w112 { width: 112px; } .szlabel .w44 { width: 44px; }
+.szlabel .w28 { width: 28px; } .szlabel .w20 { width: 20px; }
+
+/* ---------- lockup ---------- */
+.lockrow { display: flex; flex-wrap: wrap; gap: var(--s-6) var(--s-5); }
+.lock { display: inline-flex; align-items: center; gap: 10px; }
+.lock .wm { font-size: 22px; font-weight: 800; letter-spacing: -.04em; }
+.lock .wm i { color: var(--secure); font-style: normal; }
+.lock.sm .wm { font-size: 17px; letter-spacing: -.035em; }
+
+/* ---------- chat preview stage ---------- */
+.stage { background: var(--canvas); border-radius: var(--r-4); padding: var(--s-5); }
+.chat { display: flex; gap: 10px; align-items: flex-start; max-width: 340px; }
+.bub { background: var(--surface); border-radius: var(--r-2);
+  padding: 10px 12px; flex: 1; min-width: 0; }
+.bub .ttl { font-size: 13px; font-weight: 700; letter-spacing: -.006em; }
+.bub .sub { font-size: 11.5px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
+.bub .url { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-top: 6px; }
+
+/* ---------- home-screen stage ---------- */
+.home { display: flex; gap: 18px; align-items: flex-start; }
+.app { width: 60px; flex: none; text-align: center; }
+.app .nm { font-size: 10.5px; font-weight: 600; color: var(--ink-2); margin-top: 6px; }
+.faux { width: 60px; height: 60px; border-radius: 22.4%; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: var(--on-ink); }
+.f-mtn { background: #FFCC00; color: var(--ink); }
+.f-wa  { background: #25D366; }
+.f-ig  { background: #C13584; }
+.f-tel { background: #E60000; }
+
+/* ---------- verdict ---------- */
+.verdict { background: var(--secure-wash); color: var(--secure-deep);
+  border-radius: var(--r-4); padding: var(--s-4) var(--s-5); }
+.verdict .vt { font-size: 14px; font-weight: 700; }
+.verdict .vx { font-size: 13.5px; line-height: 20px; margin-top: 4px; }
+.warn { background: #FDF3E1; color: var(--caution-deep); }
+</style>
+</head>
+<body>
+<div class="spec">
+
+  <div class="spec-h1">Brand mark — five ways to draw "held"</div>
+  <div class="spec-sub">Concept: held between · Ground: ink · Round 1, geometry only</div>
+
+  <!-- ============ THE BRIEF ============ -->
+  <div class="srow">
+    <div class="slabel">The brief</div>
+    <div class="sbody">
+      <p class="lede">Croe's mark has one job: make a stranger's payment link feel safe.
+      It is seen first at <b>20&nbsp;px</b>, inside a WhatsApp preview, beside a message
+      from someone the buyer has never met — and only later at 1024&nbsp;px in a store
+      listing. So it is designed at the small end and allowed to grow.</p>
+      <p class="lede">No lock. No shield. Both are defensive symbols that announce a
+      threat, and every screen behind this icon is written to do the opposite — reassure
+      first, explain second. The mark should read as <b>holding</b>, not defending.</p>
+      <p class="lede">Two shapes, never three: one stroke form and one green dot. The dot
+      is the money and it is the same dot as the full stop in <b>croe.</b> — so the symbol
+      and the logotype share an atom instead of being two unrelated drawings.</p>
+    </div>
+  </div>
+
+  <!-- ============ CONCEPTS ============ -->
+  <div class="srow">
+    <div class="slabel">Concepts</div>
+    <div class="sbody">
+      <div class="grid">
+
+        <!-- 1 CRADLE -->
+        <div class="cell">
+          <div class="idx">01</div>
+          <div class="ico s112">
+            <svg class="mk" viewBox="0 0 100 100" aria-hidden="true">
+              <path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/>
+              <circle class="dot" cx="50" cy="49" r="9"/>
+            </svg>
+          </div>
+          <div class="cap">Cradle</div>
+          <div class="rat">An open hand. The money rests in it; nothing closes over
+            the top.</div>
+        </div>
+
+        <!-- 2 SHELTER -->
+        <div class="cell">
+          <div class="idx">02</div>
+          <div class="ico s112">
+            <svg class="mk" viewBox="0 0 100 100" aria-hidden="true">
+              <path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/>
+              <circle class="dot" cx="50" cy="53" r="9"/>
+            </svg>
+          </div>
+          <div class="cap">Shelter</div>
+          <div class="rat">Covered from above. A canopy over the money, not a lid
+            on it.</div>
+        </div>
+
+        <!-- 3 BETWEEN -->
+        <div class="cell">
+          <div class="idx">03</div>
+          <div class="ico s112">
+            <svg class="mk" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="arc" cx="50" cy="50" r="25"
+                      stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/>
+              <circle class="dot" cx="50" cy="50" r="9"/>
+            </svg>
+          </div>
+          <div class="cap">Between</div>
+          <div class="rat">Two halves that never touch. Escrow drawn literally —
+            neither side holds it.</div>
+        </div>
+
+        <!-- 4 APERTURE -->
+        <div class="cell">
+          <div class="idx">04</div>
+          <div class="ico s112">
+            <svg class="mk" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="arc" cx="50" cy="50" r="25"
+                      stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/>
+              <circle class="dot" cx="48" cy="50" r="9"/>
+            </svg>
+          </div>
+          <div class="cap">Aperture</div>
+          <div class="rat">A C that never quite closes. Carries the name without
+            being a monogram.</div>
+        </div>
+
+        <!-- 5 RELEASE -->
+        <div class="cell">
+          <div class="idx">05</div>
+          <div class="ico s112">
+            <svg class="mk" viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="arc" cx="50" cy="50" r="25"
+                      stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/>
+              <circle class="dot" cx="71.2" cy="28.8" r="7.5"/>
+            </svg>
+          </div>
+          <div class="cap">Release</div>
+          <div class="rat">Held all the way round but for one opening — and the money
+            already at it.</div>
+        </div>
+
+      </div>
+      <div class="snote">All five at 112&nbsp;px on <b>--ink</b>, mark occupying ~60% of the
+        tile, stroke 11/100 with round caps. Corner radius is the 22.4% iOS squircle
+        approximation, so these are close to true home-screen scale on a phone.</div>
+    </div>
+  </div>
+
+  <!-- ============ SIZE LADDER ============ -->
+  <div class="srow">
+    <div class="slabel">At size</div>
+    <div class="sbody">
+      <div class="szlabel">
+        <span class="w112">Store 1024</span>
+        <span class="w44">Home</span>
+        <span class="w28">Notif</span>
+        <span class="w20">Chat</span>
+      </div>
+      <div class="ladder" style="margin-top:12px">
+
+        <div class="lrow"><div class="lname">Cradle</div><div class="lsizes">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div>
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div>
+          <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div>
+          <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div>
+        </div></div>
+
+        <div class="lrow"><div class="lname">Shelter</div><div class="lsizes">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div>
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div>
+          <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div>
+          <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div>
+        </div></div>
+
+        <div class="lrow"><div class="lname">Between</div><div class="lsizes">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+          <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div>
+        </div></div>
+
+        <div class="lrow"><div class="lname">Aperture</div><div class="lsizes">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div>
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div>
+          <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div>
+          <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div>
+        </div></div>
+
+        <div class="lrow"><div class="lname">Release</div><div class="lsizes">
+          <div class="ico s112"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div>
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div>
+          <div class="ico s28"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div>
+          <div class="ico s20"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div>
+        </div></div>
+
+      </div>
+      <div class="snote">This row is the actual test, and it is unkind on purpose. At
+        20&nbsp;px a mark has roughly <b>two shapes' worth of budget</b> — anything that
+        needs a third shape, or a gap thinner than the stroke, turns to mush. Judge the
+        right-hand column first and the left-hand column last.<br><br>
+        Result: <b>Aperture and Between both survive 20&nbsp;px intact</b> — Between better
+        than expected, because its two gaps sit at top and bottom where nothing else
+        competes for them. <b>Release is the only outright failure</b>: its detached dot
+        fuses with the ring terminal and the whole thing collapses into a loading
+        spinner.</div>
+    </div>
+  </div>
+
+  <!-- ============ MONOCHROME ============ -->
+  <div class="srow">
+    <div class="slabel">Monochrome</div>
+    <div class="sbody">
+      <div class="grid">
+        <div class="cell"><div class="ico s112 mono"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 mono"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 mono"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div></div>
+      </div>
+      <div class="snote">Android 13+ themed icons strip every colour and render the
+        foreground in one tone, so <b>the green dot disappears</b>. Any concept that only
+        works because the dot is a different colour fails here. This is not an edge case —
+        it is the default icon on a large share of Ghanaian Android phones.</div>
+    </div>
+  </div>
+
+  <!-- ============ INVERTED ============ -->
+  <div class="srow">
+    <div class="slabel">On light</div>
+    <div class="sbody">
+      <div class="grid">
+        <div class="cell"><div class="ico s112 light"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 light"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 light"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 light"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div></div>
+        <div class="cell"><div class="ico s112 light"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div></div>
+      </div>
+      <div class="snote">Ink-on-canvas, for use inside the app itself — splash, screen
+        heads, the payment-link web page. The mark must survive the inversion without
+        needing a second drawing.</div>
+    </div>
+  </div>
+
+  <!-- ============ LOCKUP ============ -->
+  <div class="srow">
+    <div class="slabel">Lockup</div>
+    <div class="sbody">
+      <div class="lockrow">
+        <div class="lock"><div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div><span class="wm">croe<i>.</i></span></div>
+        <div class="lock"><div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 67 L26 57 A24 24 0 0 1 74 57 L74 67"/><circle class="dot" cx="50" cy="53" r="9"/></svg></div><span class="wm">croe<i>.</i></span></div>
+        <div class="lock"><div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="53.54 25" transform="rotate(-61.4 50 50)"/><circle class="dot" cx="50" cy="50" r="9"/></svg></div><span class="wm">croe<i>.</i></span></div>
+        <div class="lock"><div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="98.08 59" transform="rotate(67.6 50 50)"/><circle class="dot" cx="48" cy="50" r="9"/></svg></div><span class="wm">croe<i>.</i></span></div>
+        <div class="lock"><div class="ico s44 paper"><svg class="mk" viewBox="0 0 100 100"><circle class="arc" cx="50" cy="50" r="25" stroke-dasharray="131.24 25.84" transform="rotate(-15.4 50 50)"/><circle class="dot" cx="71.2" cy="28.8" r="7.5"/></svg></div><span class="wm">croe<i>.</i></span></div>
+      </div>
+      <div class="snote">Provisional only — the wordmark is still the existing
+        Plus&nbsp;Jakarta&nbsp;Sans 800 at −.04em. Note the collision to solve in round 2:
+        <b>the mark's green dot and the wordmark's green full stop are the same atom said
+        twice.</b> One of them has to give.</div>
+    </div>
+  </div>
+
+  <!-- ============ IN CONTEXT: CHAT ============ -->
+  <div class="srow">
+    <div class="slabel">In a chat</div>
+    <div class="sbody">
+      <div class="stage">
+        <div class="chat">
+          <div class="ico s44"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div>
+          <div class="bub">
+            <div class="ttl">Nike Air Max 270 — size 43</div>
+            <div class="sub">GH₵ 450.00 · held by Croe until you confirm delivery</div>
+            <div class="url">croe.app/pay/CR-89201</div>
+          </div>
+        </div>
+      </div>
+      <div class="snote">The moment that matters. A buyer sees this inside a conversation
+        with a vendor they have never met — the icon is the only thing on screen that is
+        not the vendor's own words.</div>
+    </div>
+  </div>
+
+  <!-- ============ IN CONTEXT: HOME SCREEN ============ -->
+  <div class="srow">
+    <div class="slabel">Home screen</div>
+    <div class="sbody">
+      <div class="stage">
+        <div class="home">
+          <div class="app"><div class="faux f-wa">✆</div><div class="nm">WhatsApp</div></div>
+          <div class="app"><div class="faux f-mtn">M</div><div class="nm">MyMTN</div></div>
+          <div class="app"><div class="ico" style="width:60px;height:60px"><svg class="mk" viewBox="0 0 100 100"><path class="arc" d="M26 33 L26 43 A24 24 0 0 0 74 43 L74 33"/><circle class="dot" cx="50" cy="49" r="9"/></svg></div><div class="nm">Croe</div></div>
+          <div class="app"><div class="faux f-ig">◎</div><div class="nm">Instagram</div></div>
+          <div class="app"><div class="faux f-tel">T</div><div class="nm">Telecel</div></div>
+        </div>
+      </div>
+      <div class="snote">Neighbours are loud and saturated. The ink tile is the only dark
+        one in the row — it stands out by <b>refusing to compete</b>, which is exactly the
+        posture the product takes everywhere else.</div>
+    </div>
+  </div>
+
+  <!-- ============ READ ============ -->
+  <div class="srow">
+    <div class="slabel">My read</div>
+    <div class="sbody">
+      <div class="verdict">
+        <div class="vt">It is between Aperture and Between — and they answer different
+          questions</div>
+        <div class="vx"><b>Aperture</b> is the safer, more legible mark: one closed stroke
+          plus one dot, the smallest possible shape budget, and it is unmistakable at
+          20&nbsp;px. Its real asset is that it carries the <b>name</b> — for a brand
+          nobody has heard of yet, an icon that says C is worth a great deal.<br><br>
+          <b>Between</b> is the more distinctive mark and the conceptually truer one: two
+          halves that never touch, with the money suspended between them, which is
+          precisely what escrow is. It is rarer in fintech than a letterform and it holds
+          at 20&nbsp;px better than I expected it to.</div>
+      </div>
+      <div class="snote" style="margin-top:16px">
+        <b>The honest tension:</b> you chose "held between" over "monogram C", and Aperture
+        quietly walks part of the way back — it is the held-between idea <i>drawn as a
+        letter</i>. Whether that is the best of both or a hedge is a judgement call, and
+        it is yours. Between is the answer with no hedge in it.<br><br>
+        <b>Cradle</b> is the warmest and most human of the five, but an upward bowl is a
+        well-worn gesture (wallets, "receive", deposit) and it surrenders the name.<br>
+        <b>Shelter</b> is Cradle inverted and reads as a roof — closer to insurance than
+        to escrow.<br>
+        <b>Release</b> tells the best story (held, then paid) but is the one clear
+        failure: the detached dot fuses with the ring terminal below ~44&nbsp;px, and it
+        pushes the mark out of its own bounding box.
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

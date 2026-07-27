@@ -1,0 +1,654 @@
+<!-- @dsCard group="Foundations" name="Shape & Depth" subtitle="Fill first, hairline second, shadow only for what floats — never two at once" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Croe — Shape &amp; Depth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CROE DESIGN TOKENS v3 — "SOFT LIGHT"
+   Extracted wholesale from the reference screenshot.
+   Light neutral ground, white sheets, near-black actions, big
+   radii, one type family. Chroma is semantic only — there is no
+   decorative brand hue. Depth is fill first, hairline second,
+   shadow only for things that genuinely float.
+   ============================================================ */
+
+:root {
+  /* ---- SURFACES ------------------------------------------------ */
+  --page:      #E6E6E3;   /* page behind the artboard — device reads as a device */
+  --canvas:    #F1F1EF;   /* app ground. Everything sits on this.            */
+  --surface:   #FFFFFF;   /* sheets, tiles, pills, tab bar. The only white.  */
+  --sunken:    #F5F5F3;   /* wells inside a white sheet (rare)               */
+  --scrim:     rgba(20,22,26,.34);
+
+  /* ---- INK ----------------------------------------------------- */
+  --ink:       #17181B;   /* headings, amounts, primary fill                 */
+  --ink-2:     #4A4D52;   /* body copy, secondary labels                     */
+  --ink-3:     #8E9297;   /* meta, captions, placeholders, inactive icons    */
+  --on-ink:    #FFFFFF;   /* text/icons on ink or on a solid state fill      */
+
+  /* ---- LINE ---------------------------------------------------- */
+  --line:      #E7E7E4;   /* the hairline. 1px. only on white-on-white.      */
+  --line-2:    #D9D9D5;   /* dividers inside dense lists, disabled outlines  */
+
+  /* ---- SEMANTIC STATES ----------------------------------------
+     Two idioms only, both taken from the reference:
+       solid  = fill + on-fill text  (the +5.2% pill, the dark chip)
+       quiet  = wash fill + deep text (banners, large reassurance)
+     ------------------------------------------------------------- */
+  --pending:        #EFEFEC;  --pending-on:  #5B5E63;  --pending-wash: #F3F3F0;
+  /* --secure-on is INK, not white: white on #1FC16B is 2.36:1 and this pill is the
+     app's primary trust signal, often read on a cheap screen in daylight. Ink is
+     7.52:1 and matches how --caution-on already sits on its bright fill. */
+  --secure:         #1FC16B;  --secure-on:   #17181B;  --secure-wash:  #E8F8F0;  --secure-deep: #127A45;
+  --done:           #17181B;  --done-on:     #FFFFFF;  --done-wash:    #EFEFEC;  --done-deep:   #17181B;
+  --caution:        #F5B02E;  --caution-on:  #2A1F05;  --caution-wash: #FDF3E1;  --caution-deep:#8A5A00;
+  /* --danger-on is INK for the same reason as --secure-on: white on #EF4444 is
+     3.76:1 and fails. Ink is 4.74:1. The rule is now consistent — on-fill text
+     is ink on a BRIGHT fill, white on a DARK one. */
+  --danger:         #EF4444;  --danger-on:   #17181B;  --danger-wash:  #FDECEC;  --danger-deep: #A62020;
+
+  /* Ghanaian carrier marks — flat dots, 8px, nothing else */
+  --mtn: #FFCC00; --telecel: #E60000; --at: #004F9F;
+
+  /* ---- SHAPE --------------------------------------------------- */
+  --r-1: 12px;   /* thumbs, small chips, glyph wells                 */
+  --r-2: 16px;   /* inputs, compact sheets                           */
+  --r-3: 20px;   /* tiles                                            */
+  --r-4: 24px;   /* primary sheets — the default card radius         */
+  --r-full: 999px;
+  --r-phone: 44px;
+
+  /* ---- SPACE — 4pt grid ---------------------------------------- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-7: 28px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+  --gutter: 20px;        /* screen side padding, everywhere          */
+  --pad-sheet: 20px;     /* sheet inner padding                      */
+  --gap-section: 24px;   /* between titled sections                  */
+  --gap-row: 12px;       /* between sibling rows/tiles               */
+
+  /* ---- DEPTH ---------------------------------------------------
+     RULE: a white sheet on --canvas gets NO border and NO shadow.
+     A white control on white gets a 1px --line border, no shadow.
+     Only genuinely floating layers get --elev.                     */
+  --elev: 0 8px 24px rgba(20,22,26,.08), 0 2px 6px rgba(20,22,26,.04);
+  --elev-lift: 0 14px 34px rgba(20,22,26,.12), 0 3px 8px rgba(20,22,26,.05);
+
+  /* ---- TYPE — one family, five weights ------------------------- */
+  --font: 'Plus Jakarta Sans', 'Segoe UI Variable Text', 'Segoe UI',
+          -apple-system, system-ui, sans-serif;
+
+  /* ---- MOTION -------------------------------------------------- */
+  --ease: cubic-bezier(.2,.8,.25,1);
+  --t-state: 160ms;   /* press, toggle, colour                       */
+  --t-layer: 240ms;   /* sheets, toasts, anything that floats in     */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: var(--page); }
+body { font-family: var(--font); color: var(--ink);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* ================= TYPE SCALE =================
+   Sentence case everywhere. Uppercase only at --t-micro,
+   and only for data prefixes / specimen labels.            */
+.t-display { font-size: 36px; line-height: 40px; font-weight: 800; letter-spacing: -.03em; }
+.t-title   { font-size: 24px; line-height: 30px; font-weight: 700; letter-spacing: -.022em; }
+.t-heading { font-size: 17px; line-height: 22px; font-weight: 700; letter-spacing: -.012em; }
+.t-subhead { font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: -.006em; }
+.t-body    { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--ink-2); }
+.t-label   { font-size: 14px; line-height: 18px; font-weight: 600; }
+.t-caption { font-size: 13px; line-height: 18px; font-weight: 500; color: var(--ink-3); }
+.t-micro   { font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.n         { font-variant-numeric: tabular-nums lining-nums; }
+
+/* Money. Always GH₵. The currency mark is set at the SAME size, weight and
+   colour as the numerals — the reference sets its amount uniformly. Only the
+   space after the mark is tokenised. Never raise or shrink it. */
+.amount { font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums lining-nums; }
+.amount .cur { margin-right: .18em; }
+
+/* ================= PHONE ARTBOARD 390×844 ================= */
+.phone { width: 390px; height: 844px; flex: none; margin: 0 auto; background: var(--canvas);
+  border-radius: var(--r-phone); position: relative; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: var(--elev-lift); }
+.statusbar { height: 54px; flex: none; display: flex; align-items: center;
+  justify-content: space-between; padding: 12px var(--s-7) 0;
+  font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.sb-icons { display: flex; gap: 6px; align-items: center; }
+
+.screen-head { flex: none; display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-2) var(--gutter) var(--s-4); }
+.screen-head .ttl { font-size: 17px; font-weight: 700; letter-spacing: -.012em; }
+.iconbtn { width: 44px; height: 44px; border-radius: var(--r-full); flex: none;
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; }
+.iconbtn.ghost { background: transparent; border-color: transparent; }
+
+.screen-body { flex: 1; display: flex; flex-direction: column;
+  gap: var(--gap-section); padding: var(--s-2) var(--gutter) var(--s-6);
+  overflow: hidden; }
+/* NOTHING in a screen body shrinks. A 52px button must still be 52px when the
+   content above it overflows — otherwise the flex column silently compresses
+   the CTA instead of clipping, and the screen lies about whether it fits.
+   .spacer re-declares flex:1 further down and wins on source order. */
+.screen-body > * { flex: none; }
+/* The dock occupies the bottom 90px (26 offset + 64 tall). Reserve 96 — a 6px
+   breath above it. Anything more is dead space stolen from the content. */
+.screen-body.has-tabs { padding-bottom: 96px; }
+
+/* Floating nav dock — the reference's signature bottom chrome */
+.tabdock { position: absolute; left: var(--s-4); right: var(--s-4); bottom: 26px;
+  display: flex; align-items: center; gap: 10px; }
+.tabbar { flex: 1; height: 64px; background: var(--surface); border-radius: var(--r-full);
+  box-shadow: var(--elev); display: flex; align-items: center;
+  justify-content: space-between; padding: 0 8px; }
+.tab { width: 48px; height: 48px; border-radius: var(--r-full); flex: none;
+  display: flex; align-items: center; justify-content: center; color: var(--ink-3); }
+.tab.active { width: auto; gap: var(--s-2); padding: 0 18px 0 14px;
+  background: var(--ink); color: var(--on-ink); font-size: 14px; font-weight: 600; }
+.tabfab { width: 60px; height: 60px; border-radius: var(--r-full); flex: none;
+  background: var(--surface); box-shadow: var(--elev);
+  display: flex; align-items: center; justify-content: center; }
+.home-indicator { position: absolute; left: 0; right: 0; bottom: 8px; height: 5px;
+  display: flex; align-items: center; justify-content: center; }
+.home-indicator::after { content: ''; width: 134px; height: 5px;
+  border-radius: var(--r-full); background: #C9C9C5; }
+
+/* ================= SHEETS ================= */
+/* On --canvas: no border, no shadow. Fill contrast is the depth. */
+.sheet { background: var(--surface); border-radius: var(--r-4); padding: var(--pad-sheet); }
+.sheet-2 { background: var(--surface); border-radius: var(--r-2); padding: var(--s-4); }
+.tile { background: var(--surface); border-radius: var(--r-3); padding: var(--s-4) var(--s-2);
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-2); flex: 1; }
+.tile .tl { font-size: 13px; font-weight: 600; }
+/* Wash sheets carry reassurance and caution at full width */
+.wash { border-radius: var(--r-4); padding: var(--s-4) var(--s-5);
+  display: flex; gap: var(--s-3); align-items: flex-start; }
+.wash .wt { font-size: 14px; font-weight: 700; }
+.wash .wx { font-size: 13.5px; line-height: 20px; margin-top: 3px; }
+.wash-secure  { background: var(--secure-wash);  color: var(--secure-deep); }
+.wash-caution { background: var(--caution-wash); color: var(--caution-deep); }
+.wash-danger  { background: var(--danger-wash);  color: var(--danger-deep); }
+.wash-neutral { background: var(--pending-wash); color: var(--ink-2); }
+
+/* ================= BALANCE BLOCK (the hero) ================= */
+.balance { background: var(--surface); border-radius: var(--r-4); padding: var(--s-5); }
+.balance .cap { font-size: 15px; font-weight: 600; color: var(--ink-2); }
+.balance .big { font-size: 34px; line-height: 40px; margin-top: 2px; }
+.balance .acts { display: flex; gap: var(--s-2); margin-top: var(--s-5); }
+
+/* Selector pill — white on white, so it earns a hairline */
+.selector { display: inline-flex; align-items: center; gap: var(--s-2);
+  height: 40px; padding: 0 14px 0 6px; border-radius: var(--r-full);
+  background: var(--surface); border: 1px solid var(--line);
+  font-size: 14px; font-weight: 600; }
+.selector .mark { width: 28px; height: 28px; border-radius: var(--r-full); flex: none;
+  background: var(--ink); color: var(--on-ink);
+  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+
+/* ================= BUTTONS ================= */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  flex: none; height: 52px; padding: 0 var(--s-6); border: none; border-radius: var(--r-full);
+  font-family: var(--font); font-size: 15px; font-weight: 600; letter-spacing: -.01em;
+  transition: background var(--t-state) var(--ease); }
+.btn-full { width: 100%; display: flex; }
+.btn-ink   { background: var(--ink); color: var(--on-ink); }
+.btn-line  { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn-quiet { background: transparent; color: var(--ink-2); }
+.btn-wash  { background: var(--pending); color: var(--ink); }
+.btn-danger{ background: var(--danger-wash); color: var(--danger-deep); }
+.btn-disabled { background: var(--pending); color: var(--ink-3); }
+.btn-sm { height: 44px; font-size: 14px; padding: 0 var(--s-5); }
+/* Leading glyph well — how the reference dresses Deposit / Withdraw */
+.btn .well { width: 26px; height: 26px; border-radius: var(--r-full); flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.16); margin-left: -6px; }
+.btn-line .well, .btn-quiet .well, .btn-wash .well { background: var(--pending); }
+
+/* ================= PILLS =================
+   TWO IDIOMS, and the rule for choosing IS the system:
+
+     TRACE   the default — a state mark plus words, no capsule. Use it in any
+             list, any repeated row, and anywhere a pill sits beside an amount.
+     SIGNAL  a solid capsule. ONE per scroll view, on the thing the screen is
+             actually about: the hero balance, a screen head, a confirmation.
+
+   Why two. Measured against --canvas, the five solid fills range from 1.02:1
+   (pending) to 15.70:1 (done) — so three stacked solid pills are not three
+   colours, they are three wildly different optical weights, one a black slab
+   and one invisible. That is what reads as noise. The Trace lands all five
+   states at ONE weight; the Signal is what earns the saturation.
+
+   Quiet comes from removing FILL and AREA — never from greying the text.
+   --ink-3 on --canvas is 2.77:1 and fails, so the Trace label stays --ink-2
+   (7.50:1) and gets its calm from dropping ~45x of inked area instead. */
+
+/* State modifiers set the variables; the idiom decides how to spend them. */
+.pill-pending { --sm: #5B5E63;             --sf: var(--pending); --so: var(--pending-on); }
+.pill-secure  { --sm: var(--secure-deep);  --sf: var(--secure);  --so: var(--secure-on); }
+.pill-done    { --sm: var(--done-deep);    --sf: var(--done);    --so: var(--done-on); }
+.pill-caution { --sm: var(--caution-deep); --sf: var(--caution); --so: var(--caution-on); }
+.pill-danger  { --sm: var(--danger-deep);  --sf: var(--danger);  --so: var(--danger-on); }
+
+/* ---- TRACE (default) ---- */
+.pill { display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; letter-spacing: -.002em;
+  color: var(--ink-2); white-space: nowrap; }
+.pill::before { content: ''; flex: none; width: 10px; height: 10px;
+  border-radius: var(--r-full); background: var(--sm); }
+/* Ring = YOUR move. Disc = waiting on someone else, or settled. Scan a column,
+   count the rings — that is the vendor's to-do list, and it survives greyscale. */
+.pill-mine::before { background: transparent; border: 1px solid var(--sm); }
+/* In a RIGHT-ALIGNED column the mark must trail, so the marks stack into a
+   clean column flush with the amounts above them. A leading mark rags, because
+   every state word is a different length. */
+.pill-end { flex-direction: row-reverse; }
+/* Cased trace — ONLY on --surface. On --canvas a wash capsule measures ~1.02:1
+   and is a smudge, so there the capsule is simply deleted. */
+.pill-cased { height: 26px; padding: 0 12px 0 10px; border-radius: var(--r-full);
+  background: var(--surface); border: 1px solid var(--line); }
+
+/* ---- SIGNAL (one per screen) ----
+   Geometry derives from --ph, so 28 and 34 are the same object at two scales.
+   End padding is .5h so text sits inside the ink rather than in the cap curve;
+   a leading glyph is optically lighter than a letter stem, so its side drops
+   to .34h. The 1px top padding is the two-centres shim: align-items centres
+   the LINE box, which sits below the cap band, so pill text always reads a
+   hair high — the glyph takes an equal negative margin and stays put. */
+.pill-signal { --ph: 28px; height: var(--ph); border-radius: var(--r-full);
+  background: var(--sf); color: var(--so);
+  gap: calc(var(--ph) * .22);
+  padding: 1px calc(var(--ph) * .5) 0 calc(var(--ph) * .34);
+  font-size: 12.5px; font-weight: 700; letter-spacing: .006em;
+  font-variant-numeric: tabular-nums lining-nums; }
+.pill-signal::before { display: none; }
+.pill-signal > svg { flex: none; margin-top: -1px; }
+.pill-signal.text-only { padding-left: calc(var(--ph) * .5); }
+.pill-hero { --ph: 34px; font-size: 14px; letter-spacing: 0; }
+/* Horizon — time to the next event, and NOTHING else. Never a fee, a reference
+   number or a score; two of these on one screen rebuilds the noise. */
+.pill-signal .hz { font-style: normal; font-weight: 600; opacity: .74; }
+.pill-signal .hz::before { content: '·'; margin: 0 .42em; opacity: .7; }
+
+/* Filter rail — scrolls, and is meant to bleed off the right edge */
+.chiprail { display: flex; gap: var(--s-2); align-items: center;
+  margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); overflow: hidden; }
+.chip { height: 40px; padding: 0 18px; border-radius: var(--r-full); flex: none;
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.chip.active { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.chip.icon { width: 40px; padding: 0; justify-content: center; }
+
+/* A single fact that needs separating from body copy without a whole sheet. */
+.row-inset { padding: var(--s-3) var(--s-4); background: var(--surface); border-radius: var(--r-2); }
+
+/* ================= THE TABLE =================
+   THE GLOBAL STYLE FOR EVERY LIST OF RECORDS. Escrows, wallet history,
+   evidence, KYC tiers, payouts — if it is a list of things that each have a
+   state, it is a .table of .trow, and it looks like this. Do not invent a
+   second row treatment; a product with two table styles has none.
+
+   A .trow is a white card on --canvas, so it takes no border and no shadow —
+   fill contrast is the depth. It is built from up to three tiers, and the
+   last two are OPTIONAL:
+
+     .trow-main   ALWAYS.  mark · title over subtitle · value over meta.
+     .trow-rail   only where the record has a lifecycle (4 steps).
+     .trow-foot   only where there is context worth pairing with a status.
+
+   A settled payout needs no rail. A KYC tier needs neither rail nor foot.
+   Dropping a tier is how the same component serves a dense list and a rich
+   one without a second set of rules.
+
+   NOT a table: key-value receipts, a single identity header, one setting
+   row. Those are .row-inset or plain rows — the table is for RECORDS. */
+.table { display: flex; flex-direction: column; gap: 10px; }
+.trow { background: var(--surface); border-radius: var(--r-2); flex: none; }
+.trow.s-secure  { --sm: var(--secure-deep); }
+.trow.s-caution { --sm: var(--caution-deep); }
+.trow.s-danger  { --sm: var(--danger-deep); }
+.trow.s-done    { --sm: var(--done-deep); }
+.trow-main { display: flex; align-items: center; gap: var(--s-3); padding: 10px 12px; }
+.tmark { width: 40px; height: 40px; border-radius: var(--r-1); flex: none;
+  background: var(--sunken); color: var(--ink-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12.5px; font-weight: 700; }
+.tlead { flex: 1; min-width: 0; }
+.ttitle { font-size: 14.5px; font-weight: 700; letter-spacing: -.006em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tsub { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 1px; }
+.tvals { flex: none; text-align: right; }
+.tval { font-size: 15px; font-weight: 700; letter-spacing: -.015em;
+  font-variant-numeric: tabular-nums lining-nums; }
+.tmeta { font-size: 11.5px; font-weight: 500; color: var(--ink-3); margin-top: 1px; }
+/* Four steps: link live · paid · shipped · delivered. Discrete segments with a
+   2px gap — the same construction as .alloc, which is what makes the two read
+   as one system. Deep tones only: at 2px the bright fills are ~2:1 on white. */
+.trow-rail { display: flex; gap: 2px; height: 2px; flex: none; }
+.trow-rail i { flex: 1; background: var(--line); border-radius: var(--r-full); }
+.trow-rail i.on { background: var(--sm); }
+.trow-foot { display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-3); padding: 7px 12px; }
+.tnote { display: inline-flex; align-items: center; gap: 5px; min-width: 0;
+  font-size: 11.5px; font-weight: 500; color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A note that is a DEADLINE rather than a fact takes caution and a clock. */
+.tnote.urgent { color: var(--caution-deep); font-weight: 600; }
+.tnote svg { flex: none; }
+
+/* ================= ALLOCATION BAR =================
+   What a total is made of. The segments' flex-grow values ARE the amounts, so
+   the bar can never drift from the figures printed beside it. 2px of white
+   between segments; no gradient, and no empty track when fully allocated. */
+.alloc { display: flex; gap: 2px; height: 6px; flex: none; }
+.alloc i { border-radius: var(--r-full); }
+.legend { display: flex; justify-content: space-between; gap: var(--s-3); }
+.legend span { display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 500; color: var(--ink-3); white-space: nowrap; }
+.legend i { width: 7px; height: 7px; border-radius: var(--r-full); flex: none; }
+.legend b { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.alloc .a-sec, .legend .d-sec { background: var(--secure); }
+.alloc .a-cau, .legend .d-cau { background: var(--caution); }
+.alloc .a-pend, .legend .d-pend { background: var(--pending); }
+
+/* Section header — sentence case heading + quiet action */
+.sechead { display: flex; align-items: baseline; justify-content: space-between; }
+.sechead .st { font-size: 17px; font-weight: 700; letter-spacing: -.012em; }
+.sechead .sa { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+
+/* ================= FIELDS ================= */
+.field-label { font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+  display: block; margin-bottom: var(--s-2); }
+.input { width: 100%; min-height: 56px; padding: 0 var(--s-4);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2);
+  display: flex; align-items: center; gap: var(--s-3);
+  font-family: var(--font); font-size: 16px; font-weight: 600; color: var(--ink);
+  transition: border-color var(--t-state) var(--ease); }
+.input.focus { border-color: var(--ink); }
+.input.error { border-color: var(--danger); }
+.input .prefix { font-size: 15px; font-weight: 600; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; }
+.input .amt-in { font-size: 22px; font-weight: 800; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; }
+.textarea { min-height: 108px; padding: var(--s-4); align-items: flex-start;
+  font-size: 15px; font-weight: 500; line-height: 22px; }
+.placeholder { color: var(--ink-3); font-weight: 500; }
+.helper { font-size: 12.5px; line-height: 18px; color: var(--ink-3); margin-top: var(--s-2); }
+.caret { width: 2px; height: 22px; background: var(--ink); display: inline-block;
+  border-radius: 1px; }
+
+.otp-row { display: flex; gap: var(--s-2); flex: none; }
+.otp-cell { flex: 1; height: 60px; border-radius: var(--r-2);
+  background: var(--surface); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.otp-cell.active { border-color: var(--ink); }
+.otp-cell.empty { color: var(--ink-3); }
+
+/* Choice row — carrier picker, delivery mode, dispute reason */
+.choice { display: flex; align-items: center; gap: var(--s-3);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2);
+  padding: 14px var(--s-4); }
+.choice.sel { border-color: var(--ink); }
+.choice .marker { width: 20px; height: 20px; border-radius: var(--r-full); flex: none;
+  border: 1.5px solid var(--line-2); display: flex; align-items: center; justify-content: center; }
+.choice.sel .marker { border-color: var(--ink); background: var(--ink); }
+.choice.sel .marker::after { content: ''; width: 7px; height: 7px;
+  border-radius: var(--r-full); background: var(--on-ink); }
+.dot8 { width: 8px; height: 8px; border-radius: var(--r-full); flex: none; }
+
+.dashed-tile { border: 1.5px dashed var(--line-2); border-radius: var(--r-3);
+  background: transparent; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--ink-3); }
+
+/* ================= TIMELINE =================
+   Round ticks on a 2px rail. Done = ink, now = secure, next = line. */
+.track { display: flex; flex-direction: column; }
+.step { display: flex; gap: var(--s-4); }
+.step-rail { width: 20px; flex: none; display: flex; flex-direction: column; align-items: center; }
+.tick { width: 20px; height: 20px; border-radius: var(--r-full); flex: none;
+  background: var(--pending); display: flex; align-items: center; justify-content: center; }
+.tick.done { background: var(--ink); color: var(--on-ink); }
+.tick.now  { background: var(--secure); color: var(--secure-on); }
+.step-line { width: 2px; flex: 1; min-height: 26px; background: var(--line);
+  border-radius: 1px; margin: 4px 0; }
+.step-line.done { background: var(--ink); }
+.step-main { flex: 1; padding-bottom: var(--s-5); }
+.step-t { font-size: 14.5px; font-weight: 700; letter-spacing: -.006em; }
+.step-t.next { color: var(--ink-3); font-weight: 600; }
+.step-x { font-size: 13px; line-height: 19px; color: var(--ink-2); margin-top: 3px; }
+.step-time { font-size: 12px; font-weight: 600; color: var(--ink-3);
+  flex: none; font-variant-numeric: tabular-nums; }
+
+/* Horizontal 4-step rail */
+.hrail { display: flex; align-items: flex-start; }
+.hstep { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
+.hbar { height: 2px; flex: 1; background: var(--line); margin-top: 9px; border-radius: 1px; }
+.hbar.done { background: var(--ink); }
+.hstep .hl { font-size: 11px; font-weight: 700; letter-spacing: .03em;
+  text-transform: uppercase; color: var(--ink-3); text-align: center; }
+.hstep.on .hl { color: var(--ink); }
+
+/* ================= PAYMENT SHEET =================
+   The only consumer of --scrim. A sheet rises over the screen to capture
+   payment details, and it is CAPPED so it never covers the amount: someone
+   typing a card number for a stranger must keep "GH₵ 450.00 · held until you
+   confirm" in view the whole time. That is the entire reason to prefer a
+   sheet over a form screen — if it ever grows tall enough to swallow the
+   balance block, the component is being misused.
+
+   The sheet does NOT grow to fit its contents. The method list scrolls inside
+   it and the CTA stays pinned, so the pay button is always reachable. */
+.payscrim { position: absolute; inset: 0; background: var(--scrim); }
+.paysheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 60%;
+  display: flex; flex-direction: column;
+  background: var(--surface); border-radius: var(--r-4) var(--r-4) 0 0;
+  box-shadow: var(--elev); padding: 10px var(--gutter) var(--s-6); }
+.paysheet::before { content: ''; flex: none; width: 36px; height: 4px;
+  border-radius: var(--r-full); background: var(--line-2);
+  margin: 0 auto var(--s-4); }
+.paysheet .sh { flex: none; font-size: 16px; font-weight: 700;
+  letter-spacing: -.012em; margin-bottom: var(--s-3); }
+.paylist { flex: 1; min-height: 0; overflow: hidden;
+  display: flex; flex-direction: column; gap: var(--s-2); }
+.paysheet .btn { margin-top: var(--s-3); }
+
+/* Method row — a ROW, not a tile. Tiles suit the carrier picker (three short
+   peers, mark-led); a payment method needs a sentence, which is row content. */
+.mrow { flex: none; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-2); padding: 12px var(--s-4); }
+.mrow.sel { border-color: var(--ink); }
+.mrow-top { display: flex; align-items: center; gap: var(--s-3); }
+.mrow .mw { flex: 1; min-width: 0; }
+.mrow .mt { font-size: 15px; font-weight: 700; letter-spacing: -.008em; }
+.mrow .ms { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-top: 2px; }
+/* Every method prices ITSELF, in cedis. Never a bare percentage — the card
+   surcharge has to be visible before the buyer commits to it. */
+.mrow .mv { flex: none; text-align: right; font-size: 15px; font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums; }
+.mrow .mfee { font-size: 11px; font-weight: 600; color: var(--caution-deep);
+  margin-top: 2px; }
+.mrow-body { margin-top: var(--s-3); padding-top: var(--s-3);
+  border-top: 1px solid var(--line); }
+
+/* ================= MISC ================= */
+.avatar { width: 44px; height: 44px; border-radius: var(--r-full); flex: none;
+  background: var(--ink); color: var(--on-ink); display: flex;
+  align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+.avatar.quiet { background: var(--pending); color: var(--ink-2); }
+.toast { background: var(--ink); color: var(--on-ink); border-radius: var(--r-full);
+  padding: 14px var(--s-5); font-size: 14px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: var(--s-2); box-shadow: var(--elev); }
+.spacer { flex: 1; }
+.hr { height: 1px; background: var(--line); border: none; flex: none; }
+
+/* ================= SPECIMEN PAGES =================
+   Foundations + Components render white, 760px, hairline rows. */
+body.specimen { background: var(--surface); padding: 48px 32px 80px; min-height: 100vh; }
+.spec { max-width: 760px; margin: 0 auto; }
+.spec-h1 { font-size: 30px; font-weight: 800; letter-spacing: -.03em; }
+.spec-sub { font-size: 15px; font-weight: 500; color: var(--ink-3); margin-top: 6px; }
+.srow { display: flex; gap: var(--s-8); padding: 26px 0; border-top: 1px solid var(--line); }
+.srow:first-of-type { margin-top: 32px; }
+.slabel { width: 148px; flex: none; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-top: 4px; }
+.sbody { flex: 1; min-width: 0; }
+.snote { font-size: 13px; line-height: 19px; color: var(--ink-3); margin-top: 10px; }
+.sgrid { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+.swatch { width: 100%; height: 60px; border-radius: var(--r-2); }
+.stage { background: var(--canvas); border-radius: var(--r-4); padding: var(--s-5); }
+
+/* ================= CARD-LOCAL ================= */
+.rule-head { background: var(--ink); color: var(--on-ink); border-radius: var(--r-4);
+  padding: var(--s-6); font-size: 19px; line-height: 28px; font-weight: 700;
+  letter-spacing: -.015em; }
+.rule-head span { color: #9BA0A6; font-weight: 600; }
+
+.proofs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-4); }
+.proof .stage { padding: var(--s-5) var(--s-4); min-height: 128px;
+  display: flex; align-items: center; justify-content: center; }
+.proof .stage.white { background: var(--surface); border: 1px solid var(--line); }
+.proof .cap { font-size: 12.5px; font-weight: 700; margin-top: 11px; }
+.proof .why { font-size: 11.5px; line-height: 17px; color: var(--ink-2); margin-top: 4px; }
+
+.demo-sheet { background: var(--surface); border-radius: var(--r-2);
+  padding: 14px 16px; font-size: 13px; font-weight: 600; width: 100%; }
+.demo-float { background: var(--surface); border-radius: var(--r-full);
+  box-shadow: var(--elev); height: 48px; padding: 0 20px; display: inline-flex;
+  align-items: center; font-size: 13px; font-weight: 600; }
+.demo-lift { box-shadow: var(--elev-lift); }
+
+.wrongs { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-4); }
+.wrong .stage { padding: var(--s-5); display: flex; align-items: center;
+  justify-content: center; }
+.wrong .cap { font-size: 12.5px; font-weight: 700; margin-top: 11px;
+  color: var(--danger-deep); }
+.wrong .why { font-size: 11.5px; line-height: 17px; color: var(--ink-2); margin-top: 4px; }
+.x-both { background: var(--surface); border-radius: var(--r-2); padding: 14px 16px;
+  font-size: 13px; font-weight: 600; width: 100%;
+  border: 1px solid var(--line); box-shadow: var(--elev); }
+.x-border { background: var(--surface); border-radius: var(--r-2); padding: 14px 16px;
+  font-size: 13px; font-weight: 600; width: 100%; border: 1px solid var(--line); }
+
+.pairs { display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; }
+.pairs .box { background: var(--canvas); border-radius: var(--r-4); padding: var(--s-4);
+  display: flex; align-items: center; gap: 10px; }
+
+.closing { background: var(--canvas); border-radius: var(--r-4);
+  padding: var(--s-5); margin-top: 34px; font-size: 14px; line-height: 21px;
+  color: var(--ink-2); }
+.closing b { color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body class="specimen">
+<div class="spec">
+
+  <div class="spec-h1">Shape &amp; Depth</div>
+  <div class="spec-sub">Three ways to separate two surfaces, and a strict order for reaching for them.</div>
+
+  <div class="srow">
+    <div class="slabel">The rule</div>
+    <div class="sbody">
+      <div class="rule-head">
+        Fill first. Hairline second. Shadow only for what genuinely floats.<br>
+        <span>Nothing ever gets a border and a shadow at the same time.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="srow">
+    <div class="slabel">In practice</div>
+    <div class="sbody">
+      <div class="proofs">
+        <div class="proof">
+          <div class="stage"><div class="demo-sheet">Escrow card</div></div>
+          <div class="cap">Fill — no border, no shadow</div>
+          <div class="why">White on canvas. The fill step already separates it, so a border
+            would say the same thing twice.</div>
+        </div>
+        <div class="proof">
+          <div class="stage white"><span class="chip">Awaiting</span></div>
+          <div class="cap">Hairline — 1px</div>
+          <div class="why">White sitting on white. Fill contrast is unavailable, so this is
+            the one case that earns a border.</div>
+        </div>
+        <div class="proof">
+          <div class="stage"><div class="demo-float">Floating dock</div></div>
+          <div class="cap">Shadow — --elev</div>
+          <div class="why">It passes over content as the screen scrolls. Only a real layer
+            gets a real shadow.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="srow">
+    <div class="slabel">Never</div>
+    <div class="sbody">
+      <div class="wrongs">
+        <div class="wrong">
+          <div class="stage"><div class="x-both">Border and shadow</div></div>
+          <div class="cap">Two depth cues at once</div>
+          <div class="why">Reads as a component borrowed from another design system. Pick
+            one — and on the canvas the answer is neither.</div>
+        </div>
+        <div class="wrong">
+          <div class="stage"><div class="x-border">Bordered sheet on canvas</div></div>
+          <div class="cap">A border doing no work</div>
+          <div class="why">The fill already separated it. The hairline only adds a grey
+            outline to something that was legible without it.</div>
+        </div>
+      </div>
+      <div class="snote">Both are on the BANNED list, and both are the kind of thing that
+        creeps in one card at a time. If a surface looks weak, the fix is almost always
+        more space around it, not more edge on it.</div>
+    </div>
+  </div>
+
+  <div class="srow">
+    <div class="slabel">Shape pairing</div>
+    <div class="sbody">
+      <div class="pairs">
+        <div class="box">
+          <button class="btn btn-ink btn-sm">Withdraw</button>
+          <span class="pill pill-signal pill-secure text-only">Protected</span>
+          <span class="chip">Awaiting</span>
+        </div>
+      </div>
+      <div class="snote"><b>Controls are --r-full. Containers are --r-4.</b> Anything a thumb
+        presses — button, chip, pill, icon button, the dock — is a capsule; anything that
+        holds content is a 24px sheet. That single split is most of why the language reads
+        as one thing, and it comes straight from the reference, where every interactive
+        element is a pill and every panel is a soft rectangle.</div>
+    </div>
+  </div>
+
+  <div class="srow">
+    <div class="slabel">Elevation</div>
+    <div class="sbody">
+      <div class="pairs">
+        <div class="box"><span class="demo-float">--elev</span></div>
+        <div class="box"><span class="demo-float demo-lift">--elev-lift</span></div>
+      </div>
+      <div class="snote">Two tokens, and no more. <b>--elev</b> is for the dock, the FAB and
+        toasts. <b>--elev-lift</b> exists for exactly one job — lifting the 390×844 artboard
+        off the specimen page so it reads as a device. It is not available inside a screen.</div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <b>Depth here is a consequence of the palette, not an effect layered on top of it.</b>
+    The grey ground and the white surface sit about three percent apart in luminance, and
+    that is deliberately just enough. It is what lets the interface stay entirely flat —
+    no gradient, no glow, no blur — and still survive a cheap screen in bright sunlight.
+  </div>
+
+</div>
+</body>
+</html>
