@@ -16,6 +16,7 @@
 4. **Section 5 defines pilot success.** Do not scale, market, or raise on anything less.
 5. **Section 8 is the log.** Date-stamp every business decision, the way §10 of the production manual logs incidents.
 6. **Section 10 is the budget.** Every figure in it is an **estimate awaiting a real quote** — replace each one as quotes arrive, and recompute break-even when you do.
+7. **Section 11 is the funding pipeline.** Deadline-driven. Check it monthly — several sources run a single annual cycle, and missing one costs a year.
 
 **Current position (as of 2026-08-01):** code complete at custody phase **P0** (sandbox), 275 backend + 79 frontend tests passing. Infrastructure §1.2 and Compliance §1.5 of the production manual are **0/11 and 0/9**. Nothing on this document is done.
 
@@ -486,3 +487,131 @@ Same product, same cost base, **~3× faster to profitability** — which is the 
 1. **The money is not the hard part.** ≈ GHS 15,000–30,000 gets Croe legally trading. The binding constraints are the aggregator's answer (§1) and whether pilot vendors close sales they were previously losing (§5).
 2. **Spend the minimum until both are answered.** Every line in §10.1 marked "defer" stays deferred until §1 returns a yes.
 3. **Then the expensive items become mandatory, not optional** — lawyer and pen test are the price of handling other people's money at any scale worth having.
+
+---
+
+## 11. Funding & Capital Strategy
+
+> **Program names, amounts, eligibility, and deadlines change every cycle.** Every entry below is marked **[verify]** until confirmed on the source's own site. **Check deadlines first** — several run one annual cycle, and missing it costs a year.
+>
+> Capital requirements come from §10. This section is about where that capital comes from and in what order.
+
+### 11.1 The Sequencing Principle
+
+**Do not raise equity now.** At present: finished product, no entity, no users, no transactions, unanswered regulatory question. Raising in that position as a student founder in Ghana fintech means bad terms and slow conversations.
+
+After the §10.4 validation sprint the position is: registered company, written aggregator answer, lawyer's read on custody, and 10–20 vendors with signed commitments and real ticket data. **That is a materially different conversation, and almost none of it costs money.**
+
+| Rule | |
+|---|---|
+| **Now** | Apply to everything free and non-dilutive. Cost: time only |
+| **After §1 returns yes + 10 vendor commitments** | Accelerators, thematic funds, partnership capital |
+| **After 60-day pilot data (§5)** | Angels and pre-seed, on real numbers |
+| **Never** | Equity raised to answer questions that cost GHS 0 to answer |
+
+### 11.2 Immediate — Cloud Credits (do this week)
+
+> **Highest return-on-effort item in this document.** Rolling applications, no deadline, largely self-serve.
+
+| # | Program | Status | Credit awarded | Notes |
+|---|---------|--------|----------------|-------|
+| 1 | Microsoft for Startups Founders Hub | [ ] | _—_ | Self-serve, minimal gating **[verify]** |
+| 2 | AWS Activate | [ ] | _—_ | Self-service tier available without accelerator referral **[verify]** |
+| 3 | Google Cloud for Startups | [ ] | _—_ | |
+| 4 | DigitalOcean Hatch | [ ] | _—_ | |
+
+**Why it matters more than the dollar figure:** credits would zero out the entire §10.2 infrastructure line **including GPU hosting for the LLM** — the largest recurring cost in the model, and the one that swings break-even from 63 to 750 transactions/month (§10.5). Record any award in §10.2 `Actual` and recompute `F`.
+
+### 11.3 Non-Dilutive Pipeline — Grants & Competitions
+
+| # | Source | Type | Indicative amount | Cycle / deadline | Status | Fit |
+|---|--------|------|-------------------|------------------|--------|-----|
+| 1 | **Hult Prize** | Student competition | Tiered; large grand prize | On-campus rounds **[verify]** | [ ] | ⭐ Student-specific. Most entrants have slides; Croe has a working product |
+| 2 | **Tony Elumelu Foundation** | Grant + training | ~USD 5,000 non-dilutive **[verify]** | Typically opens early in the year **[verify]** | [ ] | ⭐ Pan-African, large cohort, genuinely accessible, no equity |
+| 3 | **MEST Africa** (Accra) | Training + seed | Seed investment for selected teams **[verify]** | Annual cohort **[verify]** | [ ] | ⭐ Flagship Ghana option for this exact stage and geography |
+| 4 | **University incubator / innovation centre** | Grant + intros | Small | Rolling **[verify]** | [ ] | ⭐ Cheapest capital available — **and eligibility expires at graduation** |
+| 5 | **Catalyst Fund** (BFA Global) | Grant + technical assistance | Meaningful **[verify]** | **[verify]** | [ ] | ⭐ Thesis is *inclusive fintech in emerging markets* — Croe is on-thesis |
+| 6 | **NEIP** | Gov. seed + incubation | **[verify]** | **[verify]** | [ ] | Explicitly youth-targeted |
+| 7 | **Ghana Tech Lab** | Incubation / accelerator | **[verify]** | **[verify]** | [ ] | Accra-based |
+| 8 | **Ghana Enterprises Agency** | SME/youth support | **[verify]** | **[verify]** | [ ] | |
+| 9 | **Google for Startups Black Founders Fund / Africa** | Equity-free | **[verify]** | **[verify]** | [ ] | Has funded Ghanaian startups |
+
+### 11.4 Accelerators — After Validation
+
+| # | Program | Status | Notes |
+|---|---------|--------|-------|
+| 1 | Y Combinator | [ ] | Funds African fintech regularly; free to apply, good asymmetry. Long shot without traction |
+| 2 | Startupbootcamp AfriTech | [ ] | Fintech-focused |
+| 3 | Antler | [ ] | Pre-seed, Africa programs |
+| 4 | Norrsken | [ ] | Africa focus |
+| 5 | Techstars | [ ] | Has run African programs **[verify current]** |
+
+> Apply once vendor commitments exist (§2.4), not before.
+
+### 11.5 Equity — Angels & Pre-Seed (after pilot data)
+
+| # | Investor | Geography | Status | Notes |
+|---|----------|-----------|--------|-------|
+| 1 | Ghana Angel Investor Network (GAIN) | Ghana | [ ] | |
+| 2 | Injaro Investments | Ghana | [ ] | |
+| 3 | Ingressive Capital | West Africa pre-seed | [ ] | |
+| 4 | Ventures Platform | Nigeria / West Africa | [ ] | |
+| 5 | LoftyInc Capital | Pan-African | [ ] | |
+| 6 | Oui Capital | West Africa | [ ] | |
+| 7 | Future Africa | Nigeria | [ ] | |
+
+> **Warm intros outperform cold outreach by a wide margin.** The realistic routes in are the university alumni network and whichever accelerator accepts you.
+
+### 11.6 Strategic & Partnership Capital
+
+| # | Counterparty | Why it is worth more than cash | Status |
+|---|---|---|---|
+| 1 | **Bank / EPSP / DEMI pilot sponsor** | Simultaneously solves the **P2 custody problem** (§4, doc 02 §3). A bank hunting fintech deal flow gets a compliant product; Croe gets the trust account it needs to be legal at scale | [ ] |
+| 2 | **Aggregator builder/developer programme** | Raise this *inside* the §1 conversations — same meeting, two outcomes | [ ] |
+| 3 | **MTN Ghana innovation programme** | Owns the rail Croe depends on **[verify current programmes]** | [ ] |
+
+### 11.7 Non-Dilutive Alternative — Contract Revenue
+
+Production TypeScript, PostgreSQL, payments, and infrastructure skills are directly sellable. **Roughly two months of contract work covers the entire recommended tier in §10.4 with zero dilution.** Evaluate this against any early equity offer before accepting the equity.
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | Contract-vs-dilution comparison made explicitly before accepting any equity money | [ ] |
+
+### 11.8 Pitch Assets To Prepare
+
+| # | Asset | Status | Notes |
+|---|-------|--------|-------|
+| 1 | One-page summary | [ ] | Problem, rail, custody position, traction |
+| 2 | Deck (10–12 slides) | [ ] | |
+| 3 | **Live demo on sandbox** | [ ] | The strongest asset — a working app, not a mockup |
+| 4 | Due-diligence pack | [ ] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
+| 5 | Vendor commitment letters | [ ] | From §2.4 |
+| 6 | Unit economics one-pager | [ ] | From §10.4–10.7, with real confirmed fees |
+| 7 | Regulatory position summary | [ ] | The P0→P3 custody chain — see §11.9 |
+
+### 11.9 The Two Things That Decide the Outcome
+
+**1. The asset almost no student applicant has.** Croe is not an idea — it is 354 passing tests, an append-only financial ledger, a 28-document specification package, and a written phased-compliance plan. **The `for_agents/` package is effectively a due-diligence pack.** Lead with the fact that it is built and tested.
+
+**2. The failure mode that ends conversations instantly.** Anyone serious about African fintech knows Act 987. Saying "we hold funds in escrow" without an immediate licensing answer ends the meeting. **Croe already has the sophisticated answer — lead with the P0→P3 custody chain, not the tech stack.** It signals an understanding of the business that student founders are assumed to lack.
+
+**3. Answer the commitment question before it is asked.** Every investor will wonder what a final-year student does after graduation. Have a direct, prepared answer.
+
+### 11.10 Twelve-Month Capital Timeline
+
+| When | Action | Expected outcome |
+|---|---|---|
+| **This week** | Cloud credits — all four (§11.2) | Infra + LLM line potentially zeroed |
+| **Weeks 1–8** | Run the §10.4 sprint. Apply: Hult Prize, TEF, university incubator, MEST | Non-dilutive; entity + vendor commitments |
+| **Weeks 8–16** | With §1 answered: Catalyst Fund, accelerators, bank partnership talks | Mostly non-dilutive |
+| **Months 4–6** | 60-day pilot; collect §5 metrics | The only input that makes a real pre-seed conversation work |
+| **Months 6–12** | Angels / pre-seed on actual GMV, dispute rate, vendor retention | Priced round on defensible terms |
+
+### 11.11 Funding Application Log
+
+> One row per application. Date-stamp everything.
+
+| Date applied | Source | Amount sought | Outcome | Date resolved | Notes |
+|---|---|---|---|---|---|
+| _—_ | _—_ | _No entries yet_ | | | |
