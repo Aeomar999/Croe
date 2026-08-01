@@ -586,7 +586,7 @@ Production TypeScript, PostgreSQL, payments, and infrastructure skills are direc
 | 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes; apply brand tokens from [`20-Design-System.md`](for_agents/20-Design-System.md). **Contains `[FILL: …]` placeholders** |
 | 3 | **Live demo on sandbox** | [ ] | The strongest asset — a working app, not a mockup |
 | 4 | Due-diligence pack | [ ] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
-| 5 | Vendor commitment letters | [ ] | From §2.4 |
+| 5 | Vendor commitment letters | [x] template · [ ] collected | Template + WhatsApp version + portfolio tracker: [`pitch/VENDOR-COMMITMENT-LETTER.md`](pitch/VENDOR-COMMITMENT-LETTER.md). **Non-binding by design** — Croe is pre-incorporation and pre-licence. Collected numbers feed §5, §7.2, §10.7 |
 | 6 | Unit economics one-pager | [ ] | From §10.4–10.7, with real confirmed fees |
 | 7 | Regulatory position summary | [ ] | The P0→P3 custody chain — see §11.9 |
 
