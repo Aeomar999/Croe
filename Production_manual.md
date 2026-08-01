@@ -89,9 +89,11 @@
 
 ### 1.5 Compliance & Legal
 
+> Business-side execution for every item below — company formation steps, aggregator gating questions, regulatory sequencing, and operating policies — is tracked in [`GO-TO-MARKET.md`](GO-TO-MARKET.md). This section records **status**; that document records **how**.
+
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | Company registered (Ghana) | [ ] | |
+| 1 | Company registered (Ghana) | [ ] | `GO-TO-MARKET.md` §2.1 |
 | 2 | Legal sign-off on interim custody arrangement (P1) | [ ] | |
 | 3 | Aggregator live account approved and funded | [ ] | |
 | 4 | All `[verify]` regulatory figures confirmed with legal counsel | [ ] | |
@@ -345,17 +347,21 @@ docker compose down -v   # removes containers + volumes
 ## 8. Cost Tracking
 
 > Track actual costs against projections from `03-Business-Model-and-Costs.md`. Update this section monthly.
+>
+> **Projections below are order-of-magnitude estimates from [`GO-TO-MARKET.md`](GO-TO-MARKET.md) §10.2 — not quotes.** Replace each with a real invoice figure in `Actual` as it arrives, and recompute break-even (§10.5 of that document) whenever the monthly total moves.
 
-| Item | Projected (P1) | Actual | Notes |
-|------|----------------|--------|-------|
-| Managed Postgres | | | |
-| Managed Redis | | | |
-| LLM hosting (GPU) | | | |
-| Object storage (S3/R2) | | | |
-| SMS (OTP + notifications) | | | |
-| Aggregator fees | | | |
-| Domain + TLS | | | |
-| **Monthly total** | | | |
+| Item | Projected — Lean (GHS/mo) | Projected — Realistic (GHS/mo) | Actual | Notes |
+|------|---------------------------|-------------------------------|--------|-------|
+| App hosting | 150 | 400 | | |
+| Managed Postgres | 0–200 | 300–600 | | |
+| Managed Redis | 0–100 | 150–300 | | |
+| LLM hosting (GPU) | **0** — CPU/Ollama on app host | 1,200–4,000 | | **Largest recurring line.** Run pilot with triage off or CPU-only — see `GO-TO-MARKET.md` §10.6 and §7.2 below |
+| Object storage (S3/R2) | 30 | 100 | | Usage-based; evidence media |
+| SMS (OTP + notifications) | 30–150 | 150–600 | | ~6–10 SMS per completed transaction **[verify rate]** |
+| Monitoring / log aggregation | 0 (free tier) | 200–500 | | |
+| Domain + TLS + push + misc | 50 | 100 | | Push is free |
+| **Monthly total (`F`)** | **≈ 260–680** | **≈ 2,600–6,600** | | Doc 03 §5 targets `F < 500` |
+| _Aggregator fees_ | _per-transaction cost of goods_ | _—_ | | Not fixed overhead — belongs in unit economics, `GO-TO-MARKET.md` §10.4 |
 
 ---
 

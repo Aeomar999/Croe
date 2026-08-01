@@ -40,6 +40,7 @@ Croe/
   AGENTS.md                  <- YOU ARE HERE
   Progress.md                <- Living implementation tracker (keep updated)
   Production_manual.md       <- Go-live checklist (keep updated per PROC-03)
+  GO-TO-MARKET.md            <- Business/GTM tracker: entity, licensing, ops, pilot (keep updated)
   .env.example               <- All required env vars with comments
   .gitignore
   for_agents/                <- THE SPEC PACKAGE (28 docs, sequential numbering)

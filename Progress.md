@@ -10,9 +10,10 @@
 |---|---|
 | **Specification phase** | Complete (28 docs, design system) |
 | **Implementation phase** | ✅ All 8 phases complete (P0 sandbox ready) |
+| **Business readiness** | ⬜ Not started — tracked in [`GO-TO-MARKET.md`](GO-TO-MARKET.md) (entity, licensing, aggregator, ops, pilot) |
 | **Custody phase** | P0 (sandbox) |
 | **Active branch** | `main` |
-| **Last updated** | 2026-07-27 |
+| **Last updated** | 2026-08-01 |
 
 ---
 
