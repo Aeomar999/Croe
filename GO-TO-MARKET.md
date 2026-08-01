@@ -582,8 +582,8 @@ Production TypeScript, PostgreSQL, payments, and infrastructure skills are direc
 
 | # | Asset | Status | Notes |
 |---|-------|--------|-------|
-| 1 | One-page summary | [ ] | Problem, rail, custody position, traction |
-| 2 | Deck (10–12 slides) | [ ] | |
+| 1 | One-page summary | [x] | [`pitch/ONE-PAGER.md`](pitch/ONE-PAGER.md) — **contains `[FILL: …]` placeholders; complete before sending** |
+| 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes; apply brand tokens from [`20-Design-System.md`](for_agents/20-Design-System.md). **Contains `[FILL: …]` placeholders** |
 | 3 | **Live demo on sandbox** | [ ] | The strongest asset — a working app, not a mockup |
 | 4 | Due-diligence pack | [ ] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
 | 5 | Vendor commitment letters | [ ] | From §2.4 |
