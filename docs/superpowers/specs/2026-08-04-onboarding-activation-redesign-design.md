@@ -209,6 +209,31 @@ this design does not claim the payout step works until it lands. Both call sites
 
 ---
 
+## Delivery — two plans
+
+This design ships as two independent plans. The split is along the backend boundary: plan 1 needs
+no schema change, no new endpoint, and no dependency on the payout fix, so it can ship and be
+verified on its own.
+
+### Plan 1 — visual refresh and role branching
+
+Frontend only. `OnboardingScreen` (motion, display type, full-bleed art), `RoleSelectScreen`
+(branching), `AuthStack` routing, and their tests. Ships to a user as a better-looking onboarding
+whose role answer finally routes.
+
+Nothing here depends on plan 2. If plan 2 slips, a seller simply lands on Home as they do today.
+
+### Plan 2 — activation tail
+
+Full-stack. Migration `006_user_display_name.ts`, `PATCH /users/me`, the Setup screen, the Home
+checklist, and the KYC screen.
+
+**Gated on the `"unknown"` MSISDN fix below.** Plan 2 may be built before that lands, but the
+payout-confirm step must not ship to users until it does — the screen would otherwise promise a
+payout destination the release path cannot use.
+
+---
+
 ## Tests
 
 The two-project jest split (`node` + `components`) already exists; new component tests slot in.
