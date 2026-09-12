@@ -8,7 +8,7 @@ vi.mock("./ledger-integrity.js", () => ({
   runLedgerIntegrityCheck: vi.fn().mockResolvedValue({ totalEntries: 0, anomalies: [] }),
 }));
 vi.mock("./retention.js", () => ({
-  runRetentionPurge: vi.fn().mockResolvedValue({ deleted: { notifications: 0, messages: 0, sessions: 0 }, skipped: 0 }),
+  runRetentionPurge: vi.fn().mockResolvedValue({ deleted: { notifications: 0, sessions: 0 }, skipped: 0 }),
 }));
 
 import { startScheduler, stopScheduler, getSchedulerStatus } from "./scheduler.js";

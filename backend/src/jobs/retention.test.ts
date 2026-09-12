@@ -33,8 +33,7 @@ describe("runRetentionPurge", () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
       if (sql.includes("DELETE FROM notifications")) return { rowCount: 5 };
-      if (sql.includes("DELETE FROM messages")) return { rowCount: 3 };
-      if (sql.includes("DELETE FROM sessions")) return { rowCount: 2 };
+      if (sql.includes("DELETE FROM auth_sessions")) return { rowCount: 2 };
       if (sql.includes("COUNT")) return { rows: [{ cnt: "0" }] };
       return {};
     });
@@ -43,7 +42,6 @@ describe("runRetentionPurge", () => {
   it("returns correct deletion counts", async () => {
     const result = await runRetentionPurge();
     expect(result.deleted.notifications).toBe(5);
-    expect(result.deleted.messages).toBe(3);
     expect(result.deleted.sessions).toBe(2);
   });
 
@@ -51,8 +49,7 @@ describe("runRetentionPurge", () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
       if (sql.includes("DELETE FROM notifications")) return { rowCount: 0 };
-      if (sql.includes("DELETE FROM messages")) return { rowCount: 0 };
-      if (sql.includes("DELETE FROM sessions")) return { rowCount: 0 };
+      if (sql.includes("DELETE FROM auth_sessions")) return { rowCount: 0 };
       if (sql.includes("COUNT")) return { rows: [{ cnt: "7" }] };
       return {};
     });
@@ -107,9 +104,9 @@ describe("runRetentionPurge", () => {
 
     await runRetentionPurge();
     // DELETE queries for records that can be tied to disputes should include dispute exclusion logic
-    // (sessions are not linked to transactions, so they don't need dispute exclusion)
+    // (auth_sessions are not linked to transactions, so they don't need dispute exclusion)
     for (const q of deleteQueries) {
-      if (q.includes("notifications") || q.includes("messages")) {
+      if (q.includes("notifications")) {
         expect(q).toContain("dispute_cases");
         expect(q).toContain("DISPUTE_OPENED");
       }

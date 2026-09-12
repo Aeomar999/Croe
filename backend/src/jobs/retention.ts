@@ -1,5 +1,5 @@
 /**
- * Data retention job — purge old notifications, messages, and expired sessions.
+ * Data retention job — purge old notifications and expired sessions.
  * Skips records tied to active disputes.
  *
  * 23-Observability-and-Reconciliation.md §1.
@@ -13,7 +13,6 @@ export interface RetentionResult {
   timestamp: string;
   deleted: {
     notifications: number;
-    messages: number;
     sessions: number;
   };
   skipped: number;
@@ -25,7 +24,7 @@ export async function runRetentionPurge(): Promise<RetentionResult> {
   const client = await pool.connect();
   let totalSkipped = 0;
 
-  const deleted = { notifications: 0, messages: 0, sessions: 0 };
+  const deleted = { notifications: 0, sessions: 0 };
 
   try {
     await client.query("BEGIN");
@@ -42,25 +41,13 @@ export async function runRetentionPurge(): Promise<RetentionResult> {
     );
     deleted.notifications = notifRows ?? 0;
 
-    // ── 2. Delete chat messages older than 90 days (skip disputed) ──
-    const { rowCount: msgRows } = await client.query(
-      `DELETE FROM messages
-       WHERE created_at < NOW() - INTERVAL '90 days'
-         AND NOT EXISTS (
-           SELECT 1 FROM dispute_cases dc
-           WHERE dc.transaction_id = messages.transaction_id
-             AND dc.status IN ('DISPUTE_OPENED', 'AI_PROCESSING', 'UNDER_HUMAN_REVIEW')
-         )`,
-    );
-    deleted.messages = msgRows ?? 0;
-
-    // ── 3. Delete expired sessions ──
+    // ── 2. Delete expired auth sessions ──
     const { rowCount: sessionRows } = await client.query(
-      `DELETE FROM sessions WHERE expires_at < NOW()`,
+      `DELETE FROM auth_sessions WHERE expires_at < NOW()`,
     );
     deleted.sessions = sessionRows ?? 0;
 
-    // ── 4. Count skipped (disputed records that match retention age) ──
+    // ── 3. Count skipped (disputed notifications that match retention age) ──
     const { rows: skippedRows } = await client.query<{ cnt: string }>(
       `SELECT COUNT(*)::text AS cnt
        FROM notifications n
@@ -86,7 +73,7 @@ export async function runRetentionPurge(): Promise<RetentionResult> {
     alertDiskRetentionFailure(totalSkipped);
   }
 
-  const total = deleted.notifications + deleted.messages + deleted.sessions;
+  const total = deleted.notifications + deleted.sessions;
   logger.info(
     { deleted, skipped: totalSkipped, total },
     "Retention purge completed",
