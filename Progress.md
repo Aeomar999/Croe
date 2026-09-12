@@ -12,10 +12,10 @@
 | **Implementation phase** | ✅ All 8 phases complete (P0 sandbox ready) |
 | **Business readiness** | ⬜ Not started — tracked in [`GO-TO-MARKET.md`](GO-TO-MARKET.md) (entity, licensing, aggregator, ops, pilot) |
 | **Custody phase** | P0 (sandbox) |
-| **Test suite** | 282 backend tests passing (24 files) — `tsc --noEmit` clean |
+| **Test suite** | 285 backend tests passing (25 files) — `tsc --noEmit` clean |
 | **Active branch** | `main` |
 | **Last updated** | 2026-09-12 |
-| **Follow-up fixes (2026-09-12)** | Retention purge targets `auth_sessions`+`notifications`; `/health` mounted at root; ledger-integrity introspects checksum column (23 §6, skipped when absent); reconciliation sources custody balances via `CustodyProvider.getBalance` (23 §1); sandbox pooled sum reads `amount_delta`. Live boot verified: all 3 jobs run clean, `/health` + `/v1/health` → 200. |
+| **Follow-up fixes (2026-09-12)** | Retention purge targets `auth_sessions`+`notifications`; `/health` mounted at root; ledger-integrity introspects checksum column (23 §6, skipped when absent); reconciliation + admin report source custody balances via `CustodyProvider.getBalance` (23 §1); sandbox pooled sum reads `amount_delta`. Live boot verified: all 3 jobs run clean, `/health` + `/v1/health` → 200. |
 
 ---
 
@@ -501,4 +501,4 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 5 — AI Triage | ✅ Complete | 111 | ✅ |
 | 6 — Identity, KYC, Notif, Admin | ✅ Complete | 174 | ✅ |
 | 7 — Frontend | ✅ Complete | 42 unit + 37 E2E | ✅ |
-| 8 — Ops, Reconciliation, Hardening | ✅ Complete | 282 (backend total) | ✅ |
+| 8 — Ops, Reconciliation, Hardening | ✅ Complete | 285 (backend total) | ✅ |

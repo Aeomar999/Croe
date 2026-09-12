@@ -1,7 +1,8 @@
 import { getTransactionClient } from "../db/pool.js";
 import { AppError } from "../middleware/error-handler.js";
 import { logger } from "../config/logger.js";
-import type { EscrowState, LedgerEvent } from "../types/domain.js";
+import { custodyProvider } from "../providers/index.js";
+import type { Currency, EscrowState, LedgerEvent } from "../types/domain.js";
 
 type DisputeQueueRow = {
   dispute_id: string;
@@ -22,12 +23,6 @@ type KycQueueRow = {
   id_type: string;
   status: string;
   created_at: Date;
-};
-
-type CustodyAccountRow = {
-  provider: string;
-  currency: string;
-  balance: string;
 };
 
 export async function requireRole(
@@ -338,8 +333,16 @@ export async function getReconciliationReport(
     const released = parseFloat(totals["FUNDS_RELEASED"] ?? "0");
     const refunded = parseFloat(totals["REFUND_ISSUED"] ?? "0");
 
-    const { rows: custodyRows } = await client.query<CustodyAccountRow>(
-      `SELECT provider, currency, balance::text AS balance FROM custody_accounts`,
+    const { rows: accountRows } = await client.query<{ provider: string; currency: string }>(
+      `SELECT DISTINCT provider, currency FROM custody_accounts WHERE is_active = true`,
+    );
+
+    const custodyAccounts = await Promise.all(
+      accountRows.map(async (row) => ({
+        provider: row.provider,
+        currency: row.currency,
+        balance: (await custodyProvider.getBalance(row.currency as Currency)).amount,
+      })),
     );
 
     return {
@@ -349,11 +352,7 @@ export async function getReconciliationReport(
         totalRefunded: refunded.toFixed(2),
         netHeld: (deposited - released - refunded).toFixed(2),
       },
-      custodyAccounts: custodyRows.map((row) => ({
-        provider: row.provider,
-        currency: row.currency,
-        balance: row.balance,
-      })),
+      custodyAccounts,
     };
   } finally {
     client.release();
