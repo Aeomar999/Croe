@@ -59,6 +59,9 @@ app.use("/v1", authRoutes);
 app.use("/v1", kycRoutes);
 app.use("/v1", adminRoutes);
 
+// Unversioned health probe for load balancers / container healthchecks
+app.use("/", healthRoutes);
+
 // 404 and error handling
 app.use(notFoundHandler);
 app.use(errorHandler);
