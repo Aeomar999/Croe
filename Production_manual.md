@@ -21,12 +21,12 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [x] | 275 tests passing, `6d30444` |
+| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [x] | 285 tests passing, `f346315` |
 | 2 | All acceptance criteria met for every subsystem doc (`for_agents/`) | [x] | All checklist items in Progress.md checked |
 | 3 | TypeScript strict mode — zero `any` types in production code | [x] | Only `catch (e: any)` in trust-score.ts and Express rawBody cast (standard patterns) |
 | 4 | `pnpm typecheck` passes with zero errors | [x] | Verified |
-| 5 | `pnpm lint` passes with zero warnings | [ ] | No ESLint configured yet — see Phase 8 notes |
-| 6 | All tests passing: unit, integration, contract, E2E | [x] | 275 backend + 79 frontend |
+| 5 | `pnpm lint` passes with zero warnings | [ ] | ESLint 10 + typescript-eslint 8 configured (flat config); 0 errors, 34 warnings backlog (unused vars / explicit `any`) |
+| 6 | All tests passing: unit, integration, contract, E2E | [x] | 285 backend + 79 frontend |
 | 7 | 50-webhook concurrent race test passes deterministically | [x] | `escrow.integration.test.ts` |
 | 8 | Money-precision tests assert exact equality (zero float drift) | [x] | `payment-precision.test.ts` |
 | 9 | Idempotency survives worker restart | [x] | `idempotency.test.ts` |

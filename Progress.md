@@ -16,6 +16,7 @@
 | **Active branch** | `main` |
 | **Last updated** | 2026-09-12 |
 | **Follow-up fixes (2026-09-12)** | Retention purge targets `auth_sessions`+`notifications`; `/health` mounted at root; ledger-integrity introspects checksum column (23 §6, skipped when absent); reconciliation + admin report source custody balances via `CustodyProvider.getBalance` (23 §1); sandbox pooled sum reads `amount_delta`. Live boot verified: all 3 jobs run clean, `/health` + `/v1/health` → 200. |
+| **Tooling (2026-09-12)** | `lint` now runs: ESLint 10 + typescript-eslint 8 flat config (`backend/eslint.config.mjs`), `typescript` pinned to 6.0.3 (typescript-eslint rejects TS 7), script updated to `eslint src`. Gate: 0 errors / 34 warnings (`no-unused-vars` + explicit `any` backlog); Express type augmentation allowed via `no-namespace` with `allowDeclarations`. |
 
 ---
 
