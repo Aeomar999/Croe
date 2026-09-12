@@ -28,6 +28,8 @@ describe("runLedgerIntegrityCheck", () => {
     // Default: clean check
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: true }] };
       if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("checksum") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
         return { rows: [{ cnt: "100" }] };
       if (sql.includes("checksum IS NULL"))
@@ -54,6 +56,8 @@ describe("runLedgerIntegrityCheck", () => {
   it("detects missing checksums", async () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: true }] };
       if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("checksum IS NULL") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
         return { rows: [{ cnt: "50" }] };
       if (sql.includes("checksum IS NULL"))
@@ -76,6 +80,8 @@ describe("runLedgerIntegrityCheck", () => {
   it("detects orphaned ledger entries", async () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: true }] };
       if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("checksum IS NULL") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
         return { rows: [{ cnt: "100" }] };
       if (sql.includes("checksum IS NULL"))
@@ -98,6 +104,8 @@ describe("runLedgerIntegrityCheck", () => {
   it("detects double-spend attempts", async () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: true }] };
       if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("checksum IS NULL") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
         return { rows: [{ cnt: "100" }] };
       if (sql.includes("checksum IS NULL"))
@@ -121,6 +129,8 @@ describe("runLedgerIntegrityCheck", () => {
   it("fires alert when anomalies found", async () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: true }] };
       if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("checksum IS NULL") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
         return { rows: [{ cnt: "100" }] };
       if (sql.includes("checksum IS NULL"))
@@ -138,6 +148,31 @@ describe("runLedgerIntegrityCheck", () => {
 
     await runLedgerIntegrityCheck();
     expect(alertLedgerIntegrityFailure).toHaveBeenCalledOnce();
+  });
+
+  it("skips checksum verification when the checksum column is absent", async () => {
+    const queries: string[] = [];
+    mockQuery.mockImplementation(async (sql: string) => {
+      queries.push(sql);
+      if (sql === "BEGIN" || sql === "COMMIT") return {};
+      if (sql.includes("information_schema.columns"))
+        return { rows: [{ has_checksum: false }] };
+      if (sql.includes("COUNT(*)") && sql.includes("FROM transaction_ledger") && !sql.includes("NOW() + INTERVAL") && !sql.includes("NOT EXISTS") && !sql.includes("HAVING"))
+        return { rows: [{ cnt: "100" }] };
+      if (sql.includes("NOW() + INTERVAL"))
+        return { rows: [{ cnt: "0" }] };
+      if (sql.includes("NOT EXISTS") && sql.includes("escrow_transactions"))
+        return { rows: [{ cnt: "0" }] };
+      if (sql.includes("HAVING COUNT(*) > 1"))
+        return { rows: [] };
+      return {};
+    });
+
+    const result = await runLedgerIntegrityCheck();
+    expect(result.anomalies).toEqual([]);
+    expect(result.checksumVerified).toBe(0);
+    expect(queries.some((q) => q.includes("checksum IS") || q.includes(", checksum"))).toBe(false);
+    expect(queries.some((q) => q.includes("information_schema.columns"))).toBe(true);
   });
 
   it("rolls back on error", async () => {

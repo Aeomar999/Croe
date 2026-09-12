@@ -54,51 +54,71 @@ export async function runLedgerIntegrityCheck(): Promise<IntegrityResult> {
     );
     totalEntries = parseInt(countRows[0].cnt, 10);
 
-    // ── 2. Check for missing checksums ──
-    const { rows: missingChecksum } = await client.query<{ cnt: string }>(
-      `SELECT COUNT(*)::text AS cnt FROM transaction_ledger WHERE checksum IS NULL`,
+    // ── 1b. Detect the optional checksum column (hash-chain is optional hardening) ──
+    const { rows: colRows } = await client.query<{ has_checksum: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns
+         WHERE table_name = 'transaction_ledger'
+           AND column_name = 'checksum'
+       ) AS has_checksum`,
     );
-    if (parseInt(missingChecksum[0].cnt, 10) > 0) {
-      anomalies.push(`${missingChecksum[0].cnt} ledger entries missing checksum`);
+    const hasChecksum = colRows?.[0]?.has_checksum === true;
+
+    if (!hasChecksum) {
+      logger.info(
+        "checksum column not present — skipping optional checksum verification (23-Observability-and-Reconciliation.md §6)",
+      );
+    }
+
+    // ── 2. Check for missing checksums ──
+    if (hasChecksum) {
+      const { rows: missingChecksum } = await client.query<{ cnt: string }>(
+        `SELECT COUNT(*)::text AS cnt FROM transaction_ledger WHERE checksum IS NULL`,
+      );
+      if (parseInt(missingChecksum[0].cnt, 10) > 0) {
+        anomalies.push(`${missingChecksum[0].cnt} ledger entries missing checksum`);
+      }
     }
 
     // ── 3. Verify checksums on a sample (last 1000 entries) ──
-    const { rows: sampleEntries } = await client.query<{
-      ledger_id: string;
-      transaction_id: string;
-      event_type: string;
-      previous_status: string | null;
-      new_status: string | null;
-      amount_delta: string | null;
-      created_at: string;
-      checksum: string | null;
-    }>(
-      `SELECT ledger_id, transaction_id, event_type, previous_status,
-              new_status, amount_delta, created_at::text, checksum
-       FROM transaction_ledger
-       ORDER BY created_at DESC
-       LIMIT 1000`,
-    );
+    if (hasChecksum) {
+      const { rows: sampleEntries } = await client.query<{
+        ledger_id: string;
+        transaction_id: string;
+        event_type: string;
+        previous_status: string | null;
+        new_status: string | null;
+        amount_delta: string | null;
+        created_at: string;
+        checksum: string | null;
+      }>(
+        `SELECT ledger_id, transaction_id, event_type, previous_status,
+                new_status, amount_delta, created_at::text, checksum
+         FROM transaction_ledger
+         ORDER BY created_at DESC
+         LIMIT 1000`,
+      );
 
-    for (const entry of sampleEntries) {
-      if (!entry.checksum) continue;
+      for (const entry of sampleEntries) {
+        if (!entry.checksum) continue;
 
-      const expected = computeEntryHash(entry);
-      if (entry.checksum !== expected) {
-        anomalies.push(
-          `Checksum mismatch on ledger_id ${entry.ledger_id}: expected ${expected}, got ${entry.checksum}`,
-        );
-      } else {
-        checksumVerified++;
+        const expected = computeEntryHash(entry);
+        if (entry.checksum !== expected) {
+          anomalies.push(
+            `Checksum mismatch on ledger_id ${entry.ledger_id}: expected ${expected}, got ${entry.checksum}`,
+          );
+        } else {
+          checksumVerified++;
+        }
       }
     }
 
     // ── 4. Check for out-of-order timestamps (created_at > updated_at pattern) ──
+    const checksumClause = hasChecksum ? "checksum IS NOT NULL AND " : "";
     const { rows: outOfOrder } = await client.query<{ cnt: string }>(
       `SELECT COUNT(*)::text AS cnt
        FROM transaction_ledger
-       WHERE checksum IS NOT NULL
-         AND created_at > NOW() + INTERVAL '1 minute'`,
+       WHERE ${checksumClause}created_at > NOW() + INTERVAL '1 minute'`,
     );
     if (parseInt(outOfOrder[0].cnt, 10) > 0) {
       anomalies.push(`${outOfOrder[0].cnt} ledger entries with future timestamps`);
