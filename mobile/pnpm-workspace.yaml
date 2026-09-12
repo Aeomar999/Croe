@@ -1,0 +1,7 @@
+allowBuilds:
+  '@parcel/watcher': true
+  detox: true
+  esbuild: true
+ignoredBuiltDependencies:
+  - dtrace-provider
+  - unrs-resolver

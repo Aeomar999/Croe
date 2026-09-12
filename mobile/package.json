@@ -2,6 +2,13 @@
   "name": "croe-mobile",
   "version": "1.0.0",
   "main": "index.ts",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.1.2",
+      "onFail": "download"
+    }
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -23,6 +30,7 @@
     "@tanstack/react-query": "^5.60.0",
     "axios": "^1.7.0",
     "expo": "~54.0.0",
+    "expo-file-system": "~19.0.24",
     "expo-font": "~14.0.12",
     "expo-image": "~3.0.11",
     "expo-secure-store": "~15.0.8",

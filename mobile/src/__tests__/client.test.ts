@@ -13,8 +13,18 @@ const requestInterceptors: Array<(config: any) => any> = [];
 const responseInterceptors: Array<{ onFulfilled: (v: any) => any; onRejected: (e: any) => any }> = [];
 const mockAxiosPost = jest.fn();
 
+interface AxiosMockInstance {
+  interceptors: {
+    request: { use: jest.Mock };
+    response: { use: jest.Mock };
+  };
+  post: jest.Mock;
+  get: jest.Mock;
+  create: jest.Mock;
+}
+
 jest.mock('axios', () => {
-  const mockInstance = {
+  const mockInstance: AxiosMockInstance = {
     interceptors: {
       request: {
         use: jest.fn((fulfilled: any) => {
@@ -56,7 +66,7 @@ describe('Request interceptor — forensic headers (AUD-02)', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'get' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['X-Device-Fingerprint']).toBe('device-unknown');
     expect(result.headers['X-Network-Type']).toBe('UNKNOWN');
@@ -74,7 +84,7 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'post' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Idempotency-Key']).toBeDefined();
     expect(typeof result.headers['Idempotency-Key']).toBe('string');
@@ -85,7 +95,7 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'put' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Idempotency-Key']).toBeDefined();
   });
@@ -94,7 +104,7 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'delete' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Idempotency-Key']).toBeDefined();
   });
@@ -103,7 +113,7 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'get' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Idempotency-Key']).toBeUndefined();
   });
@@ -113,7 +123,7 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     const existingKey = 'stable-key-for-retry-12345';
     const config: any = { headers: { 'Idempotency-Key': existingKey }, method: 'post' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Idempotency-Key']).toBe(existingKey);
   });
@@ -123,8 +133,8 @@ describe('Request interceptor — idempotency key (UI-02)', () => {
     const config1: any = { headers: {}, method: 'post' };
     const config2: any = { headers: {}, method: 'post' };
 
-    const result1 = await requestInterceptors[0](config1);
-    const result2 = await requestInterceptors[0](config2);
+    const result1 = await requestInterceptors[0]!(config1);
+    const result2 = await requestInterceptors[0]!(config2);
 
     expect(result1.headers['Idempotency-Key']).not.toBe(result2.headers['Idempotency-Key']);
   });
@@ -139,7 +149,7 @@ describe('Request interceptor — auth token', () => {
     });
     const config: any = { headers: {}, method: 'get' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Authorization']).toBe('Bearer test-access-token-abc');
   });
@@ -148,7 +158,7 @@ describe('Request interceptor — auth token', () => {
     (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(null);
     const config: any = { headers: {}, method: 'get' };
 
-    const result = await requestInterceptors[0](config);
+    const result = await requestInterceptors[0]!(config);
 
     expect(result.headers['Authorization']).toBeUndefined();
   });

@@ -13,7 +13,25 @@
 | **Business readiness** | ⬜ Not started — tracked in [`GO-TO-MARKET.md`](GO-TO-MARKET.md) (entity, licensing, aggregator, ops, pilot) |
 | **Custody phase** | P0 (sandbox) |
 | **Active branch** | `main` |
-| **Last updated** | 2026-08-01 |
+| **Last updated** | 2026-09-12 |
+
+---
+
+## Local Dev Environment (2026-09-12)
+
+> Workaround record. This dev box uses a Podman 6.0.2 machine (`podman-machine-default`, Fedora 44, WSL2, kernel `6.6.87.2-microsoft-standard-WSL2`) whose kernel ships **no NAT modules** (`nft_chain_nat`/`nft_masq` absent, legacy `iptable_nat` too). Podman 6's netavark v2 dropped the iptables firewall backend, so **bridge networking with port maps cannot start** (`docker compose up` fails). Docker Desktop is installed but its engine fails to start ("backend exited before becoming ready"). Fallback in use:
+
+- Postgres + Redis run **host-networked** in the Podman VM (reuses `croe_pgdata` / `croe_redisdata` volumes, same images/env as `docker-compose.yml`):
+  ```
+  podman run -d --name croe-postgres --network host -e POSTGRES_USER=croe -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=croe -v croe_pgdata:/var/lib/postgresql/data postgres:16-alpine
+  podman run -d --name croe-redis --network host -v croe_redisdata:/data redis:7.2-alpine
+  ```
+- `backend/.env` now points at the VM's WSL address `172.25.95.79` (was `127.0.0.1`) for `DATABASE_URL` / `REDIS_URL`. **IP may change if the Podman machine restarts** — re-check via `podman exec croe-postgres sh -c "ip route"` (eth0 src) and update `.env`.
+- Verified: 5 migrations applied, seed idempotent, `pnpm --dir backend dev` boots and serves HTTP.
+
+**Pre-existing issues found (not caused by the env migration):**
+- `jobs/retention.ts` `runRetentionPurge` errors: `relation "messages" does not exist` — job queries a table that was never in the schema (schema has `notifications`). Scheduler logs ERROR every tick.
+- `GET /health` returns 404 — no route registered (compose healthcheck expects it).
 
 ---
 
