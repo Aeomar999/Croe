@@ -19,8 +19,14 @@ vi.mock("../services/alerting.js", () => ({
   alertReconciliationAnomaly: vi.fn(),
 }));
 
+// Mock custody provider (balances live with the provider, not the DB)
+vi.mock("../providers/index.js", () => ({
+  custodyProvider: { getBalance: vi.fn() },
+}));
+
 import { runReconciliation } from "./reconciliation.js";
 import { alertReconciliationAnomaly } from "../services/alerting.js";
+import { custodyProvider } from "../providers/index.js";
 
 describe("runReconciliation", () => {
   beforeEach(() => {
@@ -40,6 +46,7 @@ describe("runReconciliation", () => {
         return { rows: [{ cnt: "0" }] };
       return {};
     });
+    vi.mocked(custodyProvider.getBalance).mockResolvedValue({ amount: "0.00", currency: "GHS" });
   });
 
   it("returns a result with timestamp and empty anomalies when clean", async () => {
@@ -60,7 +67,7 @@ describe("runReconciliation", () => {
           ],
         };
       if (sql.includes("custody_accounts"))
-        return { rows: [{ provider: "sandbox", currency: "GHS", balance: "500.00" }] };
+        return { rows: [{ currency: "GHS" }] };
       if (sql.includes("GROUP BY current_status"))
         return { rows: [{ current_status: "FUNDS_SECURED", cnt: "3" }] };
       if (sql.includes("dispute_cases dc"))
@@ -69,6 +76,8 @@ describe("runReconciliation", () => {
         return { rows: [{ cnt: "0" }] };
       return {};
     });
+
+    vi.mocked(custodyProvider.getBalance).mockResolvedValue({ amount: "500.00", currency: "GHS" });
 
     const result = await runReconciliation();
     expect(result.ledgerSummary.totalDeposited).toBe("1000.00");
@@ -83,7 +92,7 @@ describe("runReconciliation", () => {
       if (sql.includes("event_type") && sql.includes("SUM"))
         return { rows: [{ event_type: "FUNDS_DEPOSITED", total: "1000.00" }] };
       if (sql.includes("custody_accounts"))
-        return { rows: [{ provider: "sandbox", currency: "GHS", balance: "800.00" }] };
+        return { rows: [{ currency: "GHS" }] };
       if (sql.includes("GROUP BY current_status"))
         return { rows: [] };
       if (sql.includes("dispute_cases dc"))
@@ -92,6 +101,8 @@ describe("runReconciliation", () => {
         return { rows: [{ cnt: "0" }] };
       return {};
     });
+
+    vi.mocked(custodyProvider.getBalance).mockResolvedValue({ amount: "800.00", currency: "GHS" });
 
     const result = await runReconciliation();
     expect(result.anomalies.length).toBeGreaterThan(0);

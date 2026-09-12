@@ -77,14 +77,13 @@ export class SandboxCustodyProvider implements CustodyProvider {
       [window.from, window.to],
     );
 
-    // Pooled balance: sum of all confirmed deposits minus payouts
+    // Pooled balance: sum of all signed ledger deltas (deposits +, payouts -)
     const { rows: pooledRows } = await pool.query<{ pooled: string; currency: string }>(
       `SELECT
          COALESCE(SUM(
            CASE
-             WHEN event_type = 'FUNDS_DEPOSITED' THEN (metadata->>'amount')::NUMERIC
-             WHEN event_type = 'FUNDS_RELEASED' THEN -(metadata->>'amount')::NUMERIC
-             WHEN event_type = 'REFUND_ISSUED' THEN -(metadata->>'amount')::NUMERIC
+             WHEN event_type IN ('FUNDS_DEPOSITED', 'FUNDS_RELEASED', 'REFUND_ISSUED')
+               THEN amount_delta
              ELSE 0
            END
          ), '0') AS pooled,

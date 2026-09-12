@@ -7,9 +7,10 @@
  */
 import { pool } from "../db/pool.js";
 import { logger } from "../config/logger.js";
+import { custodyProvider } from "../providers/index.js";
 import { recordReconciliationLatency, incrementReconciliationAnomaly } from "../services/metrics.js";
 import { alertReconciliationAnomaly } from "../services/alerting.js";
-import type { EscrowState } from "../types/domain.js";
+import type { Currency, EscrowState } from "../types/domain.js";
 
 export interface ReconciliationResult {
   timestamp: string;
@@ -59,16 +60,18 @@ export async function runReconciliation(): Promise<ReconciliationResult> {
     refunded = parseFloat(totals["REFUND_ISSUED"] ?? "0");
     netHeld = deposited - released - refunded;
 
-    // ── 2. Custody account balances ──
-    const { rows: custodyRows } = await client.query<{
-      provider: string;
-      currency: string;
-      balance: string;
-    }>(`SELECT provider, currency, balance::text AS balance FROM custody_accounts`);
+    // ── 2. Custody provider balances (CustodyProvider.getBalance per currency) ──
+    // Custody balances live with the provider, not the DB — see 23 §1 + MONEY-03.
+    const { rows: custodyCurrencies } = await client.query<{ currency: string }>(
+      `SELECT DISTINCT currency FROM custody_accounts WHERE is_active = true
+       UNION
+       SELECT DISTINCT currency FROM transaction_ledger`,
+    );
 
     let totalCustodyBalance = 0;
-    for (const row of custodyRows) {
-      totalCustodyBalance += parseFloat(row.balance);
+    for (const row of custodyCurrencies) {
+      const balance = await custodyProvider.getBalance(row.currency as Currency);
+      totalCustodyBalance += parseFloat(balance.amount);
     }
 
     // ── 3. Escrow state counts ──
