@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import { authenticate, requireRole } from "../middleware/auth.js";
+import { adminRateLimiter } from "../middleware/rate-limiter.js";
 import {
   getDisputeQueue,
   resolveDispute,
@@ -10,6 +11,8 @@ import {
   getKYCQueue,
 } from "../services/admin.js";
 import { reviewKYC } from "../services/kyc.js";
+import { getMetricsSnapshot } from "../services/metrics.js";
+import { getSchedulerStatus } from "../jobs/scheduler.js";
 import { AppError } from "../middleware/error-handler.js";
 
 const router: RouterType = Router();
@@ -38,6 +41,7 @@ function requireNonEmptyString(value: unknown, field: string): string {
  */
 router.get(
   "/admin/disputes/queue",
+  adminRateLimiter,
   authenticate,
   requireRole("reviewer", "ops", "admin"),
   async (_req: Request, res: Response) => {
@@ -53,6 +57,7 @@ router.get(
  */
 router.post(
   "/admin/disputes/:id/resolve",
+  adminRateLimiter,
   authenticate,
   requireRole("reviewer", "ops", "admin"),
   async (req: Request, res: Response) => {
@@ -88,6 +93,7 @@ router.post(
  */
 router.post(
   "/admin/users/:id/freeze",
+  adminRateLimiter,
   authenticate,
   requireRole("reviewer", "ops", "admin"),
   async (req: Request, res: Response) => {
@@ -114,6 +120,7 @@ router.post(
  */
 router.post(
   "/admin/users/:id/trust-score",
+  adminRateLimiter,
   authenticate,
   requireRole("ops", "admin"),
   async (req: Request, res: Response) => {
@@ -140,6 +147,7 @@ router.post(
  */
 router.get(
   "/admin/reconciliation",
+  adminRateLimiter,
   authenticate,
   requireRole("ops", "admin"),
   async (req: Request, res: Response) => {
@@ -168,6 +176,7 @@ router.get(
  */
 router.get(
   "/admin/kyc/queue",
+  adminRateLimiter,
   authenticate,
   requireRole("ops", "admin"),
   async (_req: Request, res: Response) => {
@@ -182,6 +191,7 @@ router.get(
  */
 router.post(
   "/admin/kyc/:id/review",
+  adminRateLimiter,
   authenticate,
   requireRole("ops", "admin"),
   async (req: Request, res: Response) => {
@@ -198,6 +208,36 @@ router.post(
     await reviewKYC(kycId, req.userId!, approved, reason);
 
     res.json({ status: approved ? "APPROVED" : "REJECTED" });
+  },
+);
+
+/**
+ * GET /admin/metrics — Prometheus-format metrics scrape
+ * Roles: admin
+ */
+router.get(
+  "/admin/metrics",
+  adminRateLimiter,
+  authenticate,
+  requireRole("admin"),
+  async (_req: Request, res: Response) => {
+    const snapshot = getMetricsSnapshot();
+    res.type("text/plain").send(snapshot.prometheusText);
+  },
+);
+
+/**
+ * GET /admin/scheduler-status — Background job scheduler status
+ * Roles: ops, admin
+ */
+router.get(
+  "/admin/scheduler-status",
+  adminRateLimiter,
+  authenticate,
+  requireRole("ops", "admin"),
+  async (_req: Request, res: Response) => {
+    const status = getSchedulerStatus();
+    res.json(status);
   },
 );
 

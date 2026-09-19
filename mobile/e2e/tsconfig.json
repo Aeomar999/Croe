@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "jest",
+      "detox"
+    ]
+  },
+  "include": [
+    "**/*.test.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

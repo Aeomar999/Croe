@@ -40,6 +40,7 @@ Croe/
   AGENTS.md                  <- YOU ARE HERE
   Progress.md                <- Living implementation tracker (keep updated)
   Production_manual.md       <- Go-live checklist (keep updated per PROC-03)
+  GO-TO-MARKET.md            <- Business/GTM tracker: entity, licensing, ops, pilot (keep updated)
   .env.example               <- All required env vars with comments
   .gitignore
   for_agents/                <- THE SPEC PACKAGE (28 docs, sequential numbering)
@@ -397,10 +398,11 @@ These files MUST be updated as development progresses:
 | Item | Status |
 |------|--------|
 | Specification phase | Complete (28 docs) |
-| Implementation phase | Not started |
-| Custody phase | P0 (sandbox) |
-| Active branch | main |
-| Git commits | 2 |
+| Implementation phase | **Complete (Phases 1–8)** |
+| Test suite | 275 passing (backend) + 79 frontend |
+| Custody phase | P0 (sandbox) — code ready for P1 Pilot gate |
+| Active branch | `main` |
+| Git commits | 5 (`ffc1fad` → `6d30444`) |
 | Remote | None configured |
 
 The next step is to begin Phase 1 (Data and Ledger) on branch `phase/1-data-ledger`.

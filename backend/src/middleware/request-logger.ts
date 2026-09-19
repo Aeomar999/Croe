@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { logger } from "../config/logger.js";
 
 /**
- * Structured request logging middleware.
+ * Structured request logging middleware with correlation ID propagation.
  * Captures method, url, status, and response time.
  */
 export function requestLogger(req: Request, res: Response, next: NextFunction): void {
@@ -17,6 +17,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction): 
         status: res.statusCode,
         duration,
         ip: req.ip,
+        correlationId: req.correlationId,
       },
       "request",
     );

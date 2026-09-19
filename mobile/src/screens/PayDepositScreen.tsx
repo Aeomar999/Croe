@@ -106,6 +106,7 @@ export function PayDepositScreen() {
         {CARRIERS.map((c) => (
           <Pressable
             key={c.key}
+            testID={`carrier-${c.key.toLowerCase()}`}
             style={[styles.ctile, selectedCarrier === c.key && styles.ctileActive]}
             onPress={() => setSelectedCarrier(c.key)}
           >
@@ -140,6 +141,7 @@ export function PayDepositScreen() {
       {/* CTA */}
       <View>
         <Button
+          testID="payNowBtn"
           title="Pay GH₵ 450.00"
           variant="ink"
           onPress={() => {}}

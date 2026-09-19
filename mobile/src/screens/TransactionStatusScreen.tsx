@@ -140,14 +140,14 @@ export function TransactionStatusScreen({ transactionId }: Props) {
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button title="Mark as shipped" variant="ink" size="sm" onPress={() => {}} fullWidth />
-        <Button title="Message buyer" variant="line" size="sm" onPress={() => {}} fullWidth />
+        <Button testID="markShippedBtn" title="Mark as shipped" variant="ink" size="sm" onPress={() => {}} fullWidth />
+        <Button testID="messageBuyerBtn" title="Message buyer" variant="line" size="sm" onPress={() => {}} fullWidth />
       </View>
 
       <View style={{ flex: 1 }} />
 
       {/* Dispute link */}
-      <Pressable style={styles.disputeLink}>
+      <Pressable testID="disputeBtn" style={styles.disputeLink}>
         <Text style={[typography.label, { color: inkColors.tertiary }]}>
           Something wrong? Open a dispute
         </Text>

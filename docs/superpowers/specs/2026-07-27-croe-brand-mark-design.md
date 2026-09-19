@@ -33,6 +33,9 @@ designed large and shrunk.
 | Does Croe gain a brand hue? | **No.** Green stays semantic; the mark's single green dot *is* money-held |
 | One drawing or two? | **Two.** A micro variant for ≤ 24 px, standard everywhere else |
 | Green dot vs green full stop? | **Exactly one green dot per lockup** (see below) |
+| How wide is the mouth? | **Solved, not chosen** — the clear opening is exactly one dot wide |
+| The © resemblance? | **Accepted.** Unfixable while the mark is a C; the C is why this concept won |
+| The logotype? | **In scope.** Per-pair kerning, not one global tracking value |
 
 ### Why not the alternatives
 
@@ -70,7 +73,7 @@ On a `0 0 100 100` viewBox:
 ```svg
 <circle cx="51.5" cy="50" r="25"
         fill="none" stroke="#FFFFFF" stroke-width="11.5" stroke-linecap="round"
-        stroke-dasharray="101.95 55.13" transform="rotate(63.2 51.5 50)"/>
+        stroke-dasharray="114.03 43.05" transform="rotate(49.34 51.5 50)"/>
 <circle cx="50" cy="50" r="9" fill="#1FC16B"/>
 ```
 
@@ -80,17 +83,39 @@ On a `0 0 100 100` viewBox:
 | Base circle | r **25**, centre **(51.5, 50)** | |
 | Optical nudge | arc **+1.5** on x | a C is left-heavy; its geometric centre reads off |
 | Stroke | **11.5**, round cap | 2.3 px inside a 20 px icon |
-| Mouth | **100.0°**, bisector horizontal, opening right | |
+| Mouth | **72.3°**, bisector horizontal, opening right | *derived, not chosen* — see below |
+| Clear opening | **18.00** | exactly one dot diameter |
 | Dot | r **9** at **(50, 50)** | the exact centre of the tile |
 | Aperture gap | **8.75** at the closest point | 76% of the stroke |
 
-Two facts are load-bearing:
+Three facts are load-bearing:
 
-1. **The dot sits at the exact centre of the tile and the C is nudged around it.** The
+1. **The opening is exactly one dot wide.** The mouth angle is not a taste decision — it is
+   solved from the dot: `M = 2·asin((dotØ + stroke) / 2r)`. This is the sentence the mark
+   says: *this is the only way out, and it is the exact size of the thing leaving.* A wider
+   mouth means the money could fall out; a narrower one means it can never leave, which is
+   not what escrow does. Change the dot or the stroke and **the mouth must be re-solved**.
+2. **The dot sits at the exact centre of the tile and the C is nudged around it.** The
    money is what the icon is centred on; the enclosure moves to suit it.
-2. **The aperture gap renders at 1.75 px inside a 20 px icon**, above the ~1.5 px point at
-   which a gap silts up on a mid-range Android screen. This is the constraint that governs
-   every proportion above.
+3. **The aperture gap renders at 1.75 px inside a 20 px icon**, above the ~1.5 px point at
+   which a gap silts up on a mid-range Android screen.
+
+### Known and accepted: the © resemblance
+
+A heavy C with something at its centre is adjacent to **©**, and closer still to **G**. This
+was tested directly against both glyphs at 112 px and 44 px, in colour and in monochrome
+([`design/explore/brand-mark-r3.html`](../../../design/explore/brand-mark-r3.html)).
+
+The resemblance is real, is worse small than large, and is worst in Android monochrome
+where the green dot flattens to one tone and stops disambiguating. Tightening the mouth
+from 100° to 72.3° **does not fix it** — that was the expectation and the drawing disproved
+it. The only geometry that removes the resemblance is rotating the mouth off the horizontal,
+which costs the letter, which is the entire reason this concept was chosen over Between.
+
+**Decision: keep the mouth on the horizontal and accept it.** The icon is never encountered
+unlabelled, the green dot separates it in every context except themed icons, and © is not a
+glyph anyone expects to meet on a home screen. This is recorded as an accepted trade rather
+than an oversight so it is not rediscovered later as a defect.
 
 > An earlier draft of the exploration sheet specified a 9.75 gap and a rule that the gap
 > must never be narrower than the stroke. Both were wrong, and were corrected after
@@ -106,13 +131,18 @@ one stroke width**. Changing the cap style silently changes the mouth angle.
 ```svg
 <circle cx="50" cy="50" r="26"
         fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round"
-        stroke-dasharray="107.25 56.11" transform="rotate(61.8 50 50)"/>
+        stroke-dasharray="114.61 48.75" transform="rotate(53.72 50 50)"/>
 <circle cx="50" cy="50" r="10" fill="#1FC16B"/>
 ```
 
-Mouth **95.0°**, span **65**, aperture gap **9.5** (1.52 px at 16 px). The optical nudge is
-dropped — at these sizes 1.5 units is a third of a pixel, and concentric geometry buys back
-the clearance that matters more.
+Mouth **78.8°**, span **65**, clear opening **20.00**, aperture gap **9.5** (1.52 px at
+16 px). The optical nudge is dropped — at these sizes 1.5 units is a third of a pixel, and
+concentric geometry buys back the clearance that matters more.
+
+The mouth is **solved from the same rule**, not copied: this variant's dot is
+proportionally larger, so its opening — still exactly one dot wide — subtends a wider
+angle. The two drawings differ in every number and agree on the one relationship, which is
+what makes them the same mark at two optical sizes rather than two marks.
 
 Shipping a separate optical size for small rendering is standard practice, not a hedge.
 **Used for the favicon and the notification icon only** — the two places the mark is ever
@@ -130,6 +160,39 @@ asked to render below 24 px. Everything else uses the standard drawing.
 The mark introduces **no new colour**. `--secure` already means *money is held safely*, and
 that is precisely what the dot depicts, so the mark spends the system's existing vocabulary
 rather than adding to it. There is still no decorative brand hue.
+
+---
+
+## The logotype
+
+`croe` is set in Plus Jakarta Sans 800. It stays that face — but **not with one global
+tracking value**, which is what it had and what made it read as a font rather than a
+logotype. Two faults, both fixable without a font editor.
+
+### 1. Per-pair kerning
+
+| Pair | Tracking | Why |
+|---|---|---|
+| `c` → `r` | **−.042em** | round to stem; the default fit is close to right |
+| `r` → `o` | **−.078em** | the hole |
+| `o` → `e` | **−.050em** | round to round; needs less than the baseline suggests |
+| after `e` | **0** | see below |
+
+The `r|o` pair is the problem. The `r`'s arm ends in mid-air and the `o` is a full round, so
+the default fit leaves a visible gap in the middle of a four-letter word. It needs nearly
+double the `c|r` value before the four letters read as one object. **Uniform tracking cannot
+fix this by definition** — it moves every pair by the same amount, and these pairs do not
+have the same problem.
+
+### 2. No trailing letter-space
+
+`letter-spacing` applies *after* every glyph including the last. A global −.042em therefore
+pulls the full stop — and, in a lockup, the gap to the mark — tighter than specified. **The
+final glyph is set to 0.** This is why the round 2 lockup gap measured wrong.
+
+In React Native this means the wordmark renders as per-glyph `<Text>` spans rather than one
+string with a single `letterSpacing`. That is the cost of the fix, and it is confined to the
+one wordmark component.
 
 ---
 
@@ -294,8 +357,8 @@ they are for now; migrating them is separate work and is not part of this spec.
 
 ## Out of scope
 
-- Redrawing or re-kerning the `croe` wordmark. It stays Plus Jakarta Sans 800 at −.042em.
-  Custom letterform work is a separate exercise with its own brief.
+- **Redrawing** the `croe` letterforms. Kerning is in scope (above); cutting custom glyphs
+  is a separate exercise with its own brief and its own tooling.
 - Migrating the existing 25 cards to a new Claude Design project.
 - Motion. The mark's dot is an obvious animation target (travelling the aperture as an
   escrow progresses) and is deliberately left for later — a logo that only works animated
@@ -312,3 +375,5 @@ they are for now; migrating them is separate work and is not part of this spec.
 5. No new colour, no gradient, no shadow, and no raw hex enters the design system.
 6. The card renders standalone, passes the `SPEC.md` hard rules, and carries a working
    `@dsCard` marker.
+7. Both drawings satisfy `opening == dot diameter` to two decimal places, and the generator
+   asserts it rather than trusting the hand-written dash arrays.

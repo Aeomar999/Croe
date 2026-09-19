@@ -19,6 +19,7 @@ interface ButtonProps {
   size?: ButtonSize;
   fullWidth?: boolean;
   disabled?: boolean;
+  testID?: string;
 }
 
 const variantStyles: Record<ButtonVariant, { container: ViewStyle; text: TextStyle }> = {
@@ -59,12 +60,16 @@ export function Button({
   size = 'default',
   fullWidth = false,
   disabled = false,
+  testID,
 }: ButtonProps) {
   const v = disabled ? 'disabled' : variant;
   const s = variantStyles[v];
 
   return (
     <Pressable
+      testID={testID}
+      accessibilityLabel={title}
+      accessibilityRole="button"
       onPress={disabled ? undefined : onPress}
       style={({ pressed }: { pressed: boolean }) => ({
         display: 'flex',

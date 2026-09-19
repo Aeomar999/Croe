@@ -1,6 +1,7 @@
 import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport } from "../types/domain.js";
 import type { CustodyProvider } from "./custody-provider.js";
 import type { PaymentRail } from "./payment-rail.js";
+import { pool } from "../db/pool.js";
 
 /**
  * P0 Sandbox CustodyProvider.
@@ -49,16 +50,68 @@ export class SandboxCustodyProvider implements CustodyProvider {
     return { amount: "0.00", currency };
   }
 
-  async reconcile(_window: {
+  async reconcile(window: {
     from: string;
     to: string;
   }): Promise<ReconciliationReport> {
+    // Sub-ledger sum: net of all escrow_transactions in the window
+    // In P0 sandbox we compute inflows (DEPOSITED) minus outflows (RELEASED/REFUNDED)
+    const { rows: subLedgerRows } = await pool.query<{
+      net_amount: string;
+      currency: string;
+    }>(
+      `SELECT
+         COALESCE(SUM(
+           CASE
+             WHEN current_status IN ('FUNDS_SECURED', 'SHIPPED', 'DELIVERED_CONFIRMED')
+               THEN amount
+             WHEN current_status IN ('FUNDS_RELEASED', 'FUNDS_REFUNDED')
+               THEN -amount
+             ELSE 0
+           END
+         ), '0') AS net_amount,
+         currency
+       FROM escrow_transactions
+       WHERE updated_at >= $1 AND updated_at < $2
+       GROUP BY currency`,
+      [window.from, window.to],
+    );
+
+    // Pooled balance: sum of all signed ledger deltas (deposits +, payouts -)
+    const { rows: pooledRows } = await pool.query<{ pooled: string; currency: string }>(
+      `SELECT
+         COALESCE(SUM(
+           CASE
+             WHEN event_type IN ('FUNDS_DEPOSITED', 'FUNDS_RELEASED', 'REFUND_ISSUED')
+               THEN amount_delta
+             ELSE 0
+           END
+         ), '0') AS pooled,
+         currency
+       FROM transaction_ledger
+       WHERE created_at >= $1 AND created_at < $2
+       GROUP BY currency`,
+      [window.from, window.to],
+    );
+
+    // In sandbox, statement = sub-ledger (no external aggregator statement yet)
+    const netAmount = subLedgerRows[0]?.net_amount ?? "0";
+    const pooledAmount = pooledRows[0]?.pooled ?? "0";
+    const currency = (subLedgerRows[0]?.currency ?? pooledRows[0]?.currency ?? "GHS") as Currency;
+    const discrepancies: Array<{ transactionId?: string; note: string; delta: Money }> = [];
+
+    if (netAmount !== pooledAmount) {
+      discrepancies.push(
+        { note: `Sub-ledger net (${netAmount}) differs from pooled balance (${pooledAmount})`, delta: { amount: String(Math.abs(parseFloat(netAmount) - parseFloat(pooledAmount))), currency } },
+      );
+    }
+
     return {
-      pooled: { amount: "0.00", currency: "GHS" },
-      subLedgerSum: { amount: "0.00", currency: "GHS" },
-      statementSum: { amount: "0.00", currency: "GHS" },
-      matched: true,
-      discrepancies: [],
+      pooled: { amount: pooledAmount, currency },
+      subLedgerSum: { amount: netAmount, currency },
+      statementSum: { amount: netAmount, currency }, // sandbox: statement = sub-ledger
+      matched: discrepancies.length === 0,
+      discrepancies,
     };
   }
 }

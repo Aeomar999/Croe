@@ -76,6 +76,7 @@ export function DisputeOpenScreen() {
             {REASONS.map((r) => (
               <Pressable
                 key={r.key}
+                testID={`dispute-reason-${r.key}`}
                 style={[styles.choice, reason === r.key && styles.choiceActive]}
                 onPress={() => setReason(r.key)}
               >
@@ -94,6 +95,7 @@ export function DisputeOpenScreen() {
         <View style={styles.field}>
           <Text style={styles.label}>Tell us what happened</Text>
           <TextInput
+            testID="disputeDesc"
             style={[styles.input, styles.textarea]}
             value={description}
             onChangeText={setDescription}
@@ -106,7 +108,7 @@ export function DisputeOpenScreen() {
         {/* Evidence */}
         <View style={styles.field}>
           <Text style={styles.label}>Evidence</Text>
-          <Pressable style={styles.addEvidenceBtn}>
+          <Pressable testID="addEvidenceBtn" style={styles.addEvidenceBtn}>
             <Plus size={16} color={inkColors.primary} />
             <Text style={[typography.label, { color: inkColors.primary }]}>
               Add photos (up to 5)
@@ -129,7 +131,7 @@ export function DisputeOpenScreen() {
 
         {/* CTA */}
         <View>
-          <Button title="Submit for review" variant="ink" onPress={() => {}} fullWidth />
+          <Button testID="submitDisputeBtn" title="Submit for review" variant="ink" onPress={() => {}} fullWidth />
           <Text style={styles.footNote}>
             Median resolution: under ten seconds.
           </Text>

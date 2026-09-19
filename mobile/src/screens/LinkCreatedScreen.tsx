@@ -69,7 +69,7 @@ export function LinkCreatedScreen() {
         </View>
 
         {/* Copy row */}
-        <Pressable style={styles.copyRow}>
+        <Pressable style={styles.copyRow} testID="copyLinkRow">
           <Text style={styles.copyUrl}>{payUrl}</Text>
           <Text style={styles.copyBtn}>Copy</Text>
         </Pressable>
@@ -78,8 +78,8 @@ export function LinkCreatedScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <Button title="Share to WhatsApp" variant="ink" onPress={handleShare} fullWidth />
-          <Button title="More options" variant="line" onPress={handleShare} fullWidth />
+          <Button testID="shareLinkBtn" title="Share to WhatsApp" variant="ink" onPress={handleShare} fullWidth />
+          <Button testID="moreOptionsBtn" title="More options" variant="line" onPress={handleShare} fullWidth />
           <Text style={styles.footNote}>Holds this price for 24 hours.</Text>
         </View>
       </View>

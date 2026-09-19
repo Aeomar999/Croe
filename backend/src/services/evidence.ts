@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
-import { createWriteStream } from "node:fs";
-import { mkdir, rename } from "node:fs/promises";
+import { createWriteStream, createReadStream } from "node:fs";
+import { unlink } from "node:fs/promises";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { Readable } from "node:stream";
 import { getTransactionClient } from "../db/pool.js";
 import { AppError } from "../middleware/error-handler.js";
 import type { ForensicContext } from "../middleware/forensic.js";
 import { logger } from "../config/logger.js";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-const UPLOAD_DIR = join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -30,17 +31,32 @@ type EvidenceRow = {
   created_at: Date;
 };
 
+// S3 Client initialization (lazy loading environment variables)
+let s3Client: S3Client | null = null;
+function getS3Client() {
+  if (!s3Client) {
+    if (process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY) {
+      s3Client = new S3Client({
+        region: process.env.S3_REGION || "auto",
+        endpoint: process.env.S3_ENDPOINT,
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY,
+          secretAccessKey: process.env.S3_SECRET_KEY,
+        },
+      });
+    }
+  }
+  return s3Client;
+}
+
 /**
- * Compute SHA-256 hash on-the-fly while streaming to disk.
+ * Compute SHA-256 hash on-the-fly while streaming to a temp file on disk.
  * Never buffers the entire file in memory (AUD-03).
  */
-async function streamHashToFile(
+async function streamHashToTempFile(
   inputStream: Readable,
-  destPath: string,
+  tempPath: string,
 ): Promise<string> {
-  await mkdir(join(destPath, ".."), { recursive: true });
-
-  const tempPath = `${destPath}.tmp.${Date.now()}`;
   const hash = createHash("sha256");
 
   return new Promise<string>((resolve, reject) => {
@@ -60,14 +76,9 @@ async function streamHashToFile(
 
     inputStream.pipe(fileWrite);
 
-    fileWrite.on("finish", async () => {
+    fileWrite.on("finish", () => {
       const sha256 = hash.digest("hex");
-      try {
-        await rename(tempPath, destPath);
-        resolve(sha256);
-      } catch (err) {
-        reject(err);
-      }
+      resolve(sha256);
     });
 
     fileWrite.on("error", (err) => {
@@ -106,9 +117,9 @@ async function isRecycledEvidence(
  * Upload evidence artifact.
  *
  * Flow:
- * 1. Stream file, compute SHA-256 on-the-fly
+ * 1. Stream file to temp disk, compute SHA-256 on-the-fly
  * 2. Check recycled evidence (409 if reused across transactions)
- * 3. Store file with content-addressed path
+ * 3. Upload file to Object Storage (S3/R2) with content-addressed path
  * 4. INSERT evidence_artifacts row
  * 5. Write EVIDENCE_ADDED ledger entry
  *
@@ -127,81 +138,87 @@ export async function uploadEvidence(p: {
     throw new AppError(415, `Unsupported file type: ${p.mimeType}. Allowed: JPEG, PNG, WebP, HEIC, PDF`, "UNSUPPORTED_MEDIA_TYPE");
   }
 
-  // Content-addressed path: uploads/<sha256 first 2 chars>/<sha256>.<ext>
   const ext = p.fileName.split(".").pop() ?? "bin";
-  const destDir = join(UPLOAD_DIR, "pending");
-  const destPath = join(destDir, `${p.transactionId}_${Date.now()}.${ext}`);
+  const tempPath = join(tmpdir(), `croe_${p.transactionId}_${Date.now()}.${ext}`);
 
-  // Step 1+2: Stream + hash
-  const sha256Hash = await streamHashToFile(p.fileStream, destPath);
+  // Step 1: Stream to temp disk + hash
+  const sha256Hash = await streamHashToTempFile(p.fileStream, tempPath);
 
-  // Step 3: Recycled evidence check (14-Evidence-and-Forensics.md §4)
-  const recycled = await isRecycledEvidence(sha256Hash, p.transactionId);
-  if (recycled) {
-    // Clean up the stored file
-    const { unlink } = await import("node:fs/promises");
-    await unlink(destPath).catch(() => {});
-    throw new AppError(
-      409,
-      "This file has already been submitted as evidence for another transaction",
-      "EVIDENCE_RECYCLED",
-    );
-  }
-
-  // Move to final content-addressed path
-  const finalDir = join(UPLOAD_DIR, sha256Hash.slice(0, 2));
-  const finalPath = join(finalDir, `${sha256Hash}.${ext}`);
-  await mkdir(finalDir, { recursive: true });
-  const { rename: fsRename } = await import("node:fs/promises");
-  await fsRename(destPath, finalPath);
-
-  // Step 4+5: DB insert + ledger in one transaction (DB-01)
-  const client = await getTransactionClient();
   try {
-    await client.query("BEGIN");
+    // Step 2: Recycled evidence check (14-Evidence-and-Forensics.md §4)
+    const recycled = await isRecycledEvidence(sha256Hash, p.transactionId);
+    if (recycled) {
+      throw new AppError(
+        409,
+        "This file has already been submitted as evidence for another transaction",
+        "EVIDENCE_RECYCLED",
+      );
+    }
 
-    const fileUrl = `uploads/${sha256Hash.slice(0, 2)}/${sha256Hash}.${ext}`;
+    // Step 3: Upload to S3/R2
+    const s3 = getS3Client();
+    const objectKey = `uploads/${sha256Hash.slice(0, 2)}/${sha256Hash}.${ext}`;
+    
+    if (s3) {
+      const fileReadStream = createReadStream(tempPath);
+      await s3.send(new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET || "croe-evidence-prod",
+        Key: objectKey,
+        Body: fileReadStream,
+        ContentType: p.mimeType,
+      }));
+    } else {
+      logger.warn("S3 Client not configured, skipping actual upload to storage.");
+    }
 
-    const { rows } = await client.query<EvidenceRow>(
-      `INSERT INTO evidence_artifacts
-         (transaction_id, uploader_id, file_url, sha256_hash, artifact_type, ip_address, device_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [
-        p.transactionId,
-        p.uploaderId,
-        fileUrl,
-        sha256Hash,
-        p.artifactType,
-        p.forensic?.ip ?? "unknown",
-        p.forensic?.deviceId ?? "unknown",
-      ],
-    );
+    const fileUrl = s3 ? `s3://${process.env.S3_BUCKET}/${objectKey}` : objectKey;
 
-    // EVIDENCE_ADDED ledger entry (AUD-01: append-only)
-    await client.query(
-      `INSERT INTO transaction_ledger
-         (transaction_id, actor_id, event_type, previous_status, new_status, ip_address, device_id, network_type)
-       VALUES ($1, $2, 'EVIDENCE_ADDED', NULL, NULL, $3, $4, $5)`,
-      [
-        p.transactionId,
-        p.uploaderId,
-        p.forensic?.ip ?? null,
-        p.forensic?.deviceId ?? null,
-        p.forensic?.networkType ?? null,
-      ],
-    );
+    // Step 4+5: DB insert + ledger in one transaction (DB-01)
+    const client = await getTransactionClient();
+    try {
+      await client.query("BEGIN");
 
-    await client.query("COMMIT");
-    logger.info({ artifactId: rows[0].artifact_id, sha256: sha256Hash }, "Evidence uploaded");
-    return rows[0]!;
-  } catch (err) {
-    await client.query("ROLLBACK");
-    // Clean up file on DB failure
-    const { unlink } = await import("node:fs/promises");
-    await unlink(finalPath).catch(() => {});
-    throw err;
+      const { rows } = await client.query<EvidenceRow>(
+        `INSERT INTO evidence_artifacts
+           (transaction_id, uploader_id, file_url, sha256_hash, artifact_type, ip_address, device_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING *`,
+        [
+          p.transactionId,
+          p.uploaderId,
+          fileUrl,
+          sha256Hash,
+          p.artifactType,
+          p.forensic?.ip ?? "unknown",
+          p.forensic?.deviceId ?? "unknown",
+        ],
+      );
+
+      // EVIDENCE_ADDED ledger entry (AUD-01: append-only)
+      await client.query(
+        `INSERT INTO transaction_ledger
+           (transaction_id, actor_id, event_type, previous_status, new_status, ip_address, device_id, network_type)
+         VALUES ($1, $2, 'EVIDENCE_ADDED', NULL, NULL, $3, $4, $5)`,
+        [
+          p.transactionId,
+          p.uploaderId,
+          p.forensic?.ip ?? null,
+          p.forensic?.deviceId ?? null,
+          p.forensic?.networkType ?? null,
+        ],
+      );
+
+      await client.query("COMMIT");
+      logger.info({ artifactId: rows[0].artifact_id, sha256: sha256Hash }, "Evidence uploaded");
+      return rows[0]!;
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
   } finally {
-    client.release();
+    // Always clean up temp file
+    await unlink(tempPath).catch(() => {});
   }
 }

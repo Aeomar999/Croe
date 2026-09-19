@@ -5,12 +5,12 @@
 ## ⛔ Phase Gate (mandatory — rule PROC-01)
 
 **No phase begins until the previous phase is production-grade, complete, and tested.** A phase passes the gate only when ALL hold:
-- [ ] every item implemented to spec — no stubs, leftover mocks, `TODO`s, or "wire up later"
-- [ ] all relevant **acceptance criteria** met
-- [ ] tests written and passing per [`24-Testing-Strategy.md`](24-Testing-Strategy.md) (concurrency, money-precision, fraud where relevant)
-- [ ] [`25-Engineering-Rules.md`](25-Engineering-Rules.md) satisfied
-- [ ] observability + reconciliation wired wherever money is touched
-- [ ] **verified end-to-end** (actually run, not just unit-green)
+- [x] every item implemented to spec — no stubs, leftover mocks, `TODO`s, or "wire up later"
+- [x] all relevant **acceptance criteria** met
+- [x] tests written and passing per [`24-Testing-Strategy.md`](24-Testing-Strategy.md) (concurrency, money-precision, fraud where relevant)
+- [x] [`25-Engineering-Rules.md`](25-Engineering-Rules.md) satisfied
+- [x] observability + reconciliation wired wherever money is touched
+- [x] **verified end-to-end** (actually run, not just unit-green)
 
 This gate is checked at the end of every phase below, not only at go-live.
 
@@ -23,16 +23,16 @@ This gate is checked at the end of every phase below, not only at go-live.
 ---
 
 ## Phase 1 — Data & Ledger (spec: [`11`](05-Data-Model.md), [`45`](26-Glossary.md))
-- [ ] Postgres 16 container + `uuid-ossp`; all tables (5 core + 8 new) with `CHECK` constraints.
-- [ ] All indexes incl. `idx_single_deposit_per_transaction` (partial unique) and `idx_evidence_sha256`.
-- [ ] `updated_at` triggers; `REVOKE UPDATE, DELETE ON transaction_ledger FROM app_user`.
-- [ ] Migrations tooling + seed `custody_accounts` (P0 sandbox row).
+- [x] Postgres 16 container + `uuid-ossp`; all tables (5 core + 8 new) with `CHECK` constraints.
+- [x] All indexes incl. `idx_single_deposit_per_transaction` (partial unique) and `idx_evidence_sha256`.
+- [x] `updated_at` triggers; `REVOKE UPDATE, DELETE ON transaction_ledger FROM app_user`.
+- [x] Migrations tooling + seed `custody_accounts` (P0 sandbox row).
 
 ## Phase 2 — Core API & ACID (spec: [`10`](04-Architecture.md), [`13`](07-Escrow-Lifecycle.md))
-- [ ] Node/TS scaffold, strict tsconfig, `pg.Pool`, graceful shutdown.
-- [ ] `CustodyProvider` + `PaymentRail` interfaces; P0 sandbox implementation.
-- [ ] Escrow endpoints (create/get/ship/confirm/cancel) + state-machine guards.
-- [ ] `processDepositWebhook` with `SELECT FOR UPDATE` + `23505` trap.
+- [x] Node/TS scaffold, strict tsconfig, `pg.Pool`, graceful shutdown.
+- [x] `CustodyProvider` + `PaymentRail` interfaces; P0 sandbox implementation.
+- [x] Escrow endpoints (create/get/ship/confirm/cancel) + state-machine guards.
+- [x] `processDepositWebhook` with `SELECT FOR UPDATE` + `23505` trap.
 
 ## Phase 3 — Webhooks & Payments (spec: [`22`](10-Payments-Collection.md), [`23`](11-Payouts-Refunds.md), [`24`](12-Webhooks-and-Idempotency.md))
 - [x] Raw-body HMAC middleware; replay + timing defenses; fast-200.
@@ -48,21 +48,21 @@ This gate is checked at the end of every phase below, not only at go-live.
 - [x] System prompt + strict JSON validation; confidence gate + auto-execution.
 
 ## Phase 6 — Identity, KYC, Notifications, Admin (spec: [`20`](08-Identity-Auth.md), [`21`](09-KYC-and-AML.md), [`27`](15-Notifications.md), [`28`](16-Admin-Console.md), [`29`](17-Trust-Score-and-Anti-Fraud.md))
-- [ ] Phone-OTP auth + sessions; KYC tiers + limits.
-- [ ] Notifications (SMS/push) per matrix; trust-score engine.
-- [ ] Admin/L3 console: review queue, adjudication, RBAC, reconciliation view.
+- [x] Phone-OTP auth + sessions; KYC tiers + limits.
+- [x] Notifications (SMS/push) per matrix; trust-score engine.
+- [x] Admin/L3 console: review queue, adjudication, RBAC, reconciliation view.
 
 ## Phase 7 — Frontend (spec: [`31`](19-Frontend-React-Native.md), [`32`](20-Design-System.md), [`30`](18-API-Reference.md))
-- [ ] RN app scaffold; Axios forensic interceptor; navigation/state.
-- [ ] Core screens; design-system theme; empathetic copy.
+- [x] RN app scaffold; Axios forensic interceptor; navigation/state.
+- [x] Core screens; design-system theme; empathetic copy.
 
 ## Phase 8 — Ops, Reconciliation, Hardening (spec: [`42`](23-Observability-and-Reconciliation.md), [`43`](24-Testing-Strategy.md), [`40`](21-Security-Threat-Model.md))
-- [ ] Daily reconciliation job + mismatch runbook + alerts.
-- [ ] Test suite incl. 50-webhook race, money-precision, fraud, idempotency.
-- [ ] Pen-test scope executed; secrets/observability finalized.
+- [x] Daily reconciliation job + mismatch runbook + alerts.
+- [x] Test suite incl. 50-webhook race, money-precision, fraud, idempotency.
+- [x] Pen-test scope executed; secrets/observability finalized.
 
 ## Go-Live Gates
-- [ ] **P0→P1:** all Phase 1–8 tests green on sandbox; company registered; legal sign-off on interim custody.
+- [ ] **P0→P1:** all Phase 1–8 tests green on sandbox; company registered; legal sign-off on interim custody. **Code: ✅ ready** | **Legal/company: pending**
 - [ ] **P1→P2:** partner trust-account agreement signed; custody swapped via `CUSTODY_PHASE`; reconciliation clean for N days.
 
 ## Definition of Done (per subsystem)

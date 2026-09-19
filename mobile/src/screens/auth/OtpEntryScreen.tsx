@@ -117,6 +117,7 @@ export function OtpEntryScreen() {
       <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
         {/* Back button */}
         <Pressable
+          testID="otpBackBtn"
           onPress={() => navigation.goBack()}
           style={styles.backBtn}
           hitSlop={12}
@@ -177,13 +178,13 @@ export function OtpEntryScreen() {
           </View>
 
           {/* Resend */}
-          <View style={styles.resendRow}>
+          <View style={styles.resendRow} testID="resendSection">
             {countdown > 0 ? (
               <Text style={[typography.caption, { color: inkColors.tertiary }]}>
                 Resend in {formatCountdown(countdown)}
               </Text>
             ) : (
-              <Pressable onPress={handleResend}>
+              <Pressable testID="resendBtn" onPress={handleResend}>
                 <Text style={[typography.label, { color: inkColors.primary }]}>
                   Resend code
                 </Text>
@@ -208,6 +209,7 @@ export function OtpEntryScreen() {
           </Text>
           <View style={styles.btnWrap}>
             <Button
+              testID="verifyBtn"
               title={loading ? '' : 'Verify'}
               variant="ink"
               onPress={() => handleVerify(code)}
@@ -312,7 +314,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

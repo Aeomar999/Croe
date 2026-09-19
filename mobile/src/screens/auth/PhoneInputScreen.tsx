@@ -83,6 +83,7 @@ export function PhoneInputScreen() {
                 <Text style={styles.prefixText}>+233</Text>
               </View>
               <TextInput
+                testID="phoneInput"
                 style={styles.input}
                 value={phone}
                 onChangeText={(t) => {
@@ -97,7 +98,7 @@ export function PhoneInputScreen() {
               />
             </View>
             <Text style={styles.helper}>Use the number linked to your MoMo wallet.</Text>
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text testID="phoneError" style={styles.error}>{error}</Text> : null}
           </View>
 
           {/* Security wash */}
@@ -121,6 +122,7 @@ export function PhoneInputScreen() {
           <View>
             <View style={styles.btnWrap}>
               <Button
+                testID="sendOtpBtn"
                 title={loading ? '' : 'Send my code'}
                 variant="ink"
                 onPress={handleSend}
@@ -238,7 +240,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

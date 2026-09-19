@@ -2,6 +2,7 @@ import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import { requestOTP, verifyOTP, refreshSession, logout } from "../services/auth.js";
 import { authenticate } from "../middleware/auth.js";
+import { authRateLimiter, otpRateLimiter } from "../middleware/rate-limiter.js";
 import { AppError } from "../middleware/error-handler.js";
 
 const router: RouterType = Router();
@@ -14,7 +15,7 @@ const OTP_CODE_RE = /^\d{6}$/;
  * 18-API-Reference.md §1 Authentication
  * Always returns 202 to prevent user enumeration.
  */
-router.post("/auth/otp/request", async (req: Request, res: Response) => {
+router.post("/auth/otp/request", otpRateLimiter, async (req: Request, res: Response) => {
   try {
     const { phone_number } = req.body as { phone_number?: string };
 
@@ -37,7 +38,7 @@ router.post("/auth/otp/request", async (req: Request, res: Response) => {
  * POST /auth/otp/verify — Verify OTP and return session tokens
  * 18-API-Reference.md §1 Authentication
  */
-router.post("/auth/otp/verify", async (req: Request, res: Response) => {
+router.post("/auth/otp/verify", authRateLimiter, async (req: Request, res: Response) => {
   try {
     const { phone_number, code } = req.body as { phone_number?: string; code?: string };
 
@@ -63,7 +64,7 @@ router.post("/auth/otp/verify", async (req: Request, res: Response) => {
  * POST /auth/refresh — Refresh session tokens
  * 18-API-Reference.md §1 Authentication
  */
-router.post("/auth/refresh", async (req: Request, res: Response) => {
+router.post("/auth/refresh", authRateLimiter, async (req: Request, res: Response) => {
   try {
     const { refresh_token } = req.body as { refresh_token?: string };
 

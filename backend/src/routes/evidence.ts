@@ -2,6 +2,7 @@ import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import multer from "multer";
 import { requireIdempotencyKey, idempotencyGuard } from "../middleware/idempotency.js";
+import { evidenceRateLimiter } from "../middleware/rate-limiter.js";
 import { uploadEvidence } from "../services/evidence.js";
 import { AppError } from "../middleware/error-handler.js";
 
@@ -22,6 +23,7 @@ const upload = multer({
  */
 router.post(
   "/evidence/upload",
+  evidenceRateLimiter,
   requireIdempotencyKey,
   idempotencyGuard,
   (req: Request, res: Response, next) => {
