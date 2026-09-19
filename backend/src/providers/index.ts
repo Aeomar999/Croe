@@ -1,11 +1,16 @@
-import { SandboxCustodyProvider } from "./sandbox.js";
-import { SandboxPaymentRail } from "./sandbox.js";
+import { SandboxCustodyProvider, SandboxPaymentRail } from "./sandbox.js";
+import { PaystackCustodyProvider, PaystackPaymentRail } from "./paystack.js";
 import type { CustodyProvider } from "./custody-provider.js";
 import type { PaymentRail } from "./payment-rail.js";
+import { env } from "../config/env.js";
 
 /**
- * P0 shared provider instances.
- * Phase P1+ will swap these for real aggregator SDKs behind the same interfaces.
+ * Switch providers based on CUSTODY_PHASE.
+ * P0 = Sandbox (local dev)
+ * P1 = Pilot (Paystack)
  */
-export const custodyProvider: CustodyProvider = new SandboxCustodyProvider();
-export const paymentRail: PaymentRail = new SandboxPaymentRail();
+export const custodyProvider: CustodyProvider =
+  env.CUSTODY_PHASE === "P0" ? new SandboxCustodyProvider() : new PaystackCustodyProvider();
+
+export const paymentRail: PaymentRail =
+  env.CUSTODY_PHASE === "P0" ? new SandboxPaymentRail() : new PaystackPaymentRail();

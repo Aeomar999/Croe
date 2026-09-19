@@ -488,6 +488,7 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 2026-07-24 | Backend scaffold created | — | pnpm + TypeScript 7 strict + Express 5 + pg.Pool + Pino + node-pg-migrate; 3 migrations (schema, indexes/triggers, seed); CustodyProvider/PaymentRail interfaces + P0 sandbox impls; health check endpoint; forensic + request logging middleware |
 | 2026-07-25 | Phase 1–5 complete | — | 111 tests passing across 7 files; state machine, escrow CRUD, webhooks, HMAC, idempotency, evidence SHA-256, heuristics, AI triage with P0 mock sandbox |
 | 2026-07-25 | Phase 6 complete | — | 174 tests passing across 11 files; OTP auth (JWT+refresh), KYC tier enforcement, trust-score deterministic model, notification matrix, admin RBAC, 2 migrations (004, 005) |
+| 2026-09-19 | P1 Paystack Integration | Agent | Implemented PaystackPaymentRail and PaystackCustodyProvider, updated webhook HMAC for Paystack signatures, configured dynamic P1 swapping based on CUSTODY_PHASE. |
 
 ---
 
