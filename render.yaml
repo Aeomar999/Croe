@@ -2,7 +2,7 @@ services:
   - type: web
     name: croe-api
     env: node
-    buildCommand: corepack enable pnpm && pnpm install && cd backend && pnpm build && pnpm db:migrate
+    buildCommand: cd backend && npm install -g pnpm && pnpm install && pnpm build && pnpm db:migrate
     startCommand: cd backend && pnpm start
     envVars:
       - key: NODE_ENV
