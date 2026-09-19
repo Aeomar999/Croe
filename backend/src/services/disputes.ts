@@ -181,8 +181,20 @@ export async function openDispute(p: {
       await applyRule3(dispute);
     } else {
       // Rule 4: Pass — proceed to AI triage (13-Disputes-and-AI-Triage.md §4-5)
-      logger.info({ disputeId: dispute.dispute_id }, "Heuristics passed — running AI triage");
-      await runAITriage(dispute.dispute_id);
+      const custodyPhase = process.env.CUSTODY_PHASE || "P0";
+      const hasLlmConfig = !!process.env.LLM_URL;
+      
+      if (custodyPhase === "P1" && !hasLlmConfig) {
+        logger.info({ disputeId: dispute.dispute_id }, "LLM disabled in P1 (cost discipline) — routing to human");
+        const { pool: dbPool } = await import("../db/pool.js");
+        await dbPool.query(
+          `UPDATE dispute_cases SET status = 'UNDER_HUMAN_REVIEW' WHERE dispute_id = $1`,
+          [dispute.dispute_id],
+        );
+      } else {
+        logger.info({ disputeId: dispute.dispute_id }, "Heuristics passed — running AI triage");
+        await runAITriage(dispute.dispute_id);
+      }
     }
 
     // Re-fetch dispute
