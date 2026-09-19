@@ -32,12 +32,12 @@ services:
       # - S3_ENDPOINT
       # - CORS_ORIGIN
 
+  - type: redis
+    name: croe-redis
+    plan: free # Change to a paid plan for persistence in production
+
 databases:
   - name: croe-db
     databaseName: croe
     user: croe
     plan: free # Change to a paid plan for PITR and backups in production
-
-  - type: redis
-    name: croe-redis
-    plan: free # Change to a paid plan for persistence in production
