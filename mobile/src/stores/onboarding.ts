@@ -8,8 +8,8 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 
-const SEEN_KEY = 'croe.onboarding.seen';
-const ROLE_KEY = 'croe.onboarding.role';
+const SEEN_KEY = 'croe.onboarding.seen.v2';
+const ROLE_KEY = 'croe.onboarding.role.v2';
 
 export type OnboardingRole = 'seller' | 'buyer';
 
@@ -32,6 +32,12 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
 
   hydrate: async () => {
     try {
+      if (__DEV__) {
+        // Force the app to launch from 0 on every reload during development
+        await SecureStore.deleteItemAsync(SEEN_KEY);
+        await SecureStore.deleteItemAsync(ROLE_KEY);
+      }
+
       const [seen, role] = await Promise.all([
         SecureStore.getItemAsync(SEEN_KEY),
         SecureStore.getItemAsync(ROLE_KEY),

@@ -2,7 +2,7 @@
  * Chrome shared by the onboarding screens — the wordmark and the page dots.
  */
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { ink as inkColors, line, shape, states } from '../../theme/tokens';
 
 /** `croe` with a --secure full stop. The only place the wordmark is set in type. */
@@ -17,19 +17,24 @@ export function Wordmark() {
 
 interface DotsProps {
   count: number;
-  active: number;
+  activeIndex: number;
 }
 
-export function Dots({ count, active }: DotsProps) {
+export function Dots({ count, activeIndex }: DotsProps) {
   return (
     <View style={styles.dots}>
-      {Array.from({ length: count }, (_, i) => (
-        <View
-          key={i}
-          testID={`onboarding-dot-${i}${i === active ? '-active' : ''}`}
-          style={[styles.dot, i === active && styles.dotActive]}
-        />
-      ))}
+      {Array.from({ length: count }, (_, i) => {
+        const isActive = i === activeIndex;
+        return (
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              isActive && styles.dotActive,
+            ]}
+          />
+        );
+      })}
     </View>
   );
 }

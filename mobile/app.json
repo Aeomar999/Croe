@@ -6,6 +6,11 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#F1F1EF"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.croe.app"

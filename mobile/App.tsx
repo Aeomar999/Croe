@@ -16,6 +16,8 @@ const queryClient = new QueryClient({
   },
 });
 
+import { AnimatedSplashScreen } from './src/components/AnimatedSplashScreen';
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans: require('./assets/fonts/PlusJakartaSans-Regular.ttf'),
@@ -25,9 +27,12 @@ export default function App() {
     'PlusJakartaSans-ExtraBold': require('./assets/fonts/PlusJakartaSans-ExtraBold.ttf'),
   });
 
+  const [splashVisible, setSplashVisible] = React.useState(true);
+
   if (!fontsLoaded) {
     return (
       <View style={styles.loading}>
+        {/* We can use the native expo-splash-screen in the future, for now this maintains layout */}
         <ActivityIndicator size="large" color="#17181B" />
       </View>
     );
@@ -36,7 +41,12 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <RootNavigator />
+        <View style={{ flex: 1 }}>
+          <RootNavigator />
+          {splashVisible && (
+            <AnimatedSplashScreen onComplete={() => setSplashVisible(false)} />
+          )}
+        </View>
         <StatusBar style="dark" />
       </QueryClientProvider>
     </SafeAreaProvider>
