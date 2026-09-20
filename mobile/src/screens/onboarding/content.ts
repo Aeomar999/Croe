@@ -33,7 +33,7 @@ export const panels: OnboardingPanel[] = [
   },
   {
     key: 'payout',
-    art: require('../../../assets/images/onboarding-03-momo-payout.webp'),
+    art: require('../../../assets/images/onboarding-03-momo-payout.png'),
     title: 'Paid out\nin minutes.',
     lede:
       'When the buyer confirms, your money moves straight to your mobile ' +

@@ -23,13 +23,14 @@
     "test:e2e:android": "detox test --configuration android.emu.debug"
   },
   "dependencies": {
-    "@expo/vector-icons": "^15.0.3",
+    "@hugeicons/core-free-icons": "^4.3.4",
+    "@hugeicons/react-native": "^1.0.16",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
     "@react-navigation/native-stack": "^7.0.0",
     "@tanstack/react-query": "^5.60.0",
     "axios": "^1.7.0",
-    "expo": "~57.0.22",
+    "expo": "~57.0.24",
     "expo-file-system": "~57.0.7",
     "expo-font": "~57.0.4",
     "expo-image": "~57.0.5",
@@ -39,10 +40,12 @@
     "react-native": "^0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.2",
+    "react-native-svg": "15.15.4",
     "react-native-uuid": "^2.0.2",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
     "@testing-library/react-native": "^14.0.1",
     "@types/detox": "^17.14.3",
     "@types/jest": "^29.5.14",
