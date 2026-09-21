@@ -23,6 +23,7 @@ import { typography } from '../theme/typography';
 import { Pill } from '../theme/components/Pill';
 import { Eye, ChevronDown } from '../theme/components/icons';
 import { Button } from '../theme/components/Button';
+import { StateIllustration } from '../theme/components/StateIllustration';
 import { useEscrowList } from '../hooks/useEscrow';
 import type { EscrowStatus } from '../theme/tokens';
 
@@ -161,9 +162,15 @@ export function WalletScreen() {
           {isLoading ? (
             <ActivityIndicator color={inkColors.primary} style={{ margin: space.s8 }} />
           ) : history.length === 0 ? (
-            <Text style={[typography.body, { textAlign: 'center', margin: space.s8, color: inkColors.tertiary }]}>
-              No transaction history
-            </Text>
+            <View style={styles.emptyState}>
+              <StateIllustration type="empty-no-transactions" style={styles.emptyIllustration} />
+              <Text style={[typography.body, { textAlign: 'center', marginTop: space.s4, color: inkColors.tertiary }]}>
+                No transaction history
+              </Text>
+              <Text style={[typography.caption, { textAlign: 'center', marginTop: space.s2, color: inkColors.tertiary }]}>
+                Your paid out transactions will appear here
+              </Text>
+            </View>
           ) : (
             history.map((tx: any) => (
               <View key={tx.id} style={styles.trow}>
@@ -342,6 +349,14 @@ const styles = StyleSheet.create({
   },
   tvalPlus: { color: states.secure.deep },
   tvalDim: { color: inkColors.tertiary },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: space.s8,
+  },
+  emptyIllustration: {
+    width: 200,
+    height: 200,
+  },
   footNote: {
     ...typography.caption,
     textAlign: 'center',

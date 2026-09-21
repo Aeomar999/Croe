@@ -20,6 +20,7 @@ import { TransactionRow } from '../components/TransactionRow';
 import { Search, Plus } from '../theme/components/icons';
 import { useNavigation } from '@react-navigation/native';
 import { useEscrowList } from '../hooks/useEscrow';
+import { StateIllustration } from '../theme/components/StateIllustration';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../navigation/MainStack';
 import type { EscrowStatus } from '../theme/tokens';
@@ -119,6 +120,7 @@ export function LinksScreen() {
           <ActivityIndicator color={inkColors.primary} style={{ marginTop: space.s8 }} />
         ) : filtered.length === 0 ? (
           <View style={styles.empty}>
+            <StateIllustration type="empty-no-transactions" style={styles.emptyIllustration} />
             <Text style={[typography.subhead, { color: inkColors.tertiary }]}>
               No escrows found
             </Text>
@@ -219,5 +221,9 @@ const styles = StyleSheet.create({
   empty: {
     alignItems: 'center',
     paddingVertical: space.s12,
+  },
+  emptyIllustration: {
+    width: 180,
+    height: 180,
   },
 });
