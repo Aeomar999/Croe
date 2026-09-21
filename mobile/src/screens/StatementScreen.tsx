@@ -8,6 +8,7 @@ import { TransactionRow } from '../components/TransactionRow';
 import { ArrowLeft } from '../theme/components/icons';
 import { useEscrowList } from '../hooks/useEscrow';
 import { useAuthStore } from '../stores/auth';
+import { StateIllustration } from '../theme/components/StateIllustration';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../navigation/MainStack';
 import type { EscrowStatus } from '../theme/tokens';
@@ -39,9 +40,12 @@ export function StatementScreen() {
         keyExtractor={item => item.transaction_id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={[typography.body, { color: inkColors.tertiary, textAlign: 'center', marginTop: space.s8 }]}>
-            No completed transactions found.
-          </Text>
+          <View style={styles.emptyState}>
+            <StateIllustration type="empty-no-wallet-history" style={styles.emptyIllustration} />
+            <Text style={[typography.body, { color: inkColors.tertiary, textAlign: 'center', marginTop: space.s4 }]}>
+              No completed transactions found.
+            </Text>
+          </View>
         }
         renderItem={({ item, index }) => {
           const isBuyer = item.buyer_id === currentUserId;
@@ -88,5 +92,14 @@ const styles = StyleSheet.create({
   list: {
     padding: layout.gutter,
     gap: space.s3,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: space.s8,
+    paddingHorizontal: space.s4,
+  },
+  emptyIllustration: {
+    width: 180,
+    height: 180,
   },
 });

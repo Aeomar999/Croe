@@ -11,13 +11,19 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  ActionSheetIOS,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
 import { typography } from '../theme/typography';
 import { Pill } from '../theme/components/Pill';
 import { Eye, ChevronDown } from '../theme/components/icons';
 import { Button } from '../theme/components/Button';
+import { StateIllustration } from '../theme/components/StateIllustration';
 import { useEscrowList } from '../hooks/useEscrow';
 import type { EscrowStatus } from '../theme/tokens';
 
@@ -36,14 +42,14 @@ function mapStatusToHistory(status: string) {
   }
 }
 
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { MainStackParamList } from '../navigation/MainStack';
+const PERIODS = ['This week', 'This month', 'All time'];
 
 export function WalletScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { data: escrows, isLoading } = useEscrowList();
+  const [showBalance, setShowBalance] = React.useState(true);
+  const [selectedPeriod, setSelectedPeriod] = React.useState('All time');
 
   const history = React.useMemo(() => {
     if (!escrows) return [];
@@ -65,6 +71,33 @@ export function WalletScreen() {
   const available = escrows?.filter((tx: any) => tx.current_status === 'FUNDS_RELEASED').reduce((sum: number, tx: any) => sum + parseFloat(tx.amount), 0) || 0;
   const inEscrow = escrows?.filter((tx: any) => ['FUNDS_SECURED', 'SHIPPED', 'DELIVERED_CONFIRMED', 'DISPUTE_OPENED'].includes(tx.current_status)).reduce((sum: number, tx: any) => sum + parseFloat(tx.amount), 0) || 0;
 
+  const handlePeriodSelect = (period: string) => {
+    setSelectedPeriod(period);
+  };
+
+  const showPeriodPicker = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', ...PERIODS],
+          cancelButtonIndex: 0,
+        },
+        (index) => {
+          if (index > 0) {
+            const period = PERIODS[index - 1];
+            if (period) handlePeriodSelect(period);
+          }
+        }
+      );
+    } else {
+      // Android: simple alert as fallback, or use a modal
+      Alert.alert('Select period', '', PERIODS.map(p => ({
+        text: p,
+        onPress: () => handlePeriodSelect(p),
+      })));
+    }
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -74,13 +107,13 @@ export function WalletScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={typography.heading}>Wallet</Text>
-        <View style={styles.selector}>
+        <Pressable style={styles.selector} onPress={showPeriodPicker}>
           <View style={styles.selectorMark}>
             <Text style={[typography.label, { fontSize: 13, color: surfaces.surface }]}>A</Text>
           </View>
-          <Text style={[typography.label, { fontSize: 14 }]}>All time</Text>
+          <Text style={[typography.label, { fontSize: 14 }]}>{selectedPeriod}</Text>
           <ChevronDown size={14} color={inkColors.primary} />
-        </View>
+        </Pressable>
       </View>
 
       {/* Balance */}
@@ -91,9 +124,9 @@ export function WalletScreen() {
         </View>
         <View style={styles.balTop}>
           <Text style={typography.display}>
-            <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold' }}>GH₵</Text>{available.toFixed(2)}
+            <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold' }}>GH₵</Text>{showBalance ? available.toFixed(2) : '••••'}
           </Text>
-          <Pressable style={styles.eyeBtn}>
+          <Pressable style={styles.eyeBtn} onPress={() => setShowBalance(!showBalance)}>
             <Eye size={21} color={inkColors.secondary} />
           </Pressable>
         </View>
@@ -105,12 +138,12 @@ export function WalletScreen() {
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: states.secure.fill }]} />
             <Text style={styles.legendText}>Paid Out</Text>
-            <Text style={styles.legendBold}>GH₵ {available.toFixed(2)}</Text>
+            <Text style={styles.legendBold}>GH₵ {showBalance ? available.toFixed(2) : '••••'}</Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: states.caution.fill }]} />
             <Text style={styles.legendText}>In escrow</Text>
-            <Text style={styles.legendBold}>GH₵ {inEscrow.toFixed(2)}</Text>
+            <Text style={styles.legendBold}>GH₵ {showBalance ? inEscrow.toFixed(2) : '••••'}</Text>
           </View>
         </View>
         <View style={styles.acts}>
@@ -129,9 +162,15 @@ export function WalletScreen() {
           {isLoading ? (
             <ActivityIndicator color={inkColors.primary} style={{ margin: space.s8 }} />
           ) : history.length === 0 ? (
-            <Text style={[typography.body, { textAlign: 'center', margin: space.s8, color: inkColors.tertiary }]}>
-              No transaction history
-            </Text>
+            <View style={styles.emptyState}>
+              <StateIllustration type="empty-no-transactions" style={styles.emptyIllustration} />
+              <Text style={[typography.body, { textAlign: 'center', marginTop: space.s4, color: inkColors.tertiary }]}>
+                No transaction history
+              </Text>
+              <Text style={[typography.caption, { textAlign: 'center', marginTop: space.s2, color: inkColors.tertiary }]}>
+                Your paid out transactions will appear here
+              </Text>
+            </View>
           ) : (
             history.map((tx: any) => (
               <View key={tx.id} style={styles.trow}>
@@ -310,6 +349,14 @@ const styles = StyleSheet.create({
   },
   tvalPlus: { color: states.secure.deep },
   tvalDim: { color: inkColors.tertiary },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: space.s8,
+  },
+  emptyIllustration: {
+    width: 200,
+    height: 200,
+  },
   footNote: {
     ...typography.caption,
     textAlign: 'center',
