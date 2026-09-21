@@ -1,0 +1,266 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* neutralise the frame template's .option so artboards keep their size */
+.rack .option{display:block!important;flex:0 0 300px!important;width:300px;
+  background:transparent!important;border:0!important;padding:0!important;
+  border-radius:0!important;gap:0!important;align-items:stretch!important}
+.rack .option:hover{border-color:transparent!important}
+.rack .option.selected{background:transparent!important}
+
+.croe-lab{
+  --canvas:#F1F1EF; --surface:#FFFFFF; --sunken:#F5F5F3;
+  --ink:#17181B; --ink-2:#4A4D52; --ink-3:#8E9297;
+  --line:#E7E7E4; --line-2:#D9D9D5;
+  --secure:#1FC16B; --secure-wash:#E8F8F0; --secure-deep:#127A45;
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+/* box-sizing ONLY — must not carry padding/margin, or it out-specifies every
+   class rule below it and flattens the layouts. */
+.croe-lab .ph *{box-sizing:border-box}
+.croe-lab .ph p{margin:0}
+
+.rack{display:flex;flex-wrap:wrap;gap:30px 26px;justify-content:center;margin:26px 0 8px}
+.slot-cap{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.slot-key{font:800 12px/1 'Plus Jakarta Sans';color:#17181B;
+  background:#fff;border:1px solid #D9D9D5;border-radius:999px;
+  width:21px;height:21px;display:grid;place-items:center;flex:none}
+.rack .option.selected .slot-key{background:#17181B;color:#fff;border-color:#17181B}
+.slot-name{font:700 14px/1.2 'Plus Jakarta Sans'}
+.slot-note{font:500 12px/1.45 'Plus Jakarta Sans';opacity:.62;margin-bottom:12px;min-height:52px}
+
+/* Design board, not a device: modest radius, hairline, no glossy bezel — so the
+   art inside is judged on its own and doesn't read as a phone within a phone. */
+.ph{width:300px;height:649px;background:var(--canvas);border-radius:14px;
+  overflow:hidden;position:relative;border:1px solid rgba(20,22,26,.14);
+  box-shadow:0 6px 18px rgba(20,22,26,.10);
+  display:flex;flex-direction:column;cursor:pointer;
+  transition:transform .16s cubic-bezier(.2,.8,.25,1)}
+.rack .option:hover .ph{transform:translateY(-3px)}
+.rack .option.selected .ph{outline:3px solid #17181B;outline-offset:4px}
+
+.bar{display:flex;align-items:center;justify-content:space-between;padding:20px 15px 6px}
+.wm{font:800 17px/1 'Plus Jakarta Sans';letter-spacing:-.68px;color:var(--ink)}
+.wm i{color:var(--secure);font-style:normal}
+.skip{font:600 10.4px/1 'Plus Jakarta Sans';color:var(--ink-3)}
+
+.dots{display:flex;gap:4.6px;justify-content:center}
+.dot{width:4.6px;height:4.6px;border-radius:999px;background:var(--line-2);display:block}
+.dot.on{width:15.4px;background:var(--ink)}
+
+.btn{height:41px;border-radius:999px;background:var(--ink);color:#fff;
+  font:700 12.3px/1 'Plus Jakarta Sans';display:grid;place-items:center;letter-spacing:-.1px}
+.btn.q{background:transparent;color:var(--ink-2);font-weight:600}
+
+.ttl{font:700 18.5px/23px 'Plus Jakarta Sans';letter-spacing:-.41px;color:var(--ink)}
+.led{font:500 11.5px/17px 'Plus Jakarta Sans';color:var(--ink-2)}
+
+/* ---- A: centred stack (today) ---- */
+.a-body{flex:1;display:flex;flex-direction:column;padding:6px 15px 20px;gap:16px;min-height:0}
+.a-art{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.a-art .well{height:100%;aspect-ratio:1;max-width:100%;background:var(--sunken);
+  border-radius:18px;overflow:hidden}
+.a-art img{width:100%;height:100%;object-fit:contain;display:block}
+.a-copy{text-align:center}
+.a-copy .led{margin-top:8px}
+.a-foot{display:flex;flex-direction:column;gap:6px;flex:none}
+
+/* ---- B: editorial ---- */
+.b-body{flex:1;display:flex;flex-direction:column;padding:12px 0 20px;min-height:0}
+.b-head{padding:0 15px;flex:none}
+.b-kicker{font:700 9.2px/1 'Plus Jakarta Sans';letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.b-disp{font:800 26px/28px 'Plus Jakarta Sans';letter-spacing:-.78px;color:var(--ink)}
+.b-led{font:500 11.5px/17px 'Plus Jakarta Sans';color:var(--ink-2);margin-top:10px;max-width:205px}
+.b-art{flex:1;min-height:0;position:relative;margin-top:10px}
+.b-art .well{position:absolute;right:-40px;top:0;bottom:0;left:15px;
+  background:var(--sunken);border-radius:20px 0 0 20px;overflow:hidden}
+.b-art img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.b-foot{padding:14px 15px 0;display:flex;flex-direction:column;gap:10px;flex:none}
+.b-rule{display:flex;align-items:center;gap:10px}
+.b-rule .dots{justify-content:flex-start}
+.b-step{font:600 10px/1 'Plus Jakarta Sans';color:var(--ink-3);margin-left:auto}
+
+/* ---- C: product truth ---- */
+.c-body{flex:1;display:flex;flex-direction:column;padding:6px 15px 20px;gap:14px;min-height:0}
+.c-stage{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:9px}
+.c-sheet{background:var(--surface);border-radius:18px;padding:14px}
+.c-top{display:flex;align-items:center;gap:9px}
+.c-av{width:31px;height:31px;border-radius:999px;background:var(--sunken);
+  display:grid;place-items:center;font:700 10.4px/1 'Plus Jakarta Sans';color:var(--ink-2);flex:none}
+.c-who{flex:1;min-width:0}
+.c-item{font:700 11.5px/14px 'Plus Jakarta Sans';color:var(--ink);letter-spacing:-.12px}
+.c-sub{font:500 9.6px/13px 'Plus Jakarta Sans';color:var(--ink-3);margin-top:1px}
+.c-amt{font:800 13px/1 'Plus Jakarta Sans';color:var(--ink);letter-spacing:-.3px;
+  font-variant-numeric:tabular-nums;flex:none;white-space:nowrap}
+.c-amt span{font-size:9.2px;font-weight:700;color:var(--ink-3);margin-right:1.5px}
+.c-pillrow{display:flex;align-items:center;gap:6px;margin-top:11px}
+.c-pill{background:var(--secure);color:var(--ink);border-radius:999px;padding:4px 9px;
+  font:700 9.2px/1 'Plus Jakarta Sans';flex:none}
+.c-when{font:500 9.2px/1 'Plus Jakarta Sans';color:var(--ink-3)}
+.c-rail{display:flex;align-items:center;gap:3px;margin-top:12px}
+.c-node{height:3px;border-radius:999px;flex:1;background:var(--line-2);display:block}
+.c-node.on{background:var(--ink)}
+.c-mini{background:var(--secure-wash);border-radius:14px;padding:11px 12px;
+  display:flex;align-items:center;gap:9px}
+.c-lock{width:24px;height:24px;border-radius:999px;background:var(--secure);
+  display:grid;place-items:center;flex:none}
+.c-mini p{font:600 9.8px/13px 'Plus Jakarta Sans';color:var(--secure-deep)}
+.c-copy .led{margin-top:8px}
+.c-foot{display:flex;flex-direction:column;gap:6px;flex:none}
+
+/* ---- D: cinematic sheet ---- */
+.d-art{height:312px;position:relative;background:var(--sunken);flex:none;overflow:hidden}
+.d-art img{width:100%;height:100%;object-fit:contain;display:block}
+.d-skip{position:absolute;top:20px;right:15px;font:600 10.4px/1 'Plus Jakarta Sans';
+  color:var(--ink-3);background:rgba(255,255,255,.85);padding:5px 11px;border-radius:999px}
+.d-wm{position:absolute;top:19px;left:15px}
+.d-sheet{flex:1;background:var(--surface);border-radius:22px 22px 0 0;margin-top:-22px;
+  position:relative;padding:18px 15px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.d-copy .led{margin-top:8px}
+.d-spacer{flex:1}
+.d-foot{display:flex;flex-direction:column;gap:6px;flex:none}
+.d-carr{display:flex;gap:11px;margin-top:12px}
+.d-c{display:flex;align-items:center;gap:4.6px}
+.d-cd{width:6px;height:6px;border-radius:999px;display:block;flex:none}
+.d-cl{font:600 9.2px/1 'Plus Jakarta Sans';color:var(--ink-2)}
+</style>
+
+<div class="croe-lab">
+
+<h2>Which composition should onboarding use?</h2>
+<p class="subtitle">Same v3 "Soft Light" tokens, same copy, same art in all four — only the <strong>arrangement</strong> changes. Panel 1 shown. Click one to select.</p>
+
+<div class="rack">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="slot-cap"><span class="slot-key">A</span><span class="slot-name">Centred stack</span></div>
+    <div class="slot-note">What ships today. Square art, centred dots, centred copy, stacked buttons. The default arrangement.</div>
+    <div class="ph">
+      <div class="bar"><div class="wm">croe<i>.</i></div><div class="skip">Skip</div></div>
+      <div class="a-body">
+        <div class="a-art"><div class="well"><img src="/files/onboarding-01-locked-chat.webp" alt=""></div></div>
+        <div class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div>
+        <div class="a-copy">
+          <div class="ttl">Sell to strangers.<br>Get paid safely.</div>
+          <div class="led">Croe holds your buyer's money until they confirm delivery. Nobody has to go first.</div>
+        </div>
+        <div class="a-foot">
+          <div class="btn">Get started</div>
+          <div class="btn q">I already have an account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="slot-cap"><span class="slot-key">B</span><span class="slot-name">Editorial</span></div>
+    <div class="slot-note">Type leads at display scale. Art is subordinate and bleeds off the right edge. Asymmetric, magazine-like.</div>
+    <div class="ph">
+      <div class="bar"><div class="wm">croe<i>.</i></div><div class="skip">Skip</div></div>
+      <div class="b-body">
+        <div class="b-head">
+          <div class="b-kicker">Escrow for social sellers</div>
+          <div class="b-disp">Sell to<br>strangers.<br>Get paid<br>safely.</div>
+          <div class="b-led">Croe holds your buyer's money until they confirm delivery. Nobody has to go first.</div>
+        </div>
+        <div class="b-art"><div class="well"><img src="/files/onboarding-01-locked-chat.webp" alt=""></div></div>
+        <div class="b-foot">
+          <div class="b-rule">
+            <div class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div>
+            <div class="b-step">01 / 03</div>
+          </div>
+          <div class="btn">Get started</div>
+          <div class="btn q">I already have an account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="slot-cap"><span class="slot-key">C</span><span class="slot-name">Product truth</span></div>
+    <div class="slot-note">No illustration. Each panel shows the real interface doing the thing — a live deal with money actually held.</div>
+    <div class="ph">
+      <div class="bar"><div class="wm">croe<i>.</i></div><div class="skip">Skip</div></div>
+      <div class="c-body">
+        <div class="c-stage">
+          <div class="c-sheet">
+            <div class="c-top">
+              <div class="c-av">KO</div>
+              <div class="c-who">
+                <div class="c-item">Nike Air Max 270</div>
+                <div class="c-sub">Kwame O. · paid 24 Jul</div>
+              </div>
+              <div class="c-amt"><span>GH₵</span>450.00</div>
+            </div>
+            <div class="c-pillrow">
+              <div class="c-pill">Held</div>
+              <div class="c-when">Releases when Kwame confirms</div>
+            </div>
+            <div class="c-rail"><i class="c-node on"></i><i class="c-node on"></i><i class="c-node on"></i><i class="c-node"></i></div>
+          </div>
+          <div class="c-mini">
+            <div class="c-lock">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#17181B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <p>Kwame's GH₵450 is with Croe — not with you, not with him.</p>
+          </div>
+        </div>
+        <div class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div>
+        <div class="c-copy">
+          <div class="ttl">Sell to strangers.<br>Get paid safely.</div>
+          <div class="led">Croe holds your buyer's money until they confirm delivery. Nobody has to go first.</div>
+        </div>
+        <div class="c-foot">
+          <div class="btn">Get started</div>
+          <div class="btn q">I already have an account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="slot-cap"><span class="slot-key">D</span><span class="slot-name">Cinematic sheet</span></div>
+    <div class="slot-note">Art goes full-bleed to the top edge. A white sheet rises over it carrying the copy and the action.</div>
+    <div class="ph">
+      <div class="d-art">
+        <img src="/files/onboarding-01-locked-chat.webp" alt="">
+        <div class="d-wm wm">croe<i>.</i></div>
+        <div class="d-skip">Skip</div>
+      </div>
+      <div class="d-sheet">
+        <div class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div>
+        <div class="d-copy">
+          <div class="ttl">Sell to strangers.<br>Get paid safely.</div>
+          <div class="led">Croe holds your buyer's money until they confirm delivery. Nobody has to go first.</div>
+          <div class="d-carr">
+            <div class="d-c"><i class="d-cd" style="background:#FFCC00"></i><span class="d-cl">MTN MoMo</span></div>
+            <div class="d-c"><i class="d-cd" style="background:#E60000"></i><span class="d-cl">Telecel</span></div>
+            <div class="d-c"><i class="d-cd" style="background:#004F9F"></i><span class="d-cl">AT Money</span></div>
+          </div>
+        </div>
+        <div class="d-spacer"></div>
+        <div class="d-foot">
+          <div class="btn">Get started</div>
+          <div class="btn q">I already have an account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section">
+  <h3>Something the mockups just exposed</h3>
+  <p class="subtitle" style="max-width:760px">
+    The commissioned art for panel 1 is <strong>a 3D phone showing chat bubbles</strong>. Rendered inside a
+    phone screen it reads as a phone within a phone — and panel 2's vault and panel 3's payout have the same
+    literalism problem. That's an argument for <strong>C</strong> independent of the data-weight one:
+    a real deal card reading <em>GH₵450.00 · Held · releases when Kwame confirms</em> answers "will I actually
+    get my money?" concretely, where a picture of a phone only gestures at it.
+    <br><br>
+    If you want to keep the art, <strong>D</strong> gives it the most room and the least recursion.
+  </p>
+</div>
+
+</div>
