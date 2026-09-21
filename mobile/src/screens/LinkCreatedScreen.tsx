@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Share,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
 import { typography } from '../theme/typography';
@@ -18,11 +18,16 @@ import { Button } from '../theme/components/Button';
 import { Pill } from '../theme/components/Pill';
 import { Check, Shield, X } from '../theme/components/icons';
 
+type RootStackParamList = {
+  LinkCreated: { transactionId?: string; deepLink?: string };
+};
+
 export function LinkCreatedScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'LinkCreated'>>();
   const insets = useSafeAreaInsets();
 
-  const payUrl = 'croe.app/pay/CR-89201';
+  const payUrl = route.params?.deepLink || 'croe.app/pay/CR-89201';
 
   const handleShare = async () => {
     try {

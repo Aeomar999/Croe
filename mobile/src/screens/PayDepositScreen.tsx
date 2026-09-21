@@ -10,7 +10,9 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line, carriers as carrier } from '../theme/tokens';
 import { typography } from '../theme/typography';
@@ -18,6 +20,8 @@ import { Button } from '../theme/components/Button';
 import { Pill } from '../theme/components/Pill';
 import { BalanceBlock } from '../theme/components/BalanceBlock';
 import { Shield, Lock, ChevronRight } from '../theme/components/icons';
+import { useDeposit, useEscrow } from '../hooks/useEscrow';
+import { Alert } from 'react-native';
 
 type CarrierKey = 'MTN' | 'TELECEL' | 'AIRTELTIGO';
 
@@ -28,9 +32,14 @@ const CARRIERS: { key: CarrierKey; label: string; bg: string; textColor: string 
 ];
 
 export function PayDepositScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const route = useRoute<RouteProp<MainStackParamList, 'PayDeposit'>>();
+  const { transactionId } = route.params || { transactionId: 'demo-tx' };
   const insets = useSafeAreaInsets();
   const [selectedCarrier, setSelectedCarrier] = React.useState<CarrierKey>('MTN');
+  
+  const { data: escrow } = useEscrow(transactionId);
+  const depositMutation = useDeposit();
 
   return (
     <ScrollView
@@ -142,9 +151,26 @@ export function PayDepositScreen() {
       <View>
         <Button
           testID="payNowBtn"
-          title="Pay GH₵ 450.00"
+          title={`Pay GH₵ ${escrow ? escrow.amount : '...'}`}
           variant="ink"
-          onPress={() => {}}
+          onPress={() => {
+            depositMutation.mutate({
+              transactionId,
+              req: {
+                msisdn: '+233241234567', // hardcoded mock since the input isn't in UI yet
+                carrier: selectedCarrier
+              }
+            }, {
+              onSuccess: () => {
+                navigation.navigate('TransactionStatus', { transactionId });
+              },
+              onError: (error) => {
+                Alert.alert('Error', 'Failed to initiate deposit.');
+                console.error(error);
+              }
+            });
+          }}
+          isLoading={depositMutation.isPending}
           fullWidth
         />
         <Text style={styles.footNote}>

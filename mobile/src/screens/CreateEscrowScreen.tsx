@@ -14,18 +14,22 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
+import { useCreateEscrow } from '../hooks/useEscrow';
 import { typography } from '../theme/typography';
 import { Button } from '../theme/components/Button';
 import { WashBanner } from '../theme/components/WashBanner';
 import { ArrowLeft, Info } from '../theme/components/icons';
+import type { MainStackParamList } from '../navigation/MainStack';
 
 type DeliveryMode = 'MEETUP' | 'COURIER';
 
 export function CreateEscrowScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const insets = useSafeAreaInsets();
+  const createMutation = useCreateEscrow();
 
   const [description, setDescription] = React.useState('');
   const [amount, setAmount] = React.useState('');
@@ -137,8 +141,31 @@ export function CreateEscrowScreen() {
           <Button
             title="Create secure link"
             variant="ink"
-            onPress={() => navigation.navigate('LinkCreated' as never)}
+            onPress={() => {
+              if (!description || !amount) {
+                // Should show some toast/error ideally
+                return;
+              }
+              createMutation.mutate({
+                item_description: description,
+                amount: amount,
+                currency: 'GHS',
+                delivery_terms: delivery,
+              }, {
+                onSuccess: (data) => {
+                  // The backend might return the deep link or transaction ID
+                  navigation.navigate('LinkCreated', {
+                    transactionId: data.transaction_id,
+                    deepLink: `croe.app/pay/${data.transaction_id.slice(-6).toUpperCase()}`,
+                  });
+                },
+                onError: (error) => {
+                  console.error(error);
+                }
+              });
+            }}
             fullWidth
+            disabled={createMutation.isPending}
           />
           <Text style={styles.footNote}>
             Share it in WhatsApp, Instagram, anywhere.

@@ -1,7 +1,7 @@
 import type { MigrationBuilder } from "node-pg-migrate";
 
 export async function up(pgm: MigrationBuilder): Promise<void> {
-  pgm.createExtension("uuid-ossp", { ifNotExists: true });
+  // gen_random_uuid() is built into PostgreSQL 13+, no extension needed
 
   // ── 3.1 users ──
   pgm.createTable(
@@ -10,7 +10,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       user_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       phone_number: { type: "VARCHAR(20)", unique: true, notNull: true },
       full_name: { type: "VARCHAR(100)" },
@@ -58,7 +58,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       transaction_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       vendor_id: {
         type: "UUID",
@@ -182,7 +182,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       artifact_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       transaction_id: {
         type: "UUID",
@@ -217,7 +217,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       dispute_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       transaction_id: {
         type: "UUID",
@@ -287,7 +287,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       custody_account_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       provider: { type: "VARCHAR(50)", notNull: true },
       custody_phase: { type: "VARCHAR(4)", notNull: true },
@@ -326,7 +326,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       payout_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       transaction_id: {
         type: "UUID",
@@ -384,7 +384,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       kyc_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       user_id: {
         type: "UUID",
@@ -425,7 +425,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       challenge_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       phone_number: { type: "VARCHAR(20)", notNull: true },
       code_hash: { type: "CHAR(64)", notNull: true },
@@ -448,7 +448,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       session_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       user_id: {
         type: "UUID",
@@ -496,7 +496,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       webhook_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       provider: { type: "VARCHAR(50)", notNull: true },
       provider_ref: { type: "VARCHAR(128)", notNull: true },
@@ -525,7 +525,7 @@ export async function up(pgm: MigrationBuilder): Promise<void> {
       notification_id: {
         type: "UUID",
         primaryKey: true,
-        default: pgm.func("uuid_generate_v4()"),
+        default: pgm.func("gen_random_uuid()"),
       },
       user_id: {
         type: "UUID",

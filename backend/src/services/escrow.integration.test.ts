@@ -24,7 +24,9 @@ beforeEach(async () => {
     await client.query("DELETE FROM transaction_ledger");
     await client.query("DELETE FROM payouts");
     await client.query("DELETE FROM escrow_transactions");
-    await client.query("DELETE FROM users");
+    await client.query("DELETE FROM user_preferences WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+23399%')");
+    await client.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+23399%')");
+    await client.query("DELETE FROM users WHERE phone_number LIKE '+23399%'");
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");

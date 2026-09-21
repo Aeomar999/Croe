@@ -19,6 +19,7 @@ interface ButtonProps {
   size?: ButtonSize;
   fullWidth?: boolean;
   disabled?: boolean;
+  isLoading?: boolean;
   testID?: string;
 }
 
@@ -60,9 +61,10 @@ export function Button({
   size = 'default',
   fullWidth = false,
   disabled = false,
+  isLoading = false,
   testID,
 }: ButtonProps) {
-  const v = disabled ? 'disabled' : variant;
+  const v = disabled || isLoading ? 'disabled' : variant;
   const s = variantStyles[v];
 
   return (
@@ -70,7 +72,7 @@ export function Button({
       testID={testID}
       accessibilityLabel={title}
       accessibilityRole="button"
-      onPress={disabled ? undefined : onPress}
+      onPress={disabled || isLoading ? undefined : onPress}
       style={({ pressed }: { pressed: boolean }) => ({
         display: 'flex',
         flexDirection: 'row',
@@ -82,7 +84,7 @@ export function Button({
         borderRadius: shape.full,
         ...(fullWidth ? { width: '100%' } : {}),
         ...s.container,
-        opacity: pressed && !disabled ? 0.85 : 1,
+        opacity: pressed && !disabled && !isLoading ? 0.85 : 1,
       })}
     >
       <Text

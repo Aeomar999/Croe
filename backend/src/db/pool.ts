@@ -4,7 +4,7 @@ import { logger } from "../config/logger.js";
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  max: 20,
+  max: 10,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
 });

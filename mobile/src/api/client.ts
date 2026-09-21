@@ -6,10 +6,41 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import uuid from 'react-native-uuid';
+import * as Application from 'expo-application';
+import * as Device from 'expo-device';
+import * as Network from 'expo-network';
+import { Platform } from 'react-native';
+
+// ─── Base URL resolution ────────────────────────────────────────
+// In development, derive the backend URL from Expo's debugger host
+// so the phone can reach the local backend on the same network.
+// In production, use the real API domain.
+function getBaseURL(): string {
+  if (__DEV__) {
+    // expo-constants exposes the dev server host (e.g. "172.20.10.2:8081")
+    // We strip the metro port and replace with the backend port.
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const Constants = require('expo-constants').default;
+      const debuggerHost = Constants.expoConfig?.hostUri ?? Constants.manifest2?.extra?.expoGo?.debuggerHost;
+      if (debuggerHost) {
+        const host = debuggerHost.split(':')[0];
+        return `http://${host}:8080/v1`;
+      }
+    } catch {
+      // fall through to default
+    }
+    return 'http://localhost:8080/v1';
+  }
+  return 'https://api.croe.app/v1';
+}
 
 // ─── Base instance ──────────────────────────────────────────────
+const BASE_URL = getBaseURL();
+if (__DEV__) console.log('[Croe API] baseURL:', BASE_URL);
+
 export const api = axios.create({
-  baseURL: 'https://api.croe.app/v1', // P0: will be env-configured
+  baseURL: BASE_URL,
   timeout: 10000, // short for flaky cellular
   headers: {
     'Content-Type': 'application/json',
@@ -17,15 +48,43 @@ export const api = axios.create({
   },
 });
 
+let cachedDeviceId: string | null = null;
+
+async function getDeviceId() {
+  if (cachedDeviceId) return cachedDeviceId;
+  
+  if (Platform.OS === 'android') {
+    cachedDeviceId = Application.getAndroidId();
+  } else if (Platform.OS === 'ios') {
+    cachedDeviceId = await Application.getIosIdForVendorAsync();
+  }
+  
+  if (!cachedDeviceId) {
+    // Fallback: generate a random UUID and store it securely
+    const stored = await SecureStore.getItemAsync('fallback_device_id');
+    if (stored) {
+      cachedDeviceId = stored;
+    } else {
+      const newId = uuid.v4() as string;
+      await SecureStore.setItemAsync('fallback_device_id', newId);
+      cachedDeviceId = newId;
+    }
+  }
+  return cachedDeviceId;
+}
+
 // ─── Request interceptor: forensic headers + idempotency ────────
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   try {
     // Forensic headers (AUD-02)
-    config.headers['X-Device-Fingerprint'] = 'device-unknown'; // replaced by react-native-device-info when available
-    config.headers['X-Network-Type'] = 'UNKNOWN';
-    config.headers['X-App-Version'] = '1.0.0';
+    const deviceId = await getDeviceId();
+    const networkState = await Network.getNetworkStateAsync();
+    
+    config.headers['X-Device-Fingerprint'] = deviceId;
+    config.headers['X-Network-Type'] = networkState.type || 'UNKNOWN';
+    config.headers['X-App-Version'] = Application.nativeApplicationVersion || '1.0.0';
     config.headers['X-Client-Timestamp'] = new Date().toISOString();
-  } catch {
+  } catch (e) {
     config.headers['X-Forensic-Error'] = 'capture failed';
   }
 
@@ -90,7 +149,7 @@ api.interceptors.response.use(
         }
 
         const { data } = await axios.post(
-          'https://api.croe.app/v1/auth/refresh',
+          `${getBaseURL()}/auth/refresh`,
           { refresh_token: refreshToken },
           { headers: { 'Content-Type': 'application/json' } },
         );

@@ -19,6 +19,7 @@ import disputeRoutes from "./routes/disputes.js";
 import authRoutes from "./routes/auth.js";
 import kycRoutes from "./routes/kyc.js";
 import adminRoutes from "./routes/admin.js";
+import usersRoutes from "./routes/users.js";
 
 const app: Application = express();
 
@@ -58,6 +59,7 @@ app.use("/v1", disputeRoutes);
 app.use("/v1", authRoutes);
 app.use("/v1", kycRoutes);
 app.use("/v1", adminRoutes);
+app.use("/v1", usersRoutes);
 
 // Unversioned health probe for load balancers / container healthchecks
 app.use("/", healthRoutes);

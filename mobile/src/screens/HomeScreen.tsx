@@ -10,6 +10,8 @@ import {
   Pressable,
   StyleSheet,
   RefreshControl,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
@@ -19,48 +21,20 @@ import { Pill } from '../theme/components/Pill';
 import { TransactionRow } from '../components/TransactionRow';
 import { Bell, Plus } from '../theme/components/icons';
 import { useEscrowList } from '../hooks/useEscrow';
-
-// Mock data for demo
-const MOCK_TRANSACTIONS = [
-  {
-    transaction_id: '1',
-    title: 'Nike Air Max 270',
-    subtitle: 'Kwame O.',
-    amount: '450.00',
-    date: '24 Jul',
-    status: 'SHIPPED' as const,
-    initials: 'KO',
-    railOn: 3,
-  },
-  {
-    transaction_id: '2',
-    title: 'Ankara dress',
-    subtitle: 'Link shared',
-    amount: '320.00',
-    date: '25 Jul',
-    status: 'AWAITING_DEPOSIT' as const,
-    initials: '',
-    urgentNote: 'Expires in 21h',
-    railOn: 1,
-  },
-  {
-    transaction_id: '3',
-    title: 'JBL Flip 6 speaker',
-    subtitle: 'Yaw M.',
-    amount: '780.00',
-    date: '26 Jul',
-    status: 'FUNDS_SECURED' as const,
-    initials: 'YM',
-    urgentNote: 'Ship within 48h',
-    railOn: 2,
-    isMine: true,
-  },
-];
+import { useUserProfile } from '../hooks/useUser';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
+import type { EscrowStatus } from '../theme/tokens';
 
 export function HomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const insets = useSafeAreaInsets();
+  const { data: profile } = useUserProfile();
   const { data: escrows, isLoading, refetch } = useEscrowList();
   const [refreshing, setRefreshing] = React.useState(false);
+
+  const [filter, setFilter] = React.useState('ALL');
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -68,7 +42,19 @@ export function HomeScreen() {
     setRefreshing(false);
   };
 
-  const displayData = escrows?.length ? escrows : MOCK_TRANSACTIONS;
+  const filteredEscrows = React.useMemo(() => {
+    if (!escrows) return [];
+    if (filter === 'ALL') return escrows;
+    if (filter === 'AWAITING') return escrows.filter(tx => tx.current_status === 'AWAITING_DEPOSIT');
+    if (filter === 'SHIPPED') return escrows.filter(tx => tx.current_status === 'SHIPPED');
+    if (filter === 'DONE') return escrows.filter(tx => ['FUNDS_RELEASED', 'FUNDS_REFUNDED', 'DELIVERED_CONFIRMED', 'RESOLVED_AUTO'].includes(tx.current_status));
+    return escrows;
+  }, [escrows, filter]);
+
+  // Compute balances
+  const secured = escrows?.filter(tx => tx.current_status === 'FUNDS_SECURED').reduce((acc, tx) => acc + parseFloat(tx.amount), 0) || 0;
+  const awaiting = escrows?.filter(tx => tx.current_status === 'AWAITING_DEPOSIT').reduce((acc, tx) => acc + parseFloat(tx.amount), 0) || 0;
+  const total = secured + awaiting;
 
   return (
     <ScrollView
@@ -82,9 +68,9 @@ export function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={[typography.heading, { color: inkColors.tertiary }]}>
-          Hello, there
+          Hello, {profile?.phone_number ? profile.phone_number.slice(-4) : 'there'}
         </Text>
-        <Pressable style={styles.bellBtn}>
+        <Pressable style={styles.bellBtn} onPress={() => navigation.navigate('Notifications')}>
           <Bell size={21} color={inkColors.primary} />
         </Pressable>
       </View>
@@ -92,14 +78,14 @@ export function HomeScreen() {
       {/* Balance block */}
       <BalanceBlock
         label="Total held in escrow"
-        amount="1,635.00"
+        amount={total.toFixed(2)}
         pillState="secure"
         pillLabel="Protected"
         showEye
-        allocation={{ secured: 1315, awaiting: 320 }}
+        allocation={{ secured, awaiting }}
         actions={[
-          { title: 'New link', variant: 'ink', onPress: () => {} },
-          { title: 'Withdraw', variant: 'line', onPress: () => {} },
+          { title: 'New link', variant: 'ink', onPress: () => navigation.navigate('CreateEscrow') },
+          { title: 'Statement', variant: 'line', onPress: () => navigation.navigate('Statement') },
         ]}
       />
 
@@ -107,7 +93,9 @@ export function HomeScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={typography.subhead}>Escrows</Text>
-          <Text style={[typography.label, { color: inkColors.tertiary }]}>See all</Text>
+          <Pressable onPress={() => navigation.navigate('Search')}>
+            <Text style={[typography.label, { color: inkColors.tertiary }]}>Search</Text>
+          </Pressable>
         </View>
 
         {/* Filter chips */}
@@ -116,35 +104,43 @@ export function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chipRail}
         >
-          <View style={[styles.chip, styles.chipActive]}>
-            <Text style={[styles.chipText, styles.chipTextActive]}>All active</Text>
-          </View>
-          <View style={styles.chip}>
-            <Text style={styles.chipText}>Awaiting</Text>
-          </View>
-          <View style={styles.chip}>
-            <Text style={styles.chipText}>Shipped</Text>
-          </View>
-          <View style={styles.chip}>
-            <Text style={styles.chipText}>Done</Text>
-          </View>
+          <Pressable style={[styles.chip, filter === 'ALL' && styles.chipActive]} onPress={() => setFilter('ALL')}>
+            <Text style={[styles.chipText, filter === 'ALL' && styles.chipTextActive]}>All active</Text>
+          </Pressable>
+          <Pressable style={[styles.chip, filter === 'AWAITING' && styles.chipActive]} onPress={() => setFilter('AWAITING')}>
+            <Text style={[styles.chipText, filter === 'AWAITING' && styles.chipTextActive]}>Awaiting</Text>
+          </Pressable>
+          <Pressable style={[styles.chip, filter === 'SHIPPED' && styles.chipActive]} onPress={() => setFilter('SHIPPED')}>
+            <Text style={[styles.chipText, filter === 'SHIPPED' && styles.chipTextActive]}>Shipped</Text>
+          </Pressable>
+          <Pressable style={[styles.chip, filter === 'DONE' && styles.chipActive]} onPress={() => setFilter('DONE')}>
+            <Text style={[styles.chipText, filter === 'DONE' && styles.chipTextActive]}>Done</Text>
+          </Pressable>
         </ScrollView>
 
         {/* Transaction list */}
         <View style={styles.txList}>
-          {MOCK_TRANSACTIONS.map((tx) => (
-            <TransactionRow
-              key={tx.transaction_id}
-              title={tx.title}
-              subtitle={tx.subtitle}
-              amount={tx.amount}
-              date={tx.date}
-              status={tx.status}
-              initials={tx.initials}
-              urgentNote={tx.urgentNote}
-              railOn={tx.railOn}
-            />
-          ))}
+          {isLoading && !refreshing ? (
+            <ActivityIndicator color={inkColors.primary} style={{ marginTop: space.s8 }} />
+          ) : !filteredEscrows || filteredEscrows.length === 0 ? (
+            <Text style={[typography.body, { color: inkColors.tertiary, textAlign: 'center', marginTop: space.s6 }]}>
+              No active escrows
+            </Text>
+          ) : (
+            filteredEscrows.map((tx: any, idx: number) => (
+              <TransactionRow
+                key={tx.transaction_id}
+                title={tx.item_description || `Transaction ${tx.transaction_id.slice(0, 4)}`}
+                subtitle={tx.role === 'buyer' ? 'Sent' : 'Link shared'}
+                amount={tx.amount}
+                date={new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                status={tx.current_status as EscrowStatus}
+                initials={tx.role === 'buyer' ? 'B' : 'V'}
+                railOn={idx % 4}
+                onPress={() => navigation.navigate('TransactionStatus', { transactionId: tx.transaction_id })}
+              />
+            ))
+          )}
         </View>
       </View>
     </ScrollView>

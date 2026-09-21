@@ -87,7 +87,11 @@ export function PhoneInputScreen() {
                 style={styles.input}
                 value={phone}
                 onChangeText={(t) => {
-                  setPhone(t.replace(/[^0-9]/g, '').slice(0, 10));
+                  let cleaned = t.replace(/[^0-9]/g, '');
+                  if (cleaned.startsWith('0')) {
+                    cleaned = cleaned.substring(1);
+                  }
+                  setPhone(cleaned.slice(0, 9));
                   setError(null);
                 }}
                 placeholder="24 123 4567"
