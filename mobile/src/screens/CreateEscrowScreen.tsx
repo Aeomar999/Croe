@@ -31,12 +31,15 @@ export function CreateEscrowScreen() {
   const insets = useSafeAreaInsets();
   const createMutation = useCreateEscrow();
 
-  const [description, setDescription] = React.useState('');
+const [description, setDescription] = React.useState('');
   const [amount, setAmount] = React.useState('');
   const [delivery, setDelivery] = React.useState<DeliveryMode>('COURIER');
 
-  const fee = amount ? (parseFloat(amount) * 0.025).toFixed(2) : '0.00';
-  const received = amount ? (parseFloat(amount) - parseFloat(fee)).toFixed(2) : '0.00';
+  // Format amount to always have 2 decimal places for backend
+  const formattedAmount = amount ? parseFloat(amount).toFixed(2) : '';
+
+  const fee = formattedAmount ? (parseFloat(formattedAmount) * 0.025).toFixed(2) : '0.00';
+  const received = formattedAmount ? (parseFloat(formattedAmount) - parseFloat(fee)).toFixed(2) : '0.00';
 
   return (
     <KeyboardAvoidingView
@@ -142,13 +145,13 @@ export function CreateEscrowScreen() {
             title="Create secure link"
             variant="ink"
             onPress={() => {
-              if (!description || !amount) {
+              if (!description || !formattedAmount) {
                 // Should show some toast/error ideally
                 return;
               }
               createMutation.mutate({
                 item_description: description,
-                amount: amount,
+                amount: formattedAmount,
                 currency: 'GHS',
                 delivery_terms: delivery,
               }, {
