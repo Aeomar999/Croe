@@ -1,5 +1,12 @@
 import { pool } from "./pool.js";
 import { logger } from "../config/logger.js";
+import crypto from "crypto";
+
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16);
+  const derivedKey = crypto.scryptSync(password, salt, 32);
+  return `scrypt$${salt.toString("hex")}$${derivedKey.toString("hex")}`;
+}
 
 /**
  * Seed P0 sandbox custody account and test users.
@@ -9,6 +16,12 @@ async function seed(): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+
+    // Add password_hash column if not exists (safe to run multiple times)
+    await client.query(`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)
+    `);
 
     // Seed test users for P0 (placeholders until auth)
     const testUsers = [
@@ -23,6 +36,24 @@ async function seed(): Promise<void> {
         [u.id, u.phone],
       );
     }
+
+    // Seed admin user
+    const adminEmail = "amoahjerry@croe.app";
+    const adminPassword = "Password@123";
+    const adminPasswordHash = hashPassword(adminPassword);
+    const adminId = "00000000-0000-0000-0000-000000000099";
+
+    await client.query(
+      `INSERT INTO users (user_id, email, phone_number, password_hash, role, kyc_tier, trust_score, is_frozen, full_name)
+       VALUES ($1, $2, $3, $4, 'admin', 2, 100.00, false, 'Jerry Amoah')
+       ON CONFLICT (user_id) DO UPDATE SET
+         email = EXCLUDED.email,
+         password_hash = EXCLUDED.password_hash,
+         role = EXCLUDED.role`,
+      [adminId, adminEmail, "+233000000099", adminPasswordHash],
+    );
+
+    logger.info("Seeded admin user: amoahjerry@croe.app");
 
     // Seed P0 sandbox custody account
     const { rows } = await client.query(

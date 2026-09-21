@@ -25,7 +25,21 @@ const app: Application = express();
 
 // Security
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN }));
+
+// CORS — support multiple origins (comma-separated in env)
+const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
 
 // Correlation ID — earliest middleware so all downstream code can use it
 app.use(correlationId);
