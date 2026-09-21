@@ -8,6 +8,8 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
@@ -16,6 +18,10 @@ import { Pill } from '../theme/components/Pill';
 import { Avatar } from '../theme/components/Avatar';
 import { ChevronRight, Shield, Bell, FileText, HelpCircle, LogOut } from '../theme/components/icons';
 import { useAuth } from '../hooks/useAuth';
+import { useUserProfile, useKycStatus } from '../hooks/useUser';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
 
 interface SettingsRowProps {
   icon: React.ReactNode;
@@ -43,7 +49,26 @@ function SettingsRow({ icon, label, value, onPress, showChevron = true }: Settin
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { signOut } = useAuth();
+  
+  const { data: profile, isLoading: isLoadingProfile } = useUserProfile();
+  const { data: kyc, isLoading: isLoadingKyc } = useKycStatus();
+
+  const isLoading = isLoadingProfile || isLoadingKyc;
+  
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator color={inkColors.primary} />
+      </View>
+    );
+  }
+
+  const phoneStr = profile?.phone_number || '';
+  const score = profile?.trust_score ?? 100;
+  const tier = kyc?.tier ?? 0;
+  const kycStatus = kyc?.status ?? 'PENDING';
 
   return (
     <ScrollView
@@ -56,12 +81,16 @@ export function ProfileScreen() {
 
       {/* User card */}
       <View style={styles.userCard}>
-        <Avatar initials="AK" size={56} />
+        <Avatar initials={phoneStr ? phoneStr.slice(-2) : '??'} size={56} />
         <View style={{ flex: 1 }}>
-          <Text style={[typography.title, { color: inkColors.primary }]}>Akosua M.</Text>
-          <Text style={[typography.caption, { marginTop: 2 }]}>+233 24 123 4567</Text>
+          <Text style={[typography.title, { color: inkColors.primary }]}>User</Text>
+          <Text style={[typography.caption, { marginTop: 2 }]}>{phoneStr}</Text>
         </View>
-        <Pill state="done" label="Verified" isEnd />
+        {kycStatus === 'VERIFIED' && tier > 0 ? (
+          <Pill state="done" label="Verified" isEnd />
+        ) : (
+          <Pill state="caution" label="Unverified" isEnd />
+        )}
       </View>
 
       {/* Trust score */}
@@ -74,10 +103,10 @@ export function ProfileScreen() {
             <Text style={typography.subhead}>Trust score</Text>
             <Text style={[typography.caption, { marginTop: 2 }]}>Based on your transaction history</Text>
           </View>
-          <Text style={[typography.title, { color: states.secure.deep }]}>98</Text>
+          <Text style={[typography.title, { color: states.secure.deep }]}>{score}</Text>
         </View>
         <View style={styles.trustBar}>
-          <View style={[styles.trustBarFill, { width: '98%' }]} />
+          <View style={[styles.trustBarFill, { width: `${Math.max(0, Math.min(100, score))}%` }]} />
         </View>
       </View>
 
@@ -89,13 +118,15 @@ export function ProfileScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={typography.subhead}>KYC tier</Text>
-            <Text style={[typography.caption, { marginTop: 2 }]}>Tier 1 — phone verified</Text>
+            <Text style={[typography.caption, { marginTop: 2 }]}>Tier {tier} — {tier > 0 ? 'Verified' : 'Unverified'}</Text>
           </View>
-          <Pill state="caution" label="Tier 1" isEnd />
+          <Pill state={tier > 0 ? "done" : "caution"} label={`Tier ${tier}`} isEnd />
         </View>
-        <Text style={[typography.caption, { marginTop: space.s3, color: inkColors.tertiary }]}>
-          Upgrade to Tier 2 to create links above GH₵ 5,000.00
-        </Text>
+        {tier < 2 && (
+          <Text style={[typography.caption, { marginTop: space.s3, color: inkColors.tertiary }]}>
+            Upgrade to Tier {tier + 1} to unlock higher limits.
+          </Text>
+        )}
       </View>
 
       {/* Settings */}
@@ -104,19 +135,23 @@ export function ProfileScreen() {
           icon={<Bell size={20} color={inkColors.primary} />}
           label="Notifications"
           value="On"
+          onPress={() => navigation.navigate('Notifications')}
         />
         <SettingsRow
           icon={<FileText size={20} color={inkColors.primary} />}
           label="KYC verification"
-          value="Tier 1"
+          value={`Tier ${tier}`}
+          onPress={() => navigation.navigate('KycStatus')}
         />
         <SettingsRow
           icon={<HelpCircle size={20} color={inkColors.primary} />}
           label="Help centre"
+          onPress={() => navigation.navigate('HelpCentre')}
         />
         <SettingsRow
           icon={<Shield size={20} color={inkColors.primary} />}
           label="Security"
+          onPress={() => navigation.navigate('Security')}
         />
       </View>
 
@@ -226,3 +261,4 @@ const styles = StyleSheet.create({
     borderColor: line.primary,
   },
 });
+

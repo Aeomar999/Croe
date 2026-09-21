@@ -10,17 +10,23 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
 import { typography } from '../theme/typography';
 import { Button } from '../theme/components/Button';
 import { Pill } from '../theme/components/Pill';
 import { ArrowLeft, Plus, Shield } from '../theme/components/icons';
+import { useOpenDispute } from '../hooks/useDispute';
+
+type RootStackParamList = {
+  DisputeOpen: { transactionId: string };
+};
 
 type DisputeReason = 'NOT_RECEIVED' | 'NOT_AS_DESCRIBED' | 'DAMAGED';
 
@@ -32,7 +38,10 @@ const REASONS: { key: DisputeReason; label: string }[] = [
 
 export function DisputeOpenScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, 'DisputeOpen'>>();
+  const { transactionId } = route.params || { transactionId: '' };
   const insets = useSafeAreaInsets();
+  const disputeMutation = useOpenDispute();
   const [reason, setReason] = React.useState<DisputeReason>('NOT_RECEIVED');
   const [description, setDescription] = React.useState('');
 
@@ -131,7 +140,30 @@ export function DisputeOpenScreen() {
 
         {/* CTA */}
         <View>
-          <Button testID="submitDisputeBtn" title="Submit for review" variant="ink" onPress={() => {}} fullWidth />
+          <Button
+            testID="submitDisputeBtn"
+            title="Submit for review"
+            variant="ink"
+            onPress={() => {
+              disputeMutation.mutate({
+                transaction_id: transactionId,
+                reason_code: reason,
+                claim_description: description,
+                evidence_artifact_ids: [], // Mocking for now
+              }, {
+                onSuccess: () => {
+                  Alert.alert('Dispute submitted', 'Your dispute has been submitted for review.');
+                  navigation.goBack();
+                },
+                onError: (error) => {
+                  Alert.alert('Error', 'Failed to submit dispute.');
+                  console.error(error);
+                }
+              });
+            }}
+            fullWidth
+            isLoading={disputeMutation.isPending}
+          />
           <Text style={styles.footNote}>
             Median resolution: under ten seconds.
           </Text>

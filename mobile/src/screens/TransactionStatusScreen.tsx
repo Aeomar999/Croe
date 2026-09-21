@@ -9,8 +9,12 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, states, shape, space, layout, line } from '../theme/tokens';
 import { typography } from '../theme/typography';
@@ -18,6 +22,8 @@ import { Button } from '../theme/components/Button';
 import { Pill } from '../theme/components/Pill';
 import { ArrowLeft, Shield, Check } from '../theme/components/icons';
 import { stateToWords, stateToPillState } from '../theme/tokens';
+import { useEscrow, useShip, useConfirmDelivery } from '../hooks/useEscrow';
+import { useAuthStore } from '../stores/auth';
 import type { PillState, EscrowStatus } from '../theme/tokens';
 
 const STEPS = [
@@ -35,19 +41,34 @@ const STATUS_ORDER: EscrowStatus[] = [
   'DELIVERED_CONFIRMED',
 ];
 
-interface Props {
-  transactionId?: string;
-}
+type Props = NativeStackScreenProps<MainStackParamList, 'TransactionStatus'>;
 
-export function TransactionStatusScreen({ transactionId }: Props) {
-  const navigation = useNavigation();
+export function TransactionStatusScreen({ route }: Props) {
+  const { transactionId } = route.params;
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const insets = useSafeAreaInsets();
+  const { user } = useAuthStore();
+  const currentUserId = user?.user_id;
+  
+  const { data: escrow, isLoading } = useEscrow(transactionId);
+  const shipMutation = useShip();
+  const confirmMutation = useConfirmDelivery();
 
-  // Mock data for now
-  const status: EscrowStatus = 'FUNDS_SECURED';
+  if (isLoading || !escrow) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator color={inkColors.primary} />
+      </View>
+    );
+  }
+
+  const status: EscrowStatus = escrow.current_status as EscrowStatus;
   const pillState = (stateToPillState[status] ?? 'pending') as PillState;
   const pillLabel = stateToWords[status] ?? status;
   const currentStepIndex = STATUS_ORDER.indexOf(status);
+  
+  const isVendor = escrow.vendor_id === currentUserId;
+  const isBuyer = escrow.buyer_id === currentUserId;
 
   return (
     <ScrollView
@@ -61,7 +82,7 @@ export function TransactionStatusScreen({ transactionId }: Props) {
           <ArrowLeft size={20} color={inkColors.primary} />
         </Pressable>
         <Text style={[typography.micro, { color: inkColors.tertiary }]}>
-          NO. CR-89201
+          NO. {transactionId.slice(0, 8).toUpperCase()}
         </Text>
         <View style={{ flex: 1 }} />
         <Pill state={pillState} label={pillLabel} isEnd />
@@ -73,15 +94,17 @@ export function TransactionStatusScreen({ transactionId }: Props) {
           Held in escrow
         </Text>
         <Text style={[typography.display, { marginTop: space.s2 }]}>
-          <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold' }}>GH₵</Text>450.00
+          <Text style={{ fontFamily: 'PlusJakartaSans-ExtraBold' }}>GH₵</Text>{escrow.amount}
         </Text>
         <View style={styles.itemLine}>
-          <Text style={[typography.caption, { color: inkColors.tertiary }]}>Buyer</Text>
-          <Text style={[typography.subhead, { color: inkColors.primary }]}>Kwame O.</Text>
+          <Text style={[typography.caption, { color: inkColors.tertiary }]}>{isVendor ? 'Buyer' : 'Vendor'}</Text>
+          <Text style={[typography.subhead, { color: inkColors.primary }]}>{isVendor ? 'Customer' : 'Store'}</Text>
         </View>
         <View style={styles.itemLine}>
-          <Text style={[typography.caption, { color: inkColors.tertiary }]}>Paid</Text>
-          <Text style={[typography.subhead, { color: inkColors.primary }]}>Today, 13:58</Text>
+          <Text style={[typography.caption, { color: inkColors.tertiary }]}>Created</Text>
+          <Text style={[typography.subhead, { color: inkColors.primary }]}>
+            {new Date(escrow.created_at).toLocaleDateString()}
+          </Text>
         </View>
       </View>
 
@@ -129,32 +152,61 @@ export function TransactionStatusScreen({ transactionId }: Props) {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[typography.label, { color: states.secure.deep }]}>
-            You're cleared to ship
+            {status === 'FUNDS_SECURED' ? (isVendor ? "You're cleared to ship" : "Funds are secured") : "Transaction Protected"}
           </Text>
           <Text style={[typography.caption, { color: states.secure.deep, marginTop: 3 }]}>
-            Kwame's payment is safely secured in Croe. You'll be paid out when
-            he confirms delivery.
+            {status === 'FUNDS_SECURED' && isVendor 
+              ? "Payment is safely secured in Croe. You'll be paid out when delivery is confirmed." 
+              : "Payment is safely held in escrow until the transaction is complete."}
           </Text>
         </View>
       </View>
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button testID="markShippedBtn" title="Mark as shipped" variant="ink" size="sm" onPress={() => {}} fullWidth />
-        <Button testID="messageBuyerBtn" title="Message buyer" variant="line" size="sm" onPress={() => {}} fullWidth />
+        {isVendor && status === 'FUNDS_SECURED' && (
+          <Button 
+            testID="markShippedBtn" 
+            title="Mark as shipped" 
+            variant="ink" 
+            size="sm" 
+            onPress={() => shipMutation.mutate(transactionId)} 
+            fullWidth 
+            isLoading={shipMutation.isPending}
+          />
+        )}
+        {isBuyer && status === 'SHIPPED' && (
+          <Button 
+            testID="confirmDeliveryBtn" 
+            title="Confirm Delivery" 
+            variant="ink" 
+            size="sm" 
+            onPress={() => confirmMutation.mutate(transactionId)} 
+            fullWidth 
+            isLoading={confirmMutation.isPending}
+          />
+        )}
       </View>
 
-      <View style={{ flex: 1 }} />
+      <View style={{ flex: 1, minHeight: 20 }} />
 
       {/* Dispute link */}
-      <Pressable testID="disputeBtn" style={styles.disputeLink}>
-        <Text style={[typography.label, { color: inkColors.tertiary }]}>
-          Something wrong? Open a dispute
-        </Text>
-        <Text style={[typography.caption, { color: inkColors.tertiary, marginTop: 2 }]}>
-          Free · most are resolved in under ten seconds
-        </Text>
-      </Pressable>
+      {status === 'DISPUTE_OPENED' || status === 'UNDER_HUMAN_REVIEW' || status === 'RESOLVED_AUTO' ? (
+        <Pressable testID="disputeStatusBtn" style={styles.disputeLink} onPress={() => navigation.navigate('DisputeStatus', { transactionId })}>
+          <Text style={[typography.label, { color: inkColors.primary }]}>
+            View dispute status
+          </Text>
+        </Pressable>
+      ) : (
+        <Pressable testID="disputeBtn" style={styles.disputeLink} onPress={() => navigation.navigate('DisputeOpen', { transactionId })}>
+          <Text style={[typography.label, { color: inkColors.tertiary }]}>
+            Something wrong? Open a dispute
+          </Text>
+          <Text style={[typography.caption, { color: inkColors.tertiary, marginTop: 2 }]}>
+            Free · most are resolved in under ten seconds
+          </Text>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }

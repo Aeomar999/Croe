@@ -65,7 +65,8 @@ export function OtpEntryScreen() {
       setLoading(true);
       setError(null);
       try {
-        const result = await verifyOTP(phone, otp);
+        const e164Phone = phone.replace(/\s+/g, '');
+        const result = await verifyOTP(e164Phone, otp);
         await setTokens(result.access_token, result.refresh_token);
       } catch (e: any) {
         setError(e?.response?.data?.message ?? 'Invalid code. Try again.');
@@ -92,10 +93,13 @@ export function OtpEntryScreen() {
     [handleVerify],
   );
 
+
+
   const handleResend = async () => {
     if (countdown > 0) return;
     try {
-      await requestOTP(phone);
+      const e164Phone = phone.replace(/\s+/g, '');
+      await requestOTP(e164Phone);
       setCountdown(RESEND_SECONDS);
       setError(null);
     } catch {

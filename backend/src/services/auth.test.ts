@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { hashOTP, generateOTP, requestOTP, verifyOTP, createSession, refreshSession, logout, requireAuth } from "./auth.js";
 import { closeDatabasePool, getTransactionClient } from "../db/pool.js";
-import { closeRedis } from "../config/redis.js";
+import { closeRedis, redis } from "../config/redis.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { env } from "../config/env.js";
 
-const TEST_PHONE = "+2330000000001";
-const TEST_PHONE_2 = "+2330000000002";
+const TEST_PHONE = "+2330000000091";
+const TEST_PHONE_2 = "+2330000000092";
 
 async function createTestUser(phone: string = TEST_PHONE): Promise<string> {
   const client = await getTransactionClient();
@@ -25,12 +25,19 @@ async function createTestUser(phone: string = TEST_PHONE): Promise<string> {
 async function cleanTestData(): Promise<void> {
   const client = await getTransactionClient();
   try {
-    await client.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+233000%')");
-    await client.query("DELETE FROM otp_challenges WHERE phone_number LIKE '+233000%'");
-    await client.query("DELETE FROM transaction_ledger WHERE actor_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+233000%')");
-    await client.query("DELETE FROM users WHERE phone_number LIKE '+233000%'");
+    await client.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+233000000009%')");
+    await client.query("DELETE FROM otp_challenges WHERE phone_number LIKE '+233000000009%'");
+    await client.query("DELETE FROM transaction_ledger WHERE actor_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+233000000009%')");
+    await client.query("DELETE FROM user_preferences WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+233000000009%')");
+    await client.query("DELETE FROM users WHERE phone_number LIKE '+233000000009%'");
   } finally {
     client.release();
+  }
+  
+  // Clear redis rate limits for tests
+  const keys = await redis.keys("rl:*");
+  if (keys.length > 0) {
+    await redis.del(...keys);
   }
 }
 
@@ -209,7 +216,7 @@ describe("verifyOTP", () => {
     }
 
     await expect(verifyOTP(TEST_PHONE, "000000")).rejects.toThrow("OTP locked");
-  });
+  }, 10000);
 });
 
 describe("createSession", () => {

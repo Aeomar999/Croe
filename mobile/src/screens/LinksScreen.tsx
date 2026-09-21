@@ -11,12 +11,17 @@ import {
   TextInput,
   StyleSheet,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { surfaces, ink as inkColors, shape, space, layout, line } from '../theme/tokens';
 import { typography } from '../theme/typography';
 import { TransactionRow } from '../components/TransactionRow';
 import { Search, Plus } from '../theme/components/icons';
+import { useNavigation } from '@react-navigation/native';
+import { useEscrowList } from '../hooks/useEscrow';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../navigation/MainStack';
 import type { EscrowStatus } from '../theme/tokens';
 
 type FilterKey = 'all' | 'awaiting' | 'shipped' | 'done';
@@ -28,82 +33,31 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'done', label: 'Done' },
 ];
 
-const MOCK_LINKS = [
-  {
-    transaction_id: '1',
-    title: 'Nike Air Max 270',
-    subtitle: 'Kwame O.',
-    amount: '450.00',
-    date: '24 Jul',
-    status: 'SHIPPED' as EscrowStatus,
-    initials: 'KO',
-    railOn: 3,
-  },
-  {
-    transaction_id: '2',
-    title: 'Ankara dress',
-    subtitle: 'Link shared',
-    amount: '320.00',
-    date: '25 Jul',
-    status: 'AWAITING_DEPOSIT' as EscrowStatus,
-    initials: '',
-    urgentNote: 'Expires in 21h',
-    railOn: 1,
-  },
-  {
-    transaction_id: '3',
-    title: 'JBL Flip 6 speaker',
-    subtitle: 'Yaw M.',
-    amount: '780.00',
-    date: '26 Jul',
-    status: 'FUNDS_SECURED' as EscrowStatus,
-    initials: 'YM',
-    urgentNote: 'Ship within 48h',
-    railOn: 2,
-  },
-  {
-    transaction_id: '4',
-    title: 'iPhone 13 case',
-    subtitle: 'Ama D.',
-    amount: '85.00',
-    date: '19 Jul',
-    status: 'FUNDS_RELEASED' as EscrowStatus,
-    initials: 'AD',
-    railOn: 4,
-  },
-  {
-    transaction_id: '5',
-    title: 'Leather bag',
-    subtitle: 'Link shared',
-    amount: '250.00',
-    date: '27 Jul',
-    status: 'LINK_CREATED' as EscrowStatus,
-    initials: '',
-    railOn: 0,
-  },
-];
-
 export function LinksScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = React.useState<FilterKey>('all');
   const [search, setSearch] = React.useState('');
+  
+  const { data: escrows, isLoading, refetch } = useEscrowList();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 800));
+    await refetch();
     setRefreshing(false);
   };
 
-  const filtered = MOCK_LINKS.filter((tx) => {
-    if (filter === 'awaiting') return tx.status === 'AWAITING_DEPOSIT' || tx.status === 'LINK_CREATED';
-    if (filter === 'shipped') return tx.status === 'SHIPPED' || tx.status === 'FUNDS_SECURED';
-    if (filter === 'done') return tx.status === 'FUNDS_RELEASED' || tx.status === 'FUNDS_REFUNDED';
+  const filtered = (escrows || []).filter((tx: any) => {
+    if (filter === 'awaiting') return tx.current_status === 'AWAITING_DEPOSIT' || tx.current_status === 'LINK_CREATED';
+    if (filter === 'shipped') return tx.current_status === 'SHIPPED' || tx.current_status === 'FUNDS_SECURED';
+    if (filter === 'done') return tx.current_status === 'FUNDS_RELEASED' || tx.current_status === 'FUNDS_REFUNDED' || tx.current_status === 'RESOLVED_AUTO';
     return true;
-  }).filter((tx) => {
+  }).filter((tx: any) => {
     if (!search) return true;
     const q = search.toLowerCase();
-    return tx.title.toLowerCase().includes(q) || tx.subtitle.toLowerCase().includes(q);
+    const desc = tx.item_description || '';
+    return desc.toLowerCase().includes(q) || tx.transaction_id.toLowerCase().includes(q);
   });
 
   return (
@@ -118,7 +72,7 @@ export function LinksScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={typography.heading}>Links</Text>
-        <Pressable style={styles.addBtn}>
+        <Pressable style={styles.addBtn} onPress={() => navigation.navigate('CreateEscrow')}>
           <Plus size={20} color={inkColors.primary} />
         </Pressable>
       </View>
@@ -161,32 +115,33 @@ export function LinksScreen() {
 
       {/* Escrow list */}
       <View style={styles.txList}>
-        {filtered.map((tx) => (
-          <TransactionRow
-            key={tx.transaction_id}
-            title={tx.title}
-            subtitle={tx.subtitle}
-            amount={tx.amount}
-            date={tx.date}
-            status={tx.status}
-            initials={tx.initials}
-            urgentNote={tx.urgentNote}
-            railOn={tx.railOn}
-            onPress={() => {}}
-          />
-        ))}
+        {isLoading && !refreshing ? (
+          <ActivityIndicator color={inkColors.primary} style={{ marginTop: space.s8 }} />
+        ) : filtered.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={[typography.subhead, { color: inkColors.tertiary }]}>
+              No escrows found
+            </Text>
+            <Text style={[typography.caption, { color: inkColors.tertiary, marginTop: 4 }]}>
+              {search ? 'Try a different search' : 'Create a link to get started'}
+            </Text>
+          </View>
+        ) : (
+          filtered.map((tx: any, idx: number) => (
+            <TransactionRow
+              key={tx.transaction_id}
+              title={tx.item_description || `Transaction ${tx.transaction_id.slice(0, 4)}`}
+              subtitle={tx.role === 'buyer' ? 'Sent' : 'Link shared'}
+              amount={tx.amount}
+              date={new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+              status={tx.current_status as EscrowStatus}
+              initials={tx.role === 'buyer' ? 'B' : 'V'}
+              railOn={idx % 4}
+              onPress={() => navigation.navigate('TransactionStatus', { transactionId: tx.transaction_id })}
+            />
+          ))
+        )}
       </View>
-
-      {filtered.length === 0 && (
-        <View style={styles.empty}>
-          <Text style={[typography.subhead, { color: inkColors.tertiary }]}>
-            No escrows found
-          </Text>
-          <Text style={[typography.caption, { color: inkColors.tertiary, marginTop: 4 }]}>
-            {search ? 'Try a different search' : 'Create a link to get started'}
-          </Text>
-        </View>
-      )}
     </ScrollView>
   );
 }

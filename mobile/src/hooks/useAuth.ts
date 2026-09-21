@@ -11,7 +11,7 @@ export function useAuth() {
     queryKey: ['auth', 'me'],
     queryFn: async () => {
       const { data } = await api.get('/auth/me');
-      return data.user;
+      return data;
     },
     enabled: isAuthenticated && !!accessToken,
     staleTime: 5 * 60 * 1000,

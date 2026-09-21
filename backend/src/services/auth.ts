@@ -6,8 +6,18 @@ import { redis } from "../config/redis.js";
 import { logger } from "../config/logger.js";
 import { AppError } from "../middleware/error-handler.js";
 
+import { SmsProvider } from "../providers/sms/sms-provider.js";
+import { MockSmsProvider } from "../providers/sms/mock-provider.js";
+import { ArkeselSmsProvider } from "../providers/sms/arkesel-provider.js";
+
 const OTP_MAX_ATTEMPTS = 5;
 const ACCESS_TOKEN_TTL = "15m";
+
+// Instantiate provider based on environment
+const smsProvider: SmsProvider =
+  env.CUSTODY_PHASE === "P0" || env.NODE_ENV === "test"
+    ? new MockSmsProvider()
+    : new ArkeselSmsProvider();
 
 interface AuthSession {
   session_id: string;
@@ -44,6 +54,12 @@ export async function requestOTP(
 ): Promise<void> {
   const phoneKey = `rl:phone:otp_request:${phoneNumber}`;
   const ipKey = `rl:ip:otp_request:${forensicCtx.ip}`;
+  const cooldownKey = `rl:cooldown:otp_request:${phoneNumber}`;
+
+  const inCooldown = await redis.get(cooldownKey);
+  if (inCooldown) {
+    throw new AppError(429, "Too many requests. Please wait before requesting another code.", "OTP_RATE_LIMITED");
+  }
 
   const [phoneCount, ipCount] = await Promise.all([
     redis.incr(phoneKey),
@@ -58,10 +74,15 @@ export async function requestOTP(
   }
 
   if (phoneCount > 5) {
-    throw new AppError(429, "Rate limit exceeded", "OTP_RATE_LIMITED");
+    throw new AppError(429, "Maximum attempts reached. Try again in an hour.", "OTP_RATE_LIMITED");
   }
   if (ipCount > 20) {
-    throw new AppError(429, "Rate limit exceeded", "OTP_RATE_LIMITED");
+    throw new AppError(429, "Too many requests from this IP.", "OTP_RATE_LIMITED");
+  }
+
+  if (phoneCount > 1) {
+    const cooldownSeconds = Math.pow(2, phoneCount - 1) * 30;
+    await redis.set(cooldownKey, "1", "EX", cooldownSeconds);
   }
 
   const code = generateOTP();
@@ -78,7 +99,7 @@ export async function requestOTP(
     client.release();
   }
 
-  logger.info({ phone: phoneNumber, code }, "OTP sent (P0 stub)");
+  await smsProvider.sendOtp(phoneNumber, code);
 }
 
 export async function verifyOTP(

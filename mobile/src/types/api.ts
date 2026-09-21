@@ -47,9 +47,9 @@ export interface EscrowTransaction {
   current_status: EscrowState;
   vendor_id: string;
   buyer_id: string | null;
-  pay_url: string | null;
-  ref_number: string;
-  delivery_terms: string;
+  commission: string;
+  deposit_expires_at: string | null;
+  dispute_closes_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -63,8 +63,10 @@ export interface CreateEscrowRequest {
 
 export interface CreateEscrowResponse {
   transaction_id: string;
-  pay_url: string;
   current_status: EscrowState;
+  amount: string;
+  currency: EscrowCurrency;
+  created_at: string;
 }
 
 export interface DepositRequest {

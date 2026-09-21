@@ -22,6 +22,7 @@ export const env = {
   CUSTODY_PHASE: (process.env.CUSTODY_PHASE ?? "P0") as "P0" | "P1" | "P2" | "P3",
   AGGREGATOR_API_KEY: process.env.AGGREGATOR_API_KEY ?? "",
   AGGREGATOR_BASE_URL: process.env.AGGREGATOR_BASE_URL ?? "",
+  ARKESEL_SMS_API_KEY: process.env.ARKESEL_SMS_API_KEY ?? "",
   LLM_URL: process.env.LLM_URL ?? "http://localhost:11434",
   LLM_MODEL: process.env.LLM_MODEL ?? "",
   S3_BUCKET: process.env.S3_BUCKET ?? "",

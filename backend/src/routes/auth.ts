@@ -27,7 +27,9 @@ router.post("/auth/otp/request", otpRateLimiter, async (req: Request, res: Respo
       ip: req.ip!,
       deviceId: req.headers["x-device-fingerprint"] as string,
     });
-  } catch {
+  } catch (error) {
+    // Log the error to debug why OTP is failing silently
+    console.error("Swallowed error in requestOTP:", error);
     // Intentionally swallowed — always return 202 regardless of outcome.
   }
 
@@ -104,10 +106,87 @@ router.post("/auth/logout", authenticate, async (req: Request, res: Response) =>
  * 18-API-Reference.md §1 Authentication
  */
 router.get("/auth/me", authenticate, async (req: Request, res: Response) => {
-  res.status(200).json({
-    user_id: req.userId,
-    kyc_tier: req.kycTier,
-  });
+  const client = await import("../db/pool.js").then((m) => m.getTransactionClient());
+  try {
+    const { rows } = await client.query(
+      `SELECT phone_number, kyc_tier, trust_score FROM users WHERE user_id = $1`,
+      [req.userId]
+    );
+    if (rows.length === 0) throw new AppError(404, "User not found", "USER_NOT_FOUND");
+    
+    res.status(200).json({
+      user_id: req.userId,
+      phone_number: rows[0].phone_number,
+      kyc_tier: rows[0].kyc_tier,
+      trust_score: rows[0].trust_score,
+    });
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * POST /auth/pin — Set or change PIN
+ */
+router.post("/auth/pin", authenticate, async (req: Request, res: Response) => {
+  const { pin } = req.body;
+  if (!pin || !/^\d{4,6}$/.test(pin)) {
+    throw new AppError(400, "pin must be 4 to 6 digits", "VALIDATION_ERROR");
+  }
+
+  const crypto = await import("crypto");
+  const pinHash = crypto.createHash("sha256").update(pin).digest("hex");
+
+  const client = await import("../db/pool.js").then((m) => m.getTransactionClient());
+  try {
+    await client.query(`UPDATE users SET pin_hash = $1 WHERE user_id = $2`, [pinHash, req.userId]);
+    res.status(200).json({ message: "PIN updated successfully" });
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * GET /auth/sessions — List active sessions
+ */
+router.get("/auth/sessions", authenticate, async (req: Request, res: Response) => {
+  const client = await import("../db/pool.js").then((m) => m.getTransactionClient());
+  try {
+    const { rows } = await client.query(
+      `SELECT session_id, device_id, created_at, expires_at 
+       FROM auth_sessions 
+       WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > NOW()`,
+      [req.userId]
+    );
+    
+    // Mark the current session
+    const sessions = rows.map(r => ({
+      ...r,
+      is_current: r.session_id === req.sessionId
+    }));
+
+    res.status(200).json({ sessions });
+  } finally {
+    client.release();
+  }
+});
+
+/**
+ * POST /auth/sessions/revoke-other — Revoke all active sessions except the current one
+ */
+router.post("/auth/sessions/revoke-other", authenticate, async (req: Request, res: Response) => {
+  const client = await import("../db/pool.js").then((m) => m.getTransactionClient());
+  try {
+    await client.query(
+      `UPDATE auth_sessions 
+       SET revoked_at = NOW() 
+       WHERE user_id = $1 AND session_id != $2 AND revoked_at IS NULL`,
+      [req.userId, req.sessionId]
+    );
+    res.status(200).json({ message: "Other sessions revoked" });
+  } finally {
+    client.release();
+  }
 });
 
 export default router;
