@@ -3,8 +3,8 @@ packages:
   - "admin"
   - "mobile"
 allowBuilds:
-  '@parcel/watcher': set this to true or false
-  detox: set this to true or false
-  dtrace-provider: set this to true or false
-  esbuild: set this to true or false
-  unrs-resolver: set this to true or false
+  '@parcel/watcher': true
+  detox: true
+  dtrace-provider: true
+  esbuild: true
+  unrs-resolver: true
