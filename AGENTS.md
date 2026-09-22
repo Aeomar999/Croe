@@ -41,6 +41,7 @@ Croe/
   Progress.md                <- Living implementation tracker (keep updated)
   Production_manual.md       <- Go-live checklist (keep updated per PROC-03)
   GO-TO-MARKET.md            <- Business/GTM tracker: entity, licensing, ops, pilot (keep updated)
+  PRODUCTION_READINESS_PLAN.md <- Deep production readiness plan with phased task list
   .env.example               <- All required env vars with comments
   .gitignore
   for_agents/                <- THE SPEC PACKAGE (28 docs, sequential numbering)
@@ -339,6 +340,7 @@ These files MUST be updated as development progresses:
 |------|---------------|------|
 | Progress.md | Every phase gate, test result, or deployment change | PROC-01 |
 | Production_manual.md | Any change affecting production readiness (new secret, endpoint, service, migration, dependency) | PROC-03 |
+| PRODUCTION_READINESS_PLAN.md | When production readiness milestones change, gaps are closed, or timeline shifts | PROC-03 |
 | 27-Roadmap.md | When phase status changes ([ ] to [/] to [x]) | PROC-01 |
 
 ---
@@ -384,6 +386,7 @@ These files MUST be updated as development progresses:
 | Check what phase we are on | 27-Roadmap.md |
 | See implementation progress | Progress.md |
 | Find production readiness items | Production_manual.md |
+| See deep production readiness plan | PRODUCTION_READINESS_PLAN.md |
 | Check what env vars are needed | .env.example |
 | Understand the test strategy | 24-Testing-Strategy.md |
 | Find the 50-webhook race test spec | 24-Testing-Strategy.md section 2.1 |

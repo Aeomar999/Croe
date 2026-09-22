@@ -43,6 +43,22 @@ export function hashOTP(code: string): string {
   return crypto.createHash("sha256").update(code + env.OTP_PEPPER).digest("hex");
 }
 
+export function hashPassword(password: string): string {
+  // Use scrypt for password hashing (better than bcrypt for Node.js built-in)
+  const salt = crypto.randomBytes(16);
+  const derivedKey = crypto.scryptSync(password, salt, 32);
+  return `scrypt$${salt.toString("hex")}$${derivedKey.toString("hex")}`;
+}
+
+export function verifyPassword(password: string, hash: string): boolean {
+  if (!hash.startsWith("scrypt$")) return false;
+  const [, saltHex, keyHex] = hash.split("$");
+  const salt = Buffer.from(saltHex, "hex");
+  const derivedKey = crypto.scryptSync(password, salt, 32);
+  const keyBuf = Buffer.from(keyHex, "hex");
+  return crypto.timingSafeEqual(derivedKey, keyBuf);
+}
+
 export function generateOTP(): string {
   const code = crypto.randomInt(0, 1_000_000);
   return String(code).padStart(6, "0");
@@ -301,4 +317,31 @@ export async function requireAuth(
   }
 
   return { userId, sessionId, kycTier, role };
+}
+
+export async function adminLogin(
+  email: string,
+  password: string,
+): Promise<{ userId: string; accessToken: string; refreshToken: string }> {
+  const client = await getTransactionClient();
+  try {
+    const { rows } = await client.query<{ user_id: string; password_hash: string; role: string; kyc_tier: number }>(
+      `SELECT user_id, password_hash, role, kyc_tier FROM users WHERE email = $1 AND role IN ('reviewer','ops','admin')`,
+      [email],
+    );
+
+    if (rows.length === 0) {
+      throw new AppError(401, "Invalid credentials", "INVALID_CREDENTIALS");
+    }
+
+    const user = rows[0];
+    if (!user.password_hash || !verifyPassword(password, user.password_hash)) {
+      throw new AppError(401, "Invalid credentials", "INVALID_CREDENTIALS");
+    }
+
+    const tokens = await createSession(user.user_id);
+    return { userId: user.user_id, ...tokens };
+  } finally {
+    client.release();
+  }
 }

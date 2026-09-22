@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
-import { requestOTP, verifyOTP, refreshSession, logout } from "../services/auth.js";
+import { requestOTP, verifyOTP, refreshSession, logout, adminLogin } from "../services/auth.js";
 import { authenticate } from "../middleware/auth.js";
 import { authRateLimiter, otpRateLimiter } from "../middleware/rate-limiter.js";
 import { AppError } from "../middleware/error-handler.js";
@@ -96,6 +96,47 @@ router.post("/auth/logout", authenticate, async (req: Request, res: Response) =>
   try {
     await logout(req.sessionId!);
     res.status(204).end();
+  } catch (error) {
+    throw error;
+  }
+});
+
+/**
+ * POST /auth/login — Admin login with email/password
+ * Returns session tokens for admin users (reviewer, ops, admin)
+ */
+router.post("/auth/login", authRateLimiter, async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body as { email?: string; password?: string };
+
+    if (!email || !password) {
+      throw new AppError(400, "email and password are required", "VALIDATION_ERROR");
+    }
+
+    const tokens = await adminLogin(email, password);
+
+    // Fetch user details for the response
+    const client = await import("../db/pool.js").then((m) => m.getTransactionClient());
+    try {
+      const { rows } = await client.query<{ user_id: string; email: string; role: string; full_name: string | null }>(
+        `SELECT user_id, email, role, full_name FROM users WHERE user_id = $1`,
+        [tokens.userId],
+      );
+      const user = rows[0];
+      
+      res.status(200).json({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        user: {
+          userId: user.user_id,
+          email: user.email,
+          role: user.role,
+          name: user.full_name,
+        },
+      });
+    } finally {
+      client.release();
+    }
   } catch (error) {
     throw error;
   }
