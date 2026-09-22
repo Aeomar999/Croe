@@ -2,45 +2,43 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'phase/**']
   pull_request:
     branches: [main]
 
 jobs:
   typecheck:
-    name: Typecheck
+    name: Typecheck (all workspaces)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      - run: pnpm --filter croe-backend typecheck
+      - run: pnpm --filter @croe/admin typecheck
+      - run: pnpm --filter croe-mobile typecheck
 
   build:
-    name: Build
+    name: Build (all workspaces)
     runs-on: ubuntu-latest
     needs: typecheck
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - run: pnpm --filter croe-backend build
+      - run: pnpm --filter @croe/admin build
+      # mobile is Expo/React Native - built via EAS/Expo, not traditional build
       - uses: actions/upload-artifact@v4
         with:
           name: backend-dist
@@ -48,12 +46,9 @@ jobs:
           retention-days: 7
 
   test:
-    name: Tests
+    name: Tests (backend)
     runs-on: ubuntu-latest
     needs: typecheck
-    defaults:
-      run:
-        working-directory: backend
     services:
       postgres:
         image: postgres:16-alpine
@@ -92,12 +87,27 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm db:migrate
-      - run: pnpm test
+      - run: pnpm --filter croe-backend db:migrate
+      - run: pnpm --filter croe-backend test
+
+  admin-test:
+    name: Tests (admin)
+    runs-on: ubuntu-latest
+    needs: typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @croe/admin test
 
   deploy:
     name: Deploy to Render
