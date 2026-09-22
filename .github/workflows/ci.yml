@@ -38,7 +38,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter croe-backend build
       - run: pnpm --filter @croe/admin build
-      - run: pnpm --filter croe-mobile build
+      # mobile is Expo/React Native - built via EAS/Expo, not traditional build
       - uses: actions/upload-artifact@v4
         with:
           name: backend-dist
