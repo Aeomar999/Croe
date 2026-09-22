@@ -1,0 +1,19 @@
+{
+  "name": "croe",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.1.2",
+  "workspaces": [
+    "backend",
+    "admin",
+    "mobile"
+  ],
+  "scripts": {
+    "dev:backend": "pnpm --filter croe-backend dev",
+    "dev:admin": "pnpm --filter @croe/admin dev",
+    "build:backend": "pnpm --filter croe-backend build",
+    "build:admin": "pnpm --filter @croe/admin build",
+    "db:migrate": "pnpm --filter croe-backend db:migrate",
+    "db:seed": "pnpm --filter croe-backend db:seed"
+  }
+}
