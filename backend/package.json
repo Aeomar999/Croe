@@ -4,6 +4,7 @@
   "description": "Croe — mobile-first trust and escrow service backend",
   "type": "module",
   "main": "dist/index.js",
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",

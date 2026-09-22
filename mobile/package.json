@@ -2,6 +2,7 @@
   "name": "croe-mobile",
   "version": "1.0.0",
   "main": "index.ts",
+  "packageManager": "pnpm@11.1.2",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
