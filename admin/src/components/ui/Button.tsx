@@ -16,24 +16,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = `
       inline-flex items-center justify-center gap-2
       font-sans font-semibold tracking-tight
-      rounded-full transition-colors duration-[160ms] ease-[cubic-bezier(0.2,0.8,0.25,1)]
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/50
-      disabled:opacity-50 disabled:cursor-not-allowed
+      rounded-r-1 transition-all duration-[160ms] ease-[cubic-bezier(0.2,0.8,0.25,1)]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface
+      hover:-translate-y-px active:translate-y-0 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
     `;
 
     const variants = {
-      primary: 'bg-ink-primary text-on-ink hover:bg-ink-primary/90',
-      secondary: 'bg-surface text-ink-primary border border-line-primary hover:bg-surface/80',
-      outline: 'bg-transparent text-ink-primary border border-line-primary hover:bg-ink-primary/5',
-      ghost: 'bg-transparent text-ink-secondary hover:bg-ink-primary/5',
-      danger: 'bg-state-danger-wash text-state-danger-deep hover:bg-state-danger-wash/80',
-      wash: 'bg-state-pending-fill text-ink-primary hover:bg-state-pending-fill/80',
+      primary: 'bg-ink-primary text-on-ink shadow-sm hover:bg-ink-primary/90 hover:shadow-elev',
+      secondary: 'border border-line-primary bg-surface text-ink-primary hover:bg-sunken',
+      outline: 'border border-line-primary bg-transparent text-ink-primary hover:bg-sunken',
+      ghost: 'bg-transparent text-ink-secondary hover:bg-sunken hover:text-ink-primary',
+      danger: 'bg-state-danger-wash text-state-danger-deep hover:bg-state-danger-wash/75',
+      wash: 'bg-state-pending-fill text-ink-primary hover:bg-state-pending-fill/75',
     };
 
     const sizes = {
-      sm: 'h-11 px-5 text-label',
-      default: 'h-13 px-6 text-body',
-      lg: 'h-14 px-8 text-heading',
+      sm: 'h-9 px-3.5 text-label',
+      default: 'h-11 px-5 text-body',
+      lg: 'h-12 px-6 text-heading',
     };
 
     return (

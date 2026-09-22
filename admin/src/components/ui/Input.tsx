@@ -32,7 +32,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'w-full min-h-[56px] px-4 bg-surface border rounded-r-2 text-body font-medium text-ink-primary',
+              'w-full min-h-12 px-4 bg-surface border rounded-r-1 text-body font-medium text-ink-primary shadow-sm',
               'placeholder:text-ink-tertiary transition-colors duration-[160ms]',
               'focus:outline-none focus:border-ink-primary focus:ring-2 focus:ring-ink-primary/20',
               leftElement && 'pl-10',

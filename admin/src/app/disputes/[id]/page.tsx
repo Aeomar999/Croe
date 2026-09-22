@@ -1,6 +1,7 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { Table, TableRow, TableRowMain, TableRowFoot, TableNote } from '@/components/ui/Table';
@@ -20,9 +21,7 @@ import {
   Clock,
   DollarSign,
   User,
-  Eye,
-  Download,
-  MoreHorizontal,
+  ArrowLeft,
   ChevronDown,
   ChevronUp,
   FileText,
@@ -67,14 +66,6 @@ function EvidenceCard({ artifact }: { artifact: EvidenceArtifact }) {
           <span>{formatDate(artifact.uploadedAt)}</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm">
-          <Eye className="w-4 h-4" />
-        </Button>
-        <Button variant="ghost" size="sm">
-          <Download className="w-4 h-4" />
-        </Button>
-      </div>
     </Card>
   );
 }
@@ -108,7 +99,7 @@ function TimelineEvent({ event, index, total }: { event: LedgerEvent; index: num
           </div>
           {event.amountDelta && (
             <div className="text-right">
-              <p className={cn('text-body font-bold tabular-nums', event.amountDelta.startsWith('-') ? 'text-state-danger-fill' : 'text-state-secure-fill')}>
+            <p className={cn('text-body font-bold tabular-nums', event.amountDelta.startsWith('-') ? 'text-ink-primary' : 'text-state-secure-deep')}>
                 {event.amountDelta.startsWith('-') ? '' : '+'}{formatCurrency(event.amountDelta, event.currency || 'GHS')}
               </p>
             </div>
@@ -171,6 +162,7 @@ function PartyCard({ party, label }: { party: PartyInfo; label: string }) {
 
 export default function DisputeDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const disputeId = params.id as string;
   const queryClient = useQueryClient();
 
@@ -178,6 +170,7 @@ export default function DisputeDetailPage() {
   const [adjudicateAction, setAdjudicateAction] = useState<'REFUND_BUYER' | 'RELEASE_VENDOR'>('REFUND_BUYER');
   const [adjudicateReason, setAdjudicateReason] = useState('');
   const [adjudicateLoading, setAdjudicateLoading] = useState(false);
+  const [adjudicateError, setAdjudicateError] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
 
   const { data: dispute, isLoading, error } = useQuery({
@@ -197,19 +190,24 @@ export default function DisputeDetailPage() {
     },
     onError: (err) => {
       console.error('Failed to resolve dispute:', err);
-      alert('Failed to resolve dispute. Please try again.');
+      setAdjudicateError('We could not record this decision. Check the case is still available, then try again.');
+      setShowConfirm(false);
     },
   });
 
   const handleAdjudicate = async () => {
     if (!adjudicateReason.trim()) return;
+    setAdjudicateError('');
     setShowConfirm(true);
   };
 
   const handleConfirm = async () => {
     setAdjudicateLoading(true);
-    await resolveMutation.mutateAsync();
-    setAdjudicateLoading(false);
+    try {
+      await resolveMutation.mutateAsync();
+    } finally {
+      setAdjudicateLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -228,7 +226,7 @@ export default function DisputeDetailPage() {
         <Card padding="sheet" className="max-w-md mx-auto text-center">
           <AlertTriangle className="w-12 h-12 text-state-danger-fill mx-auto mb-4" />
           <p className="text-body text-ink-secondary">Dispute not found</p>
-          <Button onClick={() => window.history.back()} className="mt-4">
+          <Button onClick={() => router.push('/disputes/queue')} className="mt-4">
             Back to Queue
           </Button>
         </Card>
@@ -243,12 +241,21 @@ export default function DisputeDetailPage() {
       title={`Dispute ${dispute.disputeId.slice(0, 8)}`}
       subtitle={`${getReasonCodeLabel(dispute.reasonCode)} • ${formatCurrency(dispute.amount, dispute.currency)}`}
       headerAction={
-        canAdjudicate && (
-          <Button onClick={() => setShowAdjudicate(true)} variant="primary">
-            <Gavel className="w-4 h-4" />
-            Adjudicate
-          </Button>
-        )
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/disputes/queue"
+            className="inline-flex h-11 items-center gap-2 rounded-r-1 px-3 text-label font-semibold text-ink-secondary transition-colors hover:bg-sunken hover:text-ink-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/40"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Queue
+          </Link>
+          {canAdjudicate && (
+            <Button onClick={() => setShowAdjudicate(true)} variant="primary">
+              <Gavel className="w-4 h-4" />
+              Record decision
+            </Button>
+          )}
+        </div>
       }
     >
       {/* AI Recommendation Banner */}
@@ -360,8 +367,10 @@ export default function DisputeDetailPage() {
                       ? 'caution'
                       : dispute.status === 'AI_PROCESSING'
                       ? 'caution'
-                      : dispute.status === 'RESOLVED_AUTO' || dispute.status === 'RESOLVED_HUMAN'
+                      : dispute.status === 'RESOLVED_AUTO'
                       ? 'done'
+                      : dispute.status === 'FRAUD_LOCKOUT'
+                      ? 'danger'
                       : 'pending'
                   }
                   size="signal"
@@ -419,6 +428,12 @@ export default function DisputeDetailPage() {
             rows={4}
             required
           />
+
+          {adjudicateError && (
+            <div className="rounded-r-1 bg-state-danger-wash px-4 py-3 text-caption font-medium text-state-danger-deep" role="alert">
+              {adjudicateError}
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-line-primary">
             <Button variant="ghost" onClick={() => setShowAdjudicate(false)} disabled={adjudicateLoading}>

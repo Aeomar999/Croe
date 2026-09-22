@@ -25,7 +25,7 @@ export const Logo = forwardRef<HTMLSpanElement, LogoProps>(
             fontWeight: 800,
             fontSize: `${fontSize}px`,
             letterSpacing: '-0.038em',
-            color: '#17181B',
+            color: '#172033',
           }}
         >
           croe
@@ -36,7 +36,7 @@ export const Logo = forwardRef<HTMLSpanElement, LogoProps>(
             fontWeight: 800,
             fontSize: `${fontSize}px`,
             letterSpacing: '-0.038em',
-            color: '#1FC16B',
+            color: '#2563EB',
             marginLeft: '-0.08em',
           }}
         >

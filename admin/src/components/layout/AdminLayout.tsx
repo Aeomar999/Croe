@@ -32,16 +32,16 @@ export function AdminLayout({ children, title, subtitle, headerAction, isSplashS
       <Squiggles isSplashScreen={isSplashScreen} />
       <Sidebar />
       <PageContainer>
-        <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-sm border-b border-line-primary">
-          <div className="max-w-full px-gutter py-4 lg:px-8 flex items-center justify-between gap-4">
-            <div>
+        <header className="sticky top-[65px] lg:top-0 z-30 border-b border-line-primary bg-surface/85 backdrop-blur-md">
+          <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <div className="min-w-0">
               <h1 className="text-title font-bold text-ink-primary">{title}</h1>
               {subtitle && <p className="text-body text-ink-secondary mt-0.5">{subtitle}</p>}
             </div>
-            {headerAction && <div className="flex-shrink-0">{headerAction}</div>}
+            {headerAction && <div className="w-full lg:w-auto lg:flex-shrink-0">{headerAction}</div>}
           </div>
         </header>
-        <div className="lg:p-8 pt-6 relative z-10">{children}</div>
+        <div className="relative z-10 mx-auto max-w-[1600px] px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pb-12 lg:pt-8">{children}</div>
       </PageContainer>
     </div>
   );

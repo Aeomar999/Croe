@@ -27,18 +27,16 @@ export interface LoginResponse {
 
 // Dispute Types
 export type DisputeReasonCode =
-  | 'NOT_RECEIVED'
+  | 'ITEM_NOT_RECEIVED'
+  | 'ITEM_DAMAGED'
   | 'WRONG_ITEM'
-  | 'DAMAGED'
-  | 'NOT_AS_DESCRIBED'
-  | 'OTHER';
+  | 'ITEM_NOT_AS_DESCRIBED';
 
 export type DisputeStatus =
-  | 'OPENED'
   | 'AI_PROCESSING'
   | 'UNDER_HUMAN_REVIEW'
   | 'RESOLVED_AUTO'
-  | 'RESOLVED_HUMAN';
+  | 'FRAUD_LOCKOUT';
 
 export type AIAction = 'REFUND_BUYER' | 'RELEASE_VENDOR' | 'ESCALATE_HUMAN';
 

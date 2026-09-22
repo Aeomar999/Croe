@@ -5,17 +5,53 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: string, currency = 'GHS'): string {
-  const num = parseFloat(amount);
+  const formattedAmount = formatDecimal(amount);
   if (currency === 'GHS') {
-    return `GH₵${num.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `GH₵${formattedAmount}`;
   }
   if (currency === 'NGN') {
-    return `₦${num.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `₦${formattedAmount}`;
   }
   if (currency === 'KES') {
-    return `KSh${num.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `KSh${formattedAmount}`;
   }
-  return `${currency} ${num.toFixed(2)}`;
+  return `${currency} ${formattedAmount}`;
+}
+
+/** Formats a NUMERIC(15,2) value without coercing it to a JavaScript float. */
+export function formatDecimal(value: string): string {
+  const normalized = value.trim();
+  const isNegative = normalized.startsWith('-');
+  const unsigned = normalized.replace(/^[+-]/, '');
+  const [integerPart = '0', fractionalPart = ''] = unsigned.split('.', 2);
+  const whole = (integerPart.replace(/^0+(?=\d)/, '') || '0').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const fraction = `${fractionalPart}00`.slice(0, 2);
+
+  return `${isNegative ? '-' : ''}${whole}.${fraction}`;
+}
+
+/** Compares decimal strings precisely, preserving the financial wire format. */
+export function compareDecimalStrings(left: string, right: string): number {
+  const parse = (value: string) => {
+    const trimmed = value.trim();
+    const negative = trimmed.startsWith('-');
+    const [wholeRaw = '0', fractionalRaw = ''] = trimmed.replace(/^[+-]/, '').split('.', 2);
+    return {
+      negative,
+      whole: wholeRaw.replace(/^0+(?=\d)/, '') || '0',
+      fractional: fractionalRaw.replace(/\D/g, '').padEnd(2, '0').slice(0, 2),
+    };
+  };
+
+  const a = parse(left);
+  const b = parse(right);
+  if (a.negative !== b.negative) return a.negative ? -1 : 1;
+
+  const unsignedComparison = a.whole.length !== b.whole.length
+    ? a.whole.length - b.whole.length
+    : a.whole.localeCompare(b.whole) || a.fractional.localeCompare(b.fractional);
+
+  return a.negative ? -unsignedComparison : unsignedComparison;
 }
 
 export function formatDate(dateString: string): string {
@@ -53,33 +89,30 @@ export function getPriorityLabel(priority: number): string {
 
 export function getReasonCodeLabel(code: string): string {
   const labels: Record<string, string> = {
-    NOT_RECEIVED: 'Item Not Received',
+    ITEM_NOT_RECEIVED: 'Item Not Received',
+    ITEM_DAMAGED: 'Item Damaged',
     WRONG_ITEM: 'Wrong Item',
-    DAMAGED: 'Damaged',
-    NOT_AS_DESCRIBED: 'Not As Described',
-    OTHER: 'Other',
+    ITEM_NOT_AS_DESCRIBED: 'Item Not As Described',
   };
   return labels[code] || code;
 }
 
 export function getDisputeStatusLabel(status: string): string {
   const labels: Record<string, string> = {
-    OPENED: 'Opened',
     AI_PROCESSING: 'AI Review',
     UNDER_HUMAN_REVIEW: 'Human Review',
     RESOLVED_AUTO: 'Auto Resolved',
-    RESOLVED_HUMAN: 'Resolved',
+    FRAUD_LOCKOUT: 'Restricted',
   };
   return labels[status] || status;
 }
 
 export function getStatePillClass(state: string): string {
   const classes: Record<string, string> = {
-    OPENED: 'state-caution',
     AI_PROCESSING: 'state-caution',
     UNDER_HUMAN_REVIEW: 'state-caution',
     RESOLVED_AUTO: 'state-done',
-    RESOLVED_HUMAN: 'state-done',
+    FRAUD_LOCKOUT: 'state-danger',
     PENDING: 'state-pending',
     APPROVED: 'state-secure',
     REJECTED: 'state-danger',

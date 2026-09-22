@@ -40,8 +40,8 @@ export default function LoginPage() {
         <Card className="w-full max-w-md" padding="sheet">
           <div className="text-center mb-8">
             <Logo size={56} className="mx-auto mb-4" />
-            <h1 className="text-title font-bold text-ink-primary">Admin</h1>
-            <p className="text-body text-ink-secondary mt-2">Sign in to your admin account</p>
+            <h1 className="text-title font-bold text-ink-primary">Croe Operations</h1>
+            <p className="text-body text-ink-secondary mt-2">Sign in to access the reviewer console.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

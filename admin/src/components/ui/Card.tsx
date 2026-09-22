@@ -11,8 +11,8 @@ interface CardProps {
 export function Card({ children, className, padding = 'sheet' }: CardProps) {
   const paddingStyles = {
     none: '',
-    sheet: 'p-5 rounded-r-4 bg-surface',
-    'sheet-2': 'p-4 rounded-r-2 bg-surface',
+    sheet: 'rounded-r-4 border border-line-primary/80 bg-surface p-5 shadow-elev sm:p-6',
+    'sheet-2': 'rounded-r-2 border border-line-primary/70 bg-surface p-4',
   };
 
   return (
@@ -31,7 +31,7 @@ interface CardHeaderProps {
 
 export function CardHeader({ title, subtitle, action, className }: CardHeaderProps) {
   return (
-    <div className={cn('flex items-baseline justify-between gap-3 mb-4', className)}>
+    <div className={cn('mb-5 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3', className)}>
       <div>
         <h3 className="text-heading font-bold text-ink-primary">{title}</h3>
         {subtitle && <p className="text-caption text-ink-tertiary mt-0.5">{subtitle}</p>}

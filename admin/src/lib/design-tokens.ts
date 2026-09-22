@@ -1,15 +1,15 @@
 export const states = {
   secure: {
-    fill: '#1FC16B',
-    deep: '#127A45',
+    fill: '#2563EB',
+    deep: '#1E40AF',
   },
   caution: {
     fill: '#F5B02E',
     deep: '#8A5A00',
   },
   danger: {
-    fill: '#EF4444',
-    deep: '#A62020',
+    fill: '#B7791F',
+    deep: '#854D0E',
   },
   done: {
     fill: '#17181B',
