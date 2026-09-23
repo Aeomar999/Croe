@@ -19,7 +19,9 @@ import {
   HeartPulse,
   ActivitySquare,
   User,
-  Sparkles
+  Sparkles,
+  CircleDollarSign,
+  Heart
 } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
@@ -45,8 +47,8 @@ export default function DashboardPage() {
     <div className="flex items-center gap-4 mt-2 lg:mt-0">
       <div className="flex items-center bg-white rounded-full p-1 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02]">
         <button className="px-5 py-1.5 rounded-full bg-ink-primary text-white text-[13px] font-medium">Today</button>
-        <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary">Week</button>
-        <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary">Month</button>
+        <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary transition-colors">Week</button>
+        <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary transition-colors">Month</button>
       </div>
       <button className="px-5 py-2 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex items-center gap-1.5">
         <span className="text-[16px] font-light leading-none">+</span> New Authorization
@@ -74,10 +76,8 @@ export default function DashboardPage() {
           <motion.div variants={item} className="xl:col-span-6 bg-[#4A8B63] rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden h-[280px]">
             {/* Pill and link */}
             <div className="flex items-center justify-between relative z-10">
-              <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-2">
-                <div className="w-3.5 h-3.5 rounded-full border border-[#4A8B63] flex items-center justify-center">
-                  <span className="text-[9px] font-bold text-[#4A8B63]">$</span>
-                </div>
+              <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                <CircleDollarSign className="w-3.5 h-3.5 text-ink-primary" />
                 <span className="text-[12px] font-bold text-ink-primary">Revenue at risk</span>
               </div>
               <button className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink-primary hover:bg-white/90 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Bottom Section */}
-            <div className="border border-white/20 bg-white/5 rounded-[16px] p-4 grid grid-cols-3 mt-auto relative z-10">
+            <div className="border border-white/20 bg-white/5 rounded-[16px] p-4 grid grid-cols-3 mt-auto relative z-10 backdrop-blur-sm">
               <div className="pr-4">
                 <p className="text-white/70 text-[11px] font-medium mb-1">Recoverable this week</p>
                 <p className="text-white text-[14px] font-bold">{formatCurrency('121300', 'USD').replace('.00', '')}</p>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">42</p>
                   <p className="text-[10px] font-medium text-state-danger-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowUpRight className="w-2.5 h-2.5 text-state-danger-deep" /> 8 vs last week
+                    <ArrowUpRight className="w-2.5 h-2.5 text-state-danger-deep" /> <span className="text-state-danger-deep font-semibold">8</span> vs last week
                   </p>
                 </div>
               </div>
@@ -231,10 +231,14 @@ export default function DashboardPage() {
                 <h3 className="text-[18px] font-bold text-ink-primary">Attention required</h3>
                 <p className="text-[12px] text-ink-tertiary font-medium mt-0.5">Sorted by procedure date, then approval odds</p>
               </div>
-              <div className="bg-[#FF9A24] text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-[0_2px_8px_rgba(255,154,36,0.2)]">
-                <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                8 cases need action
-                <ArrowUpRight className="w-3 h-3" />
+              <div className="flex items-center gap-2">
+                <div className="bg-[#FF9A24] text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-[0_2px_8px_rgba(255,154,36,0.2)]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-black/60" />
+                  8 cases need action
+                </div>
+                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-primary hover:bg-[#F0F1F3] transition-colors">
+                  <ArrowUpRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
@@ -250,19 +254,19 @@ export default function DashboardPage() {
             {/* Scrollable Rows Container */}
             <div className="flex flex-col gap-2 overflow-y-auto min-h-0 pr-2 pb-2 custom-scrollbar flex-1">
               {[
-                { icon: User, name: 'MRI &middot; Lumbar Spine', sub: 'James Carter &middot; PA-48291', issue: 'Missing imaging report', payer: 'UnitedHealthcare', color: 'text-blue-700', odds: 78, segments: 8, due: 'Sep 24' },
-                { icon: BriefcaseMedical, name: 'Knee Arthroscopy', sub: 'Maria Gonzalez &middot; PA-48277', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-purple-700', odds: 61, segments: 6, due: 'Sep 25' },
-                { icon: HeartPulse, name: 'Spinal Fusion &middot; L4 to L5', sub: 'Thomas Reed &middot; PA-48102', issue: 'Peer to peer review requested', payer: 'UnitedHealthcare', color: 'text-blue-700', odds: 47, segments: 5, due: 'Sep 25' },
-                { icon: ActivitySquare, name: 'CT &middot; Abdomen and Pelvis', sub: 'Emma Wilson &middot; PA-48240', issue: 'Payer requested documents', payer: 'Cigna', color: 'text-teal-700', odds: 66, segments: 7, due: 'Sep 26' },
-                { icon: Stethoscope, name: 'Sleep Study &middot; In lab', sub: 'David Kim &middot; PA-48263', issue: 'Treatment history missing', payer: 'Anthem', color: 'text-blue-500', odds: 54, segments: 5, due: 'Sep 28' },
-                { icon: BriefcaseMedical, name: 'Hip Replacement', sub: 'Robert Taylor &middot; PA-48299', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-purple-700', odds: 32, segments: 3, due: 'Oct 01' },
+                { icon: User, name: 'MRI &middot; Lumbar Spine', sub: 'James Carter &middot; PA-48291', issue: 'Missing imaging report', payer: 'UnitedHealthcare', color: 'text-[#1B4086]', odds: 78, segments: 8, due: 'Sep 24' },
+                { icon: BriefcaseMedical, name: 'Knee Arthroscopy', sub: 'Maria Gonzalez &middot; PA-48277', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-[#9C3886]', odds: 61, segments: 6, due: 'Sep 25' },
+                { icon: Heart, name: 'Spinal Fusion &middot; L4 to L5', sub: 'Thomas Reed &middot; PA-48102', issue: 'Peer to peer review requested', payer: 'UnitedHealthcare', color: 'text-[#1B4086]', odds: 47, segments: 5, due: 'Sep 25' },
+                { icon: User, name: 'CT &middot; Abdomen and Pelvis', sub: 'Emma Wilson &middot; PA-48240', issue: 'Payer requested documents', payer: 'Cigna', color: 'text-[#008985]', odds: 66, segments: 7, due: 'Sep 26' },
+                { icon: Stethoscope, name: 'Sleep Study &middot; In lab', sub: 'David Kim &middot; PA-48263', issue: 'Treatment history missing', payer: 'Anthem', color: 'text-[#0060A9]', odds: 54, segments: 5, due: 'Sep 28' },
+                { icon: BriefcaseMedical, name: 'Hip Replacement', sub: 'Robert Taylor &middot; PA-48299', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-[#9C3886]', odds: 32, segments: 3, due: 'Oct 01' },
               ].map((row, i) => (
-                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-[16px] bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
+                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
                   
                   {/* Case Info */}
                   <div className="col-span-4 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
-                      <row.icon className="w-3.5 h-3.5" />
+                      <row.icon className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[13px] font-bold text-ink-primary truncate" dangerouslySetInnerHTML={{ __html: row.name }}></p>
@@ -281,10 +285,10 @@ export default function DashboardPage() {
                   {/* Payer */}
                   <div className="col-span-2 flex items-center">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-sm bg-blue-50 flex items-center justify-center shrink-0">
+                      <div className="w-4 h-4 rounded-sm bg-white shadow-sm flex items-center justify-center shrink-0">
                         <span className={cn("text-[10px] font-black tracking-tighter", row.color)}>{row.payer.charAt(0)}</span>
                       </div>
-                      <span className={cn("text-[11px] font-bold tracking-tight truncate", row.color)}>{row.payer}</span>
+                      <span className={cn("text-[11px] font-black tracking-tighter truncate", row.color)}>{row.payer.toLowerCase().includes('healthcare') ? 'United' : row.payer}</span>
                     </div>
                   </div>
 
@@ -304,7 +308,7 @@ export default function DashboardPage() {
                   {/* Due & Action */}
                   <div className="col-span-1 flex items-center justify-between min-w-[110px]">
                     <span className="text-[12px] font-medium text-ink-secondary">{row.due}</span>
-                    <button className="px-3 py-1 rounded-[10px] bg-white border border-black/10 text-[11px] font-bold text-ink-primary shadow-sm hover:shadow-md transition-all absolute right-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100">
+                    <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-bold text-ink-primary shadow-sm hover:shadow-md transition-all absolute right-4 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100">
                       Review case
                     </button>
                   </div>
