@@ -8,12 +8,9 @@ import {
   Bell,
   Settings,
   ChevronDown,
-  LogOut,
-  Menu
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import type { AdminRole } from '@/types';
-import { Logo } from '@/components/brand';
 
 const navigation: Array<{ name: string; href: string; roles: AdminRole[] }> = [
   { name: 'Dashboard', href: '/dashboard', roles: ['reviewer', 'ops', 'admin'] },
@@ -39,9 +36,9 @@ export function Sidebar() {
         key={item.name}
         href={item.href}
         className={cn(
-          'px-4 py-2 rounded-full text-[14px] font-semibold transition-all duration-200',
+          'px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors',
           isActive
-            ? 'bg-ink-primary text-white shadow-[0_2px_8px_rgba(0,0,0,0.12)]'
+            ? 'bg-ink-primary text-white'
             : 'text-ink-secondary hover:text-ink-primary hover:bg-black/5'
         )}
       >
@@ -51,15 +48,15 @@ export function Sidebar() {
   });
 
   return (
-    <div className="w-full px-6 py-5 flex items-center justify-between">
-      <div className="flex items-center gap-8">
+    <div className="w-full px-6 lg:px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center justify-center w-11 h-11 bg-ink-primary text-white rounded-full shadow-sm hover:scale-105 transition-transform">
-          <Logo size={24} style={{ color: 'white' }} />
+        <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 bg-ink-primary text-white rounded-full flex-shrink-0">
+          <span className="font-bold text-[18px]">C</span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center bg-white rounded-full p-1.5 shadow-sm border border-black/[0.04]">
+        {/* Desktop Nav in a white pill */}
+        <nav className="hidden lg:flex items-center bg-white rounded-full p-1 border border-black/[0.04]">
           {navLinks()}
         </nav>
       </div>
@@ -71,25 +68,26 @@ export function Sidebar() {
           <input 
             type="text" 
             placeholder="Search cases, patients, payers" 
-            className="pl-10 pr-4 py-2.5 rounded-full bg-white border border-black/[0.04] shadow-sm text-[14px] font-medium w-[280px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary transition-all"
+            className="pl-9 pr-4 py-2 rounded-full bg-white border border-black/[0.04] text-[13px] font-medium w-[240px] xl:w-[280px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
           />
         </div>
 
         {/* Icons */}
-        <button className="flex items-center justify-center w-11 h-11 bg-white border border-black/[0.04] rounded-full shadow-sm text-ink-secondary hover:text-ink-primary hover:bg-black/5 transition-all hover:-translate-y-px">
-          <Bell className="w-5 h-5" />
+        <button className="flex items-center justify-center w-10 h-10 bg-white border border-black/[0.04] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
+          <Bell className="w-4 h-4" />
         </button>
-        <button className="flex items-center justify-center w-11 h-11 bg-white border border-black/[0.04] rounded-full shadow-sm text-ink-secondary hover:text-ink-primary hover:bg-black/5 transition-all hover:-translate-y-px">
-          <Settings className="w-5 h-5" />
+        <button className="flex items-center justify-center w-10 h-10 bg-white border border-black/[0.04] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
+          <Settings className="w-4 h-4" />
         </button>
 
-        {/* Profile */}
-        <div className="flex items-center gap-2 bg-white border border-black/[0.04] rounded-full shadow-sm p-1.5 pr-4 cursor-pointer hover:bg-black/[0.02] transition-colors" onClick={logout}>
-          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-sm">
-            {user?.name?.charAt(0).toUpperCase() || 'S'}
+        {/* Profile Pill */}
+        <div className="flex items-center gap-2 bg-white border border-black/[0.04] rounded-full p-1 pr-3 cursor-pointer hover:bg-black/[0.02] transition-colors" onClick={logout}>
+          <div className="w-8 h-8 rounded-full bg-[#E88C43] flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+             {/* If we have an image, use it, otherwise initial */}
+             <img src="https://i.pravatar.cc/150?u=sarah" alt="Profile" className="w-full h-full object-cover" />
           </div>
-          <span className="text-[14px] font-semibold text-ink-primary ml-1">{user?.name?.split(' ')[0] || 'Sarah'}</span>
-          <ChevronDown className="w-4 h-4 text-ink-tertiary ml-1" />
+          <span className="text-[13px] font-medium text-ink-primary ml-1">{user?.name?.split(' ')[0] || 'Sarah'}</span>
+          <ChevronDown className="w-3.5 h-3.5 text-ink-tertiary ml-1" />
         </div>
       </div>
     </div>
