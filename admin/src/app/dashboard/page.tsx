@@ -16,8 +16,6 @@ import {
   XCircle,
   Stethoscope,
   BriefcaseMedical,
-  HeartPulse,
-  ActivitySquare,
   User,
   Sparkles,
   CircleDollarSign,
