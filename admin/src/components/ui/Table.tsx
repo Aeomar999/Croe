@@ -34,9 +34,9 @@ export function TableRow({ children, className, state, onClick }: TableRowProps)
   return (
     <div
       className={cn(
-        'trow flex-none rounded-r-2 border border-line-primary/80 bg-surface shadow-sm transition-all duration-[160ms]',
+        'trow flex-none rounded-r-2 border border-line-primary/60 bg-surface shadow-sm transition-all duration-[240ms] ease-out',
         state && stateClasses[state],
-        onClick && 'cursor-pointer hover:-translate-y-px hover:border-line-secondary hover:bg-sunken hover:shadow-elev focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/40',
+        onClick && 'cursor-pointer hover:border-line-primary hover:bg-surface/90 hover:shadow-elev hover:-translate-y-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/40',
         className
       )}
       onClick={onClick}

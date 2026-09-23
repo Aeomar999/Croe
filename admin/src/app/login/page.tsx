@@ -44,7 +44,7 @@ export default function LoginPage() {
             <p className="text-body text-ink-secondary mt-2">Sign in to access the reviewer console.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form suppressHydrationWarning onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="flex items-center gap-2 p-3 bg-state-danger-wash text-state-danger-deep rounded-r-2 text-caption">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />

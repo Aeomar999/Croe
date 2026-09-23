@@ -14,6 +14,7 @@ import { kycApi, type KYCQueueItem } from '@/lib/api';
 import { formatDate, cn } from '@/lib/utils';
 import { FileText, Search, Loader2, CheckCircle, XCircle, Eye, AlertTriangle, Loader2 as Loader } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const ID_TYPE_LABELS: Record<string, string> = {
   NATIONAL_ID: 'National ID',
@@ -83,53 +84,61 @@ export default function KYCPage() {
         </div>
       }
     >
-      <Card padding="sheet">
-        <CardContent className="space-y-0">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-ink-primary animate-spin" />
-            </div>
-          ) : filteredQueue.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-ink-tertiary mx-auto mb-4" />
-              <p className="text-body text-ink-secondary">No pending KYC submissions</p>
-              <p className="text-caption text-ink-tertiary mt-1">All caught up!</p>
-            </div>
-          ) : (
-            <Table className="max-h-[600px] overflow-y-auto scrollbar-thin">
-              {filteredQueue.map((item) => (
-                <TableRow key={item.kycId}>
-                  <TableRowMain
-                    mark={<FileText className="w-5 h-5" />}
-                    title={item.phoneNumber}
-                    subtitle={`KYC: ${item.kycId.slice(0, 8)} • User: ${item.userId.slice(0, 8)}`}
-                    value={ID_TYPE_LABELS[item.idType]}
-                    meta={formatDate(item.createdAt)}
-                  />
-                  <TableRowFoot>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="warning">Pending Review</Badge>
-                      <Pill variant={item.tier >= 2 ? 'secure' : 'caution'} size="trace">
-                        Tier {item.tier}
-                      </Pill>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => openReviewModal(item, 'approve')}>
-                        <CheckCircle className="w-4 h-4" />
-                        Approve
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => openReviewModal(item, 'reject')}>
-                        <XCircle className="w-4 h-4" />
-                        Reject
-                      </Button>
-                    </div>
-                  </TableRowFoot>
-                </TableRow>
-              ))}
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <motion.div suppressHydrationWarning
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5, ease: 'easeOut' }}
+      >
+        <Card padding="sheet">
+          <CardContent className="space-y-0">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-ink-primary animate-spin" />
+              </div>
+            ) : filteredQueue.length === 0 ? (
+              <div className="rounded-r-3 bg-state-secure-wash/50 border border-state-secure-deep/10 px-6 py-20 text-center shadow-sm">
+                <div className="mx-auto mb-5 h-16 w-16 bg-white rounded-full shadow-sm flex items-center justify-center text-state-secure-deep border border-state-secure-deep/10">
+                  <FileText className="h-8 w-8" strokeWidth={1.8} />
+                </div>
+                <p className="text-title font-bold text-ink-primary tracking-tight">No pending KYC submissions</p>
+                <p className="mt-2 text-body text-ink-secondary">The queue is clear. All users have been verified.</p>
+              </div>
+            ) : (
+              <Table className="max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
+                {filteredQueue.map((item) => (
+                  <TableRow key={item.kycId}>
+                    <TableRowMain
+                      mark={<FileText className="w-5 h-5" />}
+                      title={item.phoneNumber}
+                      subtitle={`KYC: ${item.kycId.slice(0, 8)} • User: ${item.userId.slice(0, 8)}`}
+                      value={ID_TYPE_LABELS[item.idType]}
+                      meta={formatDate(item.createdAt)}
+                    />
+                    <TableRowFoot>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="warning">Pending Review</Badge>
+                        <Pill variant={item.tier >= 2 ? 'secure' : 'caution'} size="trace">
+                          Tier {item.tier}
+                        </Pill>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => openReviewModal(item, 'approve')} className="hover:text-state-secure-deep hover:bg-state-secure-wash">
+                          <CheckCircle className="w-4 h-4 text-state-secure-deep" />
+                          Approve
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => openReviewModal(item, 'reject')} className="hover:text-state-danger-deep hover:bg-state-danger-wash">
+                          <XCircle className="w-4 h-4 text-state-danger-deep" />
+                          Reject
+                        </Button>
+                      </div>
+                    </TableRowFoot>
+                  </TableRow>
+                ))}
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Review Modal */}
       <Modal

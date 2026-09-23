@@ -11,12 +11,12 @@ interface CardProps {
 export function Card({ children, className, padding = 'sheet' }: CardProps) {
   const paddingStyles = {
     none: '',
-    sheet: 'rounded-r-4 border border-line-primary/80 bg-surface p-5 shadow-elev sm:p-6',
-    'sheet-2': 'rounded-r-2 border border-line-primary/70 bg-surface p-4',
+    sheet: 'rounded-r-4 border border-line-primary/40 bg-surface/95 backdrop-blur-sm p-6 shadow-elev sm:p-8 relative overflow-hidden',
+    'sheet-2': 'rounded-r-3 border border-line-primary/30 bg-surface p-5 shadow-sm',
   };
 
   return (
-    <div className={cn(paddingStyles[padding], className)}>
+    <div className={cn('transition-all duration-300 ease-out', paddingStyles[padding], className)}>
       {children}
     </div>
   );
@@ -31,12 +31,12 @@ interface CardHeaderProps {
 
 export function CardHeader({ title, subtitle, action, className }: CardHeaderProps) {
   return (
-    <div className={cn('mb-5 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3', className)}>
-      <div>
-        <h3 className="text-heading font-bold text-ink-primary">{title}</h3>
-        {subtitle && <p className="text-caption text-ink-tertiary mt-0.5">{subtitle}</p>}
+    <div className={cn('mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
+      <div className="space-y-1">
+        <h3 className="text-title font-bold text-ink-primary tracking-tight">{title}</h3>
+        {subtitle && <p className="text-body text-ink-secondary">{subtitle}</p>}
       </div>
-      {action && <div>{action}</div>}
+      {action && <div className="flex-shrink-0">{action}</div>}
     </div>
   );
 }

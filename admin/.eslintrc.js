@@ -4,7 +4,6 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
     'next/core-web-vitals',
   ],
   ignorePatterns: ['dist', '.next', 'node_modules'],
