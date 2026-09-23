@@ -74,9 +74,12 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-shrink-0">
           
           {/* GREEN HERO CARD */}
-          <motion.div variants={item} className="xl:col-span-6 bg-[#4A8B63] rounded-[32px] p-6 flex flex-col justify-between relative overflow-hidden h-[280px]">
+          <motion.div variants={item} className="xl:col-span-6 bg-[#4A8B63] rounded-[32px] p-2.5 flex flex-col relative overflow-hidden h-[280px]">
+            {/* Decorative background curve */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+            
             {/* Pill and link */}
-            <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center justify-between px-3 pt-2 pb-3 relative z-10 flex-shrink-0">
               <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
                 <CircleDollarSign className="w-3.5 h-3.5 text-ink-primary" />
                 <span className="text-[12px] font-bold text-ink-primary">Revenue at risk</span>
@@ -86,14 +89,14 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Main Value */}
-            <div className="mt-8 mb-4 relative z-10">
-              <div className="flex items-end justify-between">
-                <div>
+            <div className="flex-1 bg-black/15 rounded-[24px] p-5 flex flex-col justify-between relative z-10">
+              {/* Main Value */}
+              <div className="relative z-10 flex items-end justify-between">
+                <div className="mb-2">
                   <h2 className="text-[64px] font-medium text-white leading-none tracking-tighter">
-                    {formatCurrency(String(totalAmount || 184500), 'USD').replace('.00', '')}
+                    ${(totalAmount || 184500).toLocaleString('en-US')}
                   </h2>
-                  <p className="text-white/80 text-[12px] mt-1 font-medium">
+                  <p className="text-white/80 text-[12px] mt-2 font-medium">
                     across {disputes.length || 8} cases that may miss their procedure date
                   </p>
                 </div>
@@ -101,7 +104,7 @@ export default function DashboardPage() {
                 <div className="hidden sm:flex flex-col items-end opacity-100">
                   <div className="flex items-end gap-2 h-[72px] mb-2">
                     {[30, 45, 60, 50, 80, 100].map((h, i) => (
-                      <div key={i} className={cn("w-[22px] rounded-full opacity-90", i === 5 ? "bg-[#D8F04B]" : "bg-white/10 bg-hatch border border-white/30")} style={{ height: `${h}%` }} />
+                      <div key={i} className={cn("w-[22px] rounded-full opacity-90", i === 5 ? "bg-[#D8F04B] shadow-[0_0_12px_rgba(216,240,75,0.2)]" : "bg-white/10 bg-hatch border border-white/30")} style={{ height: `${h}%` }} />
                     ))}
                   </div>
                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium uppercase tracking-wider">
@@ -111,26 +114,23 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Bottom Section */}
-            <div className="border border-white/20 bg-white/5 rounded-[16px] p-4 grid grid-cols-3 mt-auto relative z-10 backdrop-blur-sm">
-              <div className="pr-4">
-                <p className="text-white/70 text-[11px] font-medium mb-1">Recoverable this week</p>
-                <p className="text-white text-[14px] font-bold">{formatCurrency('121300', 'USD').replace('.00', '')}</p>
-              </div>
-              <div className="border-l border-white/20 px-4">
-                <p className="text-white/70 text-[11px] font-medium mb-1">Largest case</p>
-                <p className="text-white text-[14px] font-bold truncate">{formatCurrency('48200', 'USD').replace('.00', '')} &middot; Spinal fusion</p>
-              </div>
-              <div className="border-l border-white/20 pl-4">
-                <p className="text-white/70 text-[11px] font-medium mb-1">Earliest procedure</p>
-                <p className="text-white text-[14px] font-bold">Sep 24</p>
+              {/* Bottom Section */}
+              <div className="border border-white/20 rounded-[16px] p-4 grid grid-cols-3 relative z-10">
+                <div className="pr-4">
+                  <p className="text-white/70 text-[11px] font-medium mb-1">Recoverable this week</p>
+                  <p className="text-white text-[14px] font-bold">$121,300</p>
+                </div>
+                <div className="border-l border-white/20 px-4">
+                  <p className="text-white/70 text-[11px] font-medium mb-1">Largest case</p>
+                  <p className="text-white text-[14px] font-bold truncate">$48,200 &middot; Spinal fusion</p>
+                </div>
+                <div className="border-l border-white/20 pl-4">
+                  <p className="text-white/70 text-[11px] font-medium mb-1">Earliest procedure</p>
+                  <p className="text-white text-[14px] font-bold">Sep 24</p>
+                </div>
               </div>
             </div>
-            
-            {/* Decorative background curve */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
           </motion.div>
 
           {/* KPI CARDS CONTAINER */}
