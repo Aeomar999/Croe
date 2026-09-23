@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
@@ -99,13 +99,15 @@ export default function DashboardPage() {
                 </div>
                 {/* Bar Chart (Decorative) */}
                 <div className="hidden sm:flex flex-col items-end opacity-100">
-                  <div className="flex items-end gap-1.5 h-16 mb-2">
+                  <div className="flex items-end gap-2 h-[72px] mb-2">
                     {[30, 45, 60, 50, 80, 100].map((h, i) => (
-                      <div key={i} className={cn("w-3.5 rounded-[2px] opacity-90", i === 5 ? "bg-[#D8F04B]" : "bg-white/10 bg-hatch border border-white/30")} style={{ height: `${h}%` }} />
+                      <div key={i} className={cn("w-[22px] rounded-full opacity-90", i === 5 ? "bg-[#D8F04B]" : "bg-white/10 bg-hatch border border-white/30")} style={{ height: `${h}%` }} />
                     ))}
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium w-full justify-between pr-1 uppercase tracking-wider">
-                    <span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span>
+                  <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium uppercase tracking-wider">
+                    {['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((month, i) => (
+                      <span key={i} className="w-[22px] text-center">{month}</span>
+                    ))}
                   </div>
                 </div>
               </div>
