@@ -218,7 +218,7 @@ export default function UsersPage() {
         size="sm"
       >
         <p className="text-body text-ink-secondary mb-4">
-          Adjust the user's trust score (0-100). Changes are audit-logged with the provided reason.
+          Adjust the user&apos;s trust score (0-100). Changes are audit-logged with the provided reason.
         </p>
         <Input
           label="Trust Score"
