@@ -63,10 +63,10 @@ describe('utils', () => {
 
   describe('getReasonCodeLabel', () => {
     it('formats known codes', () => {
-      expect(getReasonCodeLabel('NOT_RECEIVED')).toBe('Item Not Received');
+      expect(getReasonCodeLabel('ITEM_NOT_RECEIVED')).toBe('Item Not Received');
       expect(getReasonCodeLabel('WRONG_ITEM')).toBe('Wrong Item');
-      expect(getReasonCodeLabel('DAMAGED')).toBe('Damaged');
-      expect(getReasonCodeLabel('NOT_AS_DESCRIBED')).toBe('Not As Described');
+      expect(getReasonCodeLabel('ITEM_DAMAGED')).toBe('Item Damaged');
+      expect(getReasonCodeLabel('ITEM_NOT_AS_DESCRIBED')).toBe('Item Not As Described');
     });
 
     it('returns code as-is for unknown', () => {

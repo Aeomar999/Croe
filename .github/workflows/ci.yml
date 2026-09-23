@@ -137,12 +137,14 @@ jobs:
           retention-days: 7
 
   docker-build:
-    name: Verify Docker Build (backend)
+    name: Verify Docker Builds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build Docker Image
+      - name: Build Backend Docker Image
         run: docker build -t croe-backend:ci -f backend/Dockerfile backend/
+      - name: Build Admin Docker Image
+        run: docker build -t croe-admin:ci -f admin/Dockerfile .
 
   deploy-staging:
     name: Deploy to Staging
