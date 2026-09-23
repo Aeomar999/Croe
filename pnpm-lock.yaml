@@ -74,9 +74,6 @@ importers:
       eslint-config-next:
         specifier: 14.2.5
         version: 14.2.5(eslint@8.57.1)(typescript@5.9.3)
-      eslint-plugin-react-refresh:
-        specifier: ^0.5.7
-        version: 0.5.7(eslint@8.57.1)
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
@@ -3754,11 +3751,6 @@ packages:
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
-
-  eslint-plugin-react-refresh@0.5.7:
-    resolution: {integrity: sha512-XhJSzLljuYD4UjNuFGJu2v7aD3sqNVK12w5/DCUfrNfHWegZo2+TsavNx8MuxMwEquuFAzNbNfXKU0WoZ+YUIg==}
-    peerDependencies:
-      eslint: ^9 || ^10
 
   eslint-plugin-react@7.37.5:
     resolution: {integrity: sha512-Qteup0SqU15kdocexFNAJMvCJEfa2xUKNV4CC1xsVMrIIqEy3SQ/rqyxCWNzfrd3/ldy6HMlD2e0JDVpDg2qIA==}
@@ -10110,7 +10102,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@26.6.2)(@vitest/ui@2.1.9)(jsdom@25.0.1)(lightningcss@1.33.0)(terser@5.51.2)
+      vitest: 2.1.9(@types/node@20.19.43)(@vitest/ui@2.1.9)(jsdom@25.0.1)(lightningcss@1.33.0)(terser@5.51.2)
 
   '@vitest/utils@2.1.9':
     dependencies:
@@ -11517,10 +11509,6 @@ snapshots:
       string.prototype.includes: 2.0.1
 
   eslint-plugin-react-hooks@5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1):
-    dependencies:
-      eslint: 8.57.1
-
-  eslint-plugin-react-refresh@0.5.7(eslint@8.57.1):
     dependencies:
       eslint: 8.57.1
 

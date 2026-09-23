@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { api, getAccessToken, getStoredUser, setAuthTokens, clearAuthTokens, type AdminUser, type LoginRequest, type LoginResponse } from '@/lib/api';
 
 interface AuthContextType {
@@ -18,7 +18,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const initAuth = async () => {
