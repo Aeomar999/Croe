@@ -14,44 +14,78 @@
 
 ## 2. Endpoints by Domain
 
-### Auth ([`20`](08-Identity-Auth.md))
+### Auth & User Management ([`20`](08-Identity-Auth.md))
 | Method | Path | Actor | Body → Response |
 | :--- | :--- | :--- | :--- |
 | POST | `/auth/otp/request` | public | `{phone_number}` → `202` |
 | POST | `/auth/otp/verify` | public | `{phone_number, code}` → `200 {access_token, refresh_token}` |
+| POST | `/auth/login` | admin | `{email, password}` → `200 {access_token, refresh_token, user}` |
 | POST | `/auth/refresh` | user | `{refresh_token}` → `200 {access_token, refresh_token}` |
 | POST | `/auth/logout` | user | `{}` → `204` |
+| GET | `/auth/me` | user | → `200 {user}` |
+| POST | `/auth/pin` | user | `{pin}` → `200` |
+| GET | `/auth/sessions` | user | → `200 {sessions[]}` |
+| POST | `/auth/sessions/revoke-other` | user | `{}` → `204` |
+| GET | `/users/me/preferences` | user | → `200 {preferences}` |
+| PUT | `/users/me/preferences` | user | `{preferences}` → `200` |
 
 ### KYC ([`21`](09-KYC-and-AML.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | POST | `/kyc/submit` | user | multipart `{id_type, id_image}` → `202 {kyc_id, status}` |
 | GET | `/kyc/status` | user | → `200 {tier, status}` |
 
 ### Escrow ([`13`](07-Escrow-Lifecycle.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | POST | `/escrow` | vendor | `{item_description, amount, currency, delivery_terms}` → `201 {transaction_id, pay_url, current_status}` |
 | GET | `/escrow/:id` | buyer/vendor | → `200 {transaction, current_status}` (Redis-cached) |
 | POST | `/escrow/:id/deposit` | buyer | `{msisdn, carrier}` → `202 {collectionRef, status}` |
 | POST | `/escrow/:id/ship` | vendor | `{}` → `200 {current_status: "SHIPPED"}` |
 | POST | `/escrow/:id/confirm-delivery` | buyer | `{}` → `200 {current_status: "DELIVERED_CONFIRMED"}` |
 | POST | `/escrow/:id/cancel` | vendor | `{}` → `200 {current_status: "CANCELLED"}` |
+| POST | `/escrow/:id/release` | ops/admin | `{}` → `200 {current_status: "FUNDS_RELEASED"}` |
+| POST | `/escrow/:id/refund` | ops/admin | `{}` → `200 {current_status: "FUNDS_REFUNDED"}` |
 
 ### Evidence ([`26`](14-Evidence-and-Forensics.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | POST | `/evidence/upload` | buyer/vendor | multipart `{file, transaction_id, artifact_type}` → `201 {artifact_id, sha256}` |
 
 ### Disputes ([`25`](13-Disputes-and-AI-Triage.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | POST | `/disputes` | buyer/vendor | `{transaction_id, reason_code, claim_description, evidence_artifact_ids[]}` → `202 {dispute_id, status}` |
 | GET | `/disputes/:id/status` | party | → `200 {status, ai_recommended_action?, summary_for_users?}` |
 
 ### Payouts (internal/admin, [`23`](11-Payouts-Refunds.md))
-| POST | `/admin/payouts/:transaction_id/retry` | ops | `{}` → `200 {payout_id, status}` |
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
+| POST | `/admin/payouts/:transaction_id/retry` | ops | `{}` → `200 {status}` |
 
 ### Webhooks ([`24`](12-Webhooks-and-Idempotency.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | POST | `/webhooks/momo-callback` | aggregator | signed raw body → `200 OK` (<500ms) |
 
-### Admin ([`28`](16-Admin-Console.md))
+### Admin Console ([`28`](16-Admin-Console.md))
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
 | GET | `/admin/disputes/queue` | L3 | → `200 {items[]}` |
+| GET | `/admin/disputes/:id` | L3 | → `200 DisputeCaseDetail` |
 | POST | `/admin/disputes/:id/resolve` | L3 | `{action: "REFUND_BUYER"\|"RELEASE_VENDOR", reason}` → `200` |
+| GET | `/admin/kyc/queue` | ops/L3 | → `200 {items[]}` |
+| POST | `/admin/kyc/:id/review` | ops/L3 | `{approved: boolean, reason: string}` → `200` |
 | POST | `/admin/users/:id/freeze` | L3 | `{frozen, reason}` → `200` |
+| POST | `/admin/users/:id/trust-score`| ops/admin | `{trust_score, reason}` → `200` |
 | GET | `/admin/reconciliation` | ops | `?from=&to=` → `200 ReconciliationReport` |
+| GET | `/admin/metrics` | admin | → `200 text/plain` (Prometheus) |
+| GET | `/admin/scheduler-status` | ops/admin | → `200 SchedulerStatus` |
+
+### Infrastructure
+| Method | Path | Actor | Body → Response |
+| :--- | :--- | :--- | :--- |
+| GET | `/health` | system | → `200 OK` |
 
 ## 3. Global Error Catalog
 
@@ -75,15 +109,17 @@
 
 Every endpoint MUST validate inputs at the edge before any business logic runs. Use Zod (or equivalent) for runtime schema enforcement. The rules below define format constraints — the actual implementation mirrors these as typed schemas.
 
-### Auth
+### Auth & Users
 
 | Endpoint | Field | Type | Constraints |
 | :--- | :--- | :--- | :--- |
 | `POST /auth/otp/request` | `phone_number` | `string` | E.164 format: `^\+[1-9]\d{6,14}$` |
 | `POST /auth/otp/verify` | `phone_number` | `string` | E.164 format (same as above) |
 | | `code` | `string` | Exactly 6 digits: `^\d{6}$` |
+| `POST /auth/login` | `email` | `string` | Valid email |
+| | `password` | `string` | Min 8 chars |
 | `POST /auth/refresh` | `refresh_token` | `string` | Non-empty, max 512 chars |
-| `POST /auth/logout` | _(no body)_ | — | — |
+| `POST /auth/pin` | `pin` | `string` | Exactly 4 digits |
 
 ### KYC
 
@@ -107,6 +143,8 @@ Every endpoint MUST validate inputs at the edge before any business logic runs. 
 | `POST /escrow/:id/ship` | `id` | `string` | UUIDv4 |
 | `POST /escrow/:id/confirm-delivery` | `id` | `string` | UUIDv4 |
 | `POST /escrow/:id/cancel` | `id` | `string` | UUIDv4 |
+| `POST /escrow/:id/release` | `id` | `string` | UUIDv4 |
+| `POST /escrow/:id/refund` | `id` | `string` | UUIDv4 |
 
 ### Evidence
 
@@ -126,16 +164,24 @@ Every endpoint MUST validate inputs at the edge before any business logic runs. 
 | | `evidence_artifact_ids` | `string[]` | 0–10 UUIDv4 values |
 | `GET /disputes/:id/status` | `id` | `string` | UUIDv4 |
 
-### Admin
+### Admin & Payouts
 
 | Endpoint | Field | Type | Constraints |
 | :--- | :--- | :--- | :--- |
+| `GET /admin/disputes/:id` | `id` | `string` | UUIDv4 |
 | `POST /admin/disputes/:id/resolve` | `id` | `string` | UUIDv4 |
 | | `action` | `enum` | `"REFUND_BUYER" \| "RELEASE_VENDOR"` |
 | | `reason` | `string` | 10–500 chars |
+| `POST /admin/kyc/:id/review` | `id` | `string` | UUIDv4 |
+| | `approved` | `boolean` | required |
+| | `reason` | `string` | 10-500 chars (required if false) |
 | `POST /admin/users/:id/freeze` | `id` | `string` | UUIDv4 |
 | | `frozen` | `boolean` | required |
 | | `reason` | `string` | 10–500 chars |
+| `POST /admin/users/:id/trust-score` | `id` | `string` | UUIDv4 |
+| | `trust_score` | `number` | 0-100 |
+| | `reason` | `string` | 10–500 chars |
+| `POST /admin/payouts/:transaction_id/retry`| `transaction_id` | `string` | UUIDv4 |
 | `GET /admin/reconciliation` | `from` | `string` | ISO 8601 datetime |
 | | `to` | `string` | ISO 8601 datetime; must be > `from` |
 

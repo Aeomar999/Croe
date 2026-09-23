@@ -9,6 +9,8 @@ import {
   adjustTrustScore,
   getReconciliationReport,
   getKYCQueue,
+  getDisputeDetail,
+  retryPayout,
 } from "../services/admin.js";
 import { reviewKYC } from "../services/kyc.js";
 import { getMetricsSnapshot } from "../services/metrics.js";
@@ -238,6 +240,38 @@ router.get(
   async (_req: Request, res: Response) => {
     const status = getSchedulerStatus();
     res.json(status);
+  },
+);
+
+/**
+ * GET /admin/disputes/:id
+ * Roles: reviewer, ops, admin
+ */
+router.get(
+  "/admin/disputes/:id",
+  adminRateLimiter,
+  authenticate,
+  requireRole("reviewer", "ops", "admin"),
+  async (req: Request, res: Response) => {
+    const disputeId = validateId(req.params["id"] as string);
+    const detail = await getDisputeDetail(disputeId);
+    res.json(detail);
+  },
+);
+
+/**
+ * POST /admin/payouts/:transaction_id/retry
+ * Roles: ops, admin
+ */
+router.post(
+  "/admin/payouts/:transaction_id/retry",
+  adminRateLimiter,
+  authenticate,
+  requireRole("ops", "admin"),
+  async (req: Request, res: Response) => {
+    const transactionId = validateId(req.params["transaction_id"] as string);
+    const result = await retryPayout(transactionId, req.userId!);
+    res.json(result);
   },
 );
 

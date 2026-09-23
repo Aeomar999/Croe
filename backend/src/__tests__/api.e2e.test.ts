@@ -255,7 +255,7 @@ describe("E2E API Tests", () => {
       expect(disputeRes.body.dispute_id).toBeDefined();
 
       const getRes = await request(app)
-        .get(`/v1/disputes/${disputeRes.body.dispute_id}`)
+        .get(`/v1/disputes/${disputeRes.body.dispute_id}/status`)
         .set("Authorization", `Bearer ${buyerToken}`)
         .expect(200);
       

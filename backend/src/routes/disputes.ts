@@ -83,9 +83,9 @@ router.post(
 );
 
 /**
- * GET /v1/disputes/:id — Get dispute status
+ * GET /v1/disputes/:id/status — Get dispute status
  */
-router.get("/disputes/:id", authenticate, async (req: Request, res: Response) => {
+router.get("/disputes/:id/status", authenticate, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const dispute = await getDispute(id);
 

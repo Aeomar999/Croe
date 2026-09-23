@@ -3,6 +3,7 @@ import { AppError } from "../middleware/error-handler.js";
 import { logger } from "../config/logger.js";
 import { custodyProvider } from "../providers/index.js";
 import type { Currency, EscrowState, LedgerEvent } from "../types/domain.js";
+import { releaseFunds, refundFunds } from "./escrow.js";
 
 type DisputeQueueRow = {
   dispute_id: string;
@@ -397,4 +398,174 @@ export async function getKYCQueue(): Promise<Array<{
   } finally {
     client.release();
   }
+}
+
+
+export async function getDisputeDetail(disputeId: string) {
+  const client = await getTransactionClient();
+  try {
+    const { rows: disputeRows } = await client.query(
+      `SELECT
+         dc.dispute_id,
+         dc.transaction_id,
+         et.amount,
+         et.currency,
+         dc.reason_code,
+         dc.buyer_claim as claim_description,
+         dc.status,
+         dc.created_at,
+         dc.ai_recommended_action,
+         dc.ai_confidence_score as ai_confidence,
+         dc.ai_reasoning_payload,
+         et.buyer_id,
+         et.vendor_id
+       FROM dispute_cases dc
+       JOIN escrow_transactions et ON et.transaction_id = dc.transaction_id
+       WHERE dc.dispute_id = $1`,
+      [disputeId]
+    );
+    const dispute = disputeRows[0];
+    if (!dispute) {
+      throw new AppError(404, "Dispute not found", "DISPUTE_NOT_FOUND");
+    }
+
+    const { rows: userRows } = await client.query(
+      `SELECT
+         user_id,
+         phone_number,
+         trust_score,
+         kyc_tier,
+         EXTRACT(DAY FROM NOW() - created_at)::int as account_age_days,
+         is_frozen
+       FROM users
+       WHERE user_id IN ($1, $2)`,
+      [dispute.buyer_id, dispute.vendor_id]
+    );
+
+    const buyerRow = userRows.find((u) => u.user_id === dispute.buyer_id);
+    const vendorRow = userRows.find((u) => u.user_id === dispute.vendor_id);
+
+    const { rows: evidenceRows } = await client.query(
+      `SELECT
+         artifact_id,
+         transaction_id,
+         artifact_type,
+         sha256_hash,
+         file_url as storage_url,
+         uploader_id as uploaded_by,
+         created_at as uploaded_at
+       FROM evidence_artifacts
+       WHERE transaction_id = $1`,
+      [dispute.transaction_id]
+    );
+
+    const { rows: ledgerRows } = await client.query(
+      `SELECT
+         ledger_id,
+         transaction_id,
+         actor_id,
+         event_type,
+         previous_status,
+         new_status,
+         amount_delta,
+         currency,
+         device_metadata,
+         created_at
+       FROM transaction_ledger
+       WHERE transaction_id = $1
+       ORDER BY created_at ASC`,
+      [dispute.transaction_id]
+    );
+
+    return {
+      disputeId: dispute.dispute_id,
+      transactionId: dispute.transaction_id,
+      amount: dispute.amount,
+      currency: dispute.currency,
+      reasonCode: dispute.reason_code,
+      claimDescription: dispute.claim_description,
+      status: dispute.status,
+      createdAt: dispute.created_at.toISOString(),
+      aiRecommendedAction: dispute.ai_recommended_action || undefined,
+      aiConfidence: dispute.ai_confidence ? parseFloat(dispute.ai_confidence) : undefined,
+      aiReasoningPayload: dispute.ai_reasoning_payload || undefined,
+      evidence: evidenceRows.map((e) => ({
+        artifactId: e.artifact_id,
+        transactionId: e.transaction_id,
+        artifactType: e.artifact_type,
+        sha256Hash: e.sha256_hash,
+        storageUrl: e.storage_url,
+        uploadedBy: e.uploaded_by,
+        uploadedAt: e.uploaded_at.toISOString(),
+        isVerified: false,
+        isRecycled: false,
+      })),
+      timeline: ledgerRows.map((l) => ({
+        ledgerId: l.ledger_id.toString(),
+        transactionId: l.transaction_id,
+        actorId: l.actor_id,
+        eventType: l.event_type,
+        previousStatus: l.previous_status || undefined,
+        newStatus: l.new_status || undefined,
+        amountDelta: l.amount_delta || undefined,
+        currency: l.currency || undefined,
+        deviceMetadata: l.device_metadata || undefined,
+        createdAt: l.created_at.toISOString(),
+      })),
+      buyer: buyerRow
+        ? {
+            userId: buyerRow.user_id,
+            phoneNumber: buyerRow.phone_number,
+            trustScore: parseFloat(buyerRow.trust_score),
+            kycTier: buyerRow.kyc_tier,
+            accountAgeDays: buyerRow.account_age_days || 0,
+            isFrozen: buyerRow.is_frozen,
+          }
+        : null,
+      vendor: vendorRow
+        ? {
+            userId: vendorRow.user_id,
+            phoneNumber: vendorRow.phone_number,
+            trustScore: parseFloat(vendorRow.trust_score),
+            kycTier: vendorRow.kyc_tier,
+            accountAgeDays: vendorRow.account_age_days || 0,
+            isFrozen: vendorRow.is_frozen,
+          }
+        : null,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+export async function retryPayout(transactionId: string, adminId: string) {
+  const client = await getTransactionClient();
+  let currentStatus: string;
+  try {
+    const { rows } = await client.query(
+      `SELECT current_status FROM escrow_transactions WHERE transaction_id = $1`,
+      [transactionId]
+    );
+    const tx = rows[0];
+    if (!tx) {
+      throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
+    }
+    currentStatus = tx.current_status;
+  } finally {
+    client.release();
+  }
+
+  if (currentStatus === "FUNDS_RELEASED") {
+    await releaseFunds({ transactionId, forensic: { deviceId: adminId } as any });
+  } else if (currentStatus === "FUNDS_REFUNDED") {
+    await refundFunds({ transactionId, forensic: { deviceId: adminId } as any });
+  } else {
+    throw new AppError(
+      400,
+      "Transaction must be in FUNDS_RELEASED or FUNDS_REFUNDED to retry payout",
+      "INVALID_STATE"
+    );
+  }
+
+  return { status: "RETRY_INITIATED" };
 }
