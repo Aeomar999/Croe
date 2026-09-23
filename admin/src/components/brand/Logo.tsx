@@ -36,7 +36,7 @@ export const Logo = forwardRef<HTMLSpanElement, LogoProps>(
             fontWeight: 800,
             fontSize: `${fontSize}px`,
             letterSpacing: '-0.038em',
-            color: '#2563EB',
+            color: '#127A45',
             marginLeft: '-0.08em',
           }}
         >

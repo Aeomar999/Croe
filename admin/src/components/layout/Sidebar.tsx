@@ -14,12 +14,12 @@ import type { AdminRole } from '@/types';
 
 const navigation: Array<{ name: string; href: string; roles: AdminRole[] }> = [
   { name: 'Dashboard', href: '/dashboard', roles: ['reviewer', 'ops', 'admin'] },
-  { name: 'Pipeline', href: '/pipeline', roles: ['reviewer', 'ops', 'admin'] },
-  { name: 'Cases', href: '/disputes/queue', roles: ['reviewer', 'ops', 'admin'] },
-  { name: 'Payers', href: '/kyc', roles: ['ops', 'admin'] },
-  { name: 'Documents', href: '/documents', roles: ['ops', 'admin'] },
-  { name: 'Denials', href: '/reconciliation', roles: ['ops', 'admin'] },
-  { name: 'Analytics', href: '/metrics', roles: ['admin'] },
+  { name: 'Ledger', href: '/ledger', roles: ['reviewer', 'ops', 'admin'] },
+  { name: 'L3 Queue', href: '/disputes/queue', roles: ['reviewer', 'ops', 'admin'] },
+  { name: 'KYC Reviews', href: '/kyc', roles: ['ops', 'admin'] },
+  { name: 'Trust & Fraud', href: '/fraud', roles: ['ops', 'admin'] },
+  { name: 'Reconciliation', href: '/reconciliation', roles: ['ops', 'admin'] },
+  { name: 'Metrics', href: '/metrics', roles: ['admin'] },
 ];
 
 export function Sidebar() {
@@ -65,7 +65,7 @@ export function Sidebar() {
           <Search className="absolute left-4 w-4 h-4 text-ink-tertiary" />
           <input 
             type="text" 
-            placeholder="Search cases, patients, payers" 
+            placeholder="Search TXNs, users, wallets" 
             className="pl-10 pr-4 py-3 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] text-[13px] font-medium w-[240px] xl:w-[320px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
           />
         </div>
