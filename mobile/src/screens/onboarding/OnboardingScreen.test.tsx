@@ -7,7 +7,7 @@
  * content.test.tsx, which is the one place the literal wording lives.
  */
 import React from 'react';
-import { render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
+import { render, screen, userEvent, waitFor, within, fireEvent, act } from '@testing-library/react-native';
 import { useNavigation } from '@react-navigation/native';
 import { OnboardingScreen } from './OnboardingScreen';
 import { panels, carrierMarks } from './content';
@@ -15,6 +15,10 @@ import { useOnboardingStore } from '../../stores/onboarding';
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: jest.fn(),
+}));
+
+jest.mock('./Squiggles', () => ({
+  Squiggles: () => null,
 }));
 
 const replace = jest.fn();
@@ -40,13 +44,18 @@ describe('OnboardingScreen — content', () => {
   it('opens on "Get started" and offers the sign-in escape only on the first panel', async () => {
     await render(<OnboardingScreen />);
 
-    const welcome = screen.getByTestId('onboarding-panel-welcome');
-    expect(within(welcome).getByText('Get started')).toBeTruthy();
-    expect(within(welcome).getByText('I already have an account')).toBeTruthy();
+    expect(screen.getByText('Get started')).toBeTruthy();
+    expect(screen.getByText('I already have an account')).toBeTruthy();
 
-    const hold = screen.getByTestId('onboarding-panel-hold');
-    expect(within(hold).getByText('Continue')).toBeTruthy();
-    expect(within(hold).queryByText('I already have an account')).toBeNull();
+    const carousel = screen.getByTestId('onboarding-carousel');
+    await act(async () => {
+      carousel.props.onViewableItemsChanged({
+        viewableItems: [{ index: 1 }],
+      });
+    });
+
+    expect(screen.getByText('Continue')).toBeTruthy();
+    expect(screen.queryByText('I already have an account')).toBeNull();
   });
 
   it('names the three carriers on the payout panel only', async () => {
@@ -64,12 +73,9 @@ describe('OnboardingScreen — content', () => {
   it('marks the first dot active on open', async () => {
     await render(<OnboardingScreen />);
 
-    // Each panel carries its own Dots row; the open panel (index 0) must
-    // mark its first dot active while leaving the rest of its row inactive.
-    const welcomeDots = within(screen.getByTestId('onboarding-panel-welcome'));
-    expect(welcomeDots.getByTestId('onboarding-dot-0-active')).toBeTruthy();
-    expect(welcomeDots.queryByTestId('onboarding-dot-1-active')).toBeNull();
-    expect(welcomeDots.queryByTestId('onboarding-dot-2-active')).toBeNull();
+    expect(screen.getByTestId('onboarding-dot-0-active')).toBeTruthy();
+    expect(screen.queryByTestId('onboarding-dot-1-active')).toBeNull();
+    expect(screen.queryByTestId('onboarding-dot-2-active')).toBeNull();
   });
 });
 
@@ -99,6 +105,15 @@ describe('OnboardingScreen — exits', () => {
     await render(<OnboardingScreen />);
 
     await userEvent.press(screen.getByTestId('onboarding-primary-welcome'));
+    
+    // In Jest, FlatList doesn't fire viewability events automatically on scrollToIndex
+    const carousel = screen.getByTestId('onboarding-carousel');
+    await act(async () => {
+      carousel.props.onViewableItemsChanged({
+        viewableItems: [{ index: 1 }],
+      });
+    });
+
     await userEvent.press(screen.getByTestId('onboarding-primary-hold'));
 
     expect(navigate).not.toHaveBeenCalled();
@@ -107,6 +122,13 @@ describe('OnboardingScreen — exits', () => {
 
   it('goes to the role picker from the last panel', async () => {
     await render(<OnboardingScreen />);
+
+    const carousel = screen.getByTestId('onboarding-carousel');
+    await act(async () => {
+      carousel.props.onViewableItemsChanged({
+        viewableItems: [{ index: 2 }],
+      });
+    });
 
     await userEvent.press(screen.getByTestId('onboarding-primary-payout'));
 

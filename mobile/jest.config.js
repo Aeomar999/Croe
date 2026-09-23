@@ -19,6 +19,14 @@ const nodeProject = {
   moduleNameMapper: {
     '^react-native-uuid$': '<rootDir>/src/__tests__/__mocks__/react-native-uuid.ts',
     '^expo-secure-store$': '<rootDir>/src/__tests__/__mocks__/expo-secure-store.ts',
+    '^expo-application$': '<rootDir>/src/__tests__/__mocks__/expo-application.ts',
+    '^expo-device$': '<rootDir>/src/__tests__/__mocks__/expo-device.ts',
+    '^expo-network$': '<rootDir>/src/__tests__/__mocks__/expo-network.ts',
+    '^@hugeicons/.*': '<rootDir>/src/__tests__/__mocks__/hugeicons.ts',
+    '^react-native$': '<rootDir>/src/__tests__/__mocks__/react-native-mock.ts',
+  },
+  globals: {
+    __DEV__: true,
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
@@ -36,6 +44,10 @@ const componentProject = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.components.js'],
   moduleNameMapper: {
     '^expo-secure-store$': '<rootDir>/src/__tests__/__mocks__/expo-secure-store.ts',
+    '^expo-application$': '<rootDir>/src/__tests__/__mocks__/expo-application.ts',
+    '^expo-device$': '<rootDir>/src/__tests__/__mocks__/expo-device.ts',
+    '^expo-network$': '<rootDir>/src/__tests__/__mocks__/expo-network.ts',
+    '^@hugeicons/.*': '<rootDir>/src/__tests__/__mocks__/hugeicons.ts',
   },
 };
 

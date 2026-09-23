@@ -39,9 +39,8 @@ router.post(
       const { alreadyProcessed } = await enqueueWebhook({
         provider: "momo",
         providerRef: parsed.providerRef,
-        transactionId: parsed.transactionId,
+        signatureValid: true,
         payload: req.body,
-        headers: req.headers as Record<string, string>,
       });
 
       if (alreadyProcessed) {

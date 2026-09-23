@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   typecheck:
-    name: Typecheck (all workspaces)
+    name: Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +23,9 @@ jobs:
       - run: pnpm --filter @croe/admin typecheck
       - run: pnpm --filter croe-mobile typecheck
 
-  build:
-    name: Build (all workspaces)
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    needs: typecheck
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -36,19 +35,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter croe-backend build
-      - run: pnpm --filter @croe/admin build
-      # mobile is Expo/React Native - built via EAS/Expo, not traditional build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: backend-dist
-          path: backend/dist/
-          retention-days: 7
+      - run: pnpm run --recursive --if-present lint
 
-  test:
+  test-backend:
     name: Tests (backend)
     runs-on: ubuntu-latest
-    needs: typecheck
     services:
       postgres:
         image: postgres:16-alpine
@@ -91,13 +82,28 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter croe-backend db:migrate
-      - run: pnpm --filter croe-backend test
+      - name: Migration Dry Run & Setup
+        run: pnpm --filter croe-backend db:migrate
+      - name: Run Backend Tests
+        run: pnpm --filter croe-backend test
 
-  admin-test:
+  test-mobile:
+    name: Tests (mobile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter croe-mobile test:ci
+
+  test-admin:
     name: Tests (admin)
     runs-on: ubuntu-latest
-    needs: typecheck
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -109,11 +115,63 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @croe/admin test
 
-  deploy:
-    name: Deploy to Render
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    needs: [build, test]
-    if: github.ref == 'refs/heads/main'
+    needs: [typecheck, lint]
     steps:
-      - name: Trigger Render Deploy Hook
-        run: curl -s -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter croe-backend build
+      - run: pnpm --filter @croe/admin build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: backend/dist/
+          retention-days: 7
+
+  docker-build:
+    name: Verify Docker Build (backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build -t croe-backend:ci -f backend/Dockerfile backend/
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, test-backend, test-admin, test-mobile, docker-build]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - name: Trigger Staging Deploy
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL_STAGING }}" ]; then
+            curl -s -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL_STAGING }}
+          else
+            echo "Staging webhook not configured. Skipping."
+          fi
+
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://api.croe.co
+    steps:
+      - name: Trigger Production Deploy
+        run: |
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK_URL_PROD }}" ]; then
+            curl -s -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL_PROD }}
+          else
+            echo "Production webhook not configured. Skipping."
+          fi

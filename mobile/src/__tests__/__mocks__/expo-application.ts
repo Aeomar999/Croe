@@ -1,0 +1,1 @@
+module.exports = { default: 'mock', getIosIdForVendorAsync: jest.fn().mockResolvedValue('device-unknown'), getAndroidId: jest.fn().mockReturnValue('device-unknown'), getApplicationIdAsync: jest.fn(), applicationVersion: '1.0.0' };

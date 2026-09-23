@@ -52,7 +52,7 @@
 | C3 | Provision object storage (Cloudflare R2/S3) with versioning + cross-region replication | Provisioned | [ ] | Evidence media |
 | C4 | Provision LLM hosting (CPU-only Ollama on app host for pilot) | Provisioned | [ ] | **Run pilot CPU-only per cost discipline** |
 | C5 | Configure DNS + TLS (Cloudflare) with auto-renewing certs | Configured | [ ] | api.croe.com |
-| C6 | Set up CI/CD pipeline (GitHub Actions → Render/Railway/Fly) | Running | [ ] | Typecheck → Lint → Test → Build → Migrate → Deploy |
+| C6 | Set up CI/CD pipeline (GitHub Actions → Render/Railway/Fly) | Running | [x] | Typecheck → Lint → Test → Build → Migrate → Deploy |
 | C7 | Configure log aggregation (Pino → Loki/Better Stack/Datadog) | Configured | [ ] | Structured JSON |
 | C8 | Configure daily Postgres backups + PITR with monthly restore tests | Verified | [ ] | Automated + tested |
 

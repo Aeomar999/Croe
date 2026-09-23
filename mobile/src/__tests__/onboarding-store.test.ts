@@ -23,40 +23,60 @@ beforeEach(() => {
 
 describe('Onboarding store — hydrate', () => {
   it('reports "not seen" when nothing is stored', async () => {
+    const originalDev = global.__DEV__;
+    global.__DEV__ = false as any;
+
     await useOnboardingStore.getState().hydrate();
 
     const state = useOnboardingStore.getState();
     expect(state.seen).toBe(false);
     expect(state.role).toBeNull();
     expect(state.hydrated).toBe(true);
+
+    global.__DEV__ = originalDev;
   });
 
   it('restores a stored flag and role', async () => {
-    await SecureStore.setItemAsync('croe.onboarding.seen', 'true');
-    await SecureStore.setItemAsync('croe.onboarding.role', 'buyer');
+    const originalDev = global.__DEV__;
+    global.__DEV__ = false as any;
+
+    await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'true');
+    await SecureStore.setItemAsync('croe.onboarding.role.v2', 'buyer');
 
     await useOnboardingStore.getState().hydrate();
 
     const state = useOnboardingStore.getState();
     expect(state.seen).toBe(true);
     expect(state.role).toBe('buyer');
+    
+    global.__DEV__ = originalDev;
   });
 
   it('discards a role value that is not one of the two roles', async () => {
-    await SecureStore.setItemAsync('croe.onboarding.seen', 'true');
-    await SecureStore.setItemAsync('croe.onboarding.role', 'administrator');
+    const originalDev = global.__DEV__;
+    global.__DEV__ = false as any;
+
+    await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'true');
+    await SecureStore.setItemAsync('croe.onboarding.role.v2', 'administrator');
 
     await useOnboardingStore.getState().hydrate();
 
     expect(useOnboardingStore.getState().role).toBeNull();
+
+    global.__DEV__ = originalDev;
   });
 
   it('treats any value other than "true" as not seen', async () => {
-    await SecureStore.setItemAsync('croe.onboarding.seen', 'yes');
+    const originalDev = global.__DEV__;
+    global.__DEV__ = false as any;
+
+    await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'yes');
 
     await useOnboardingStore.getState().hydrate();
 
     expect(useOnboardingStore.getState().seen).toBe(false);
+
+    global.__DEV__ = originalDev;
   });
 
   it('still finishes hydrating when SecureStore throws', async () => {
@@ -78,8 +98,8 @@ describe('Onboarding store — complete', () => {
   it('persists the chosen role and marks onboarding seen', async () => {
     await useOnboardingStore.getState().complete('seller');
 
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.seen', 'true');
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.role', 'seller');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.seen.v2', 'true');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.role.v2', 'seller');
 
     const state = useOnboardingStore.getState();
     expect(state.seen).toBe(true);
@@ -89,9 +109,9 @@ describe('Onboarding store — complete', () => {
   it('records seen without a role on the skip path', async () => {
     await useOnboardingStore.getState().complete(null);
 
-    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.seen', 'true');
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('croe.onboarding.seen.v2', 'true');
     expect(SecureStore.setItemAsync).not.toHaveBeenCalledWith(
-      'croe.onboarding.role',
+      'croe.onboarding.role.v2',
       expect.anything()
     );
 
@@ -101,12 +121,22 @@ describe('Onboarding store — complete', () => {
   });
 
   it('survives a round trip through hydrate', async () => {
-    await useOnboardingStore.getState().complete('buyer');
-    useOnboardingStore.setState({ ...initial });
+    // @ts-ignore - Mock __DEV__ to false so it doesn't wipe state
+    const originalDev = global.__DEV__;
+    // @ts-ignore
+    global.__DEV__ = false;
 
-    await useOnboardingStore.getState().hydrate();
+    try {
+      await useOnboardingStore.getState().complete('buyer');
+      useOnboardingStore.setState({ ...initial });
 
-    expect(useOnboardingStore.getState().seen).toBe(true);
-    expect(useOnboardingStore.getState().role).toBe('buyer');
+      await useOnboardingStore.getState().hydrate();
+
+      expect(useOnboardingStore.getState().seen).toBe(true);
+      expect(useOnboardingStore.getState().role).toBe('buyer');
+    } finally {
+      // @ts-ignore
+      global.__DEV__ = originalDev;
+    }
   });
 });

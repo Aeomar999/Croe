@@ -148,7 +148,30 @@ docker compose down -v   # removes containers + volumes
 | 5 | Post-deploy smoke | Automated health check + key flow verification |
 | 6 | Monitor | Watch error rates, latency, reconciliation for 30 min |
 
-### 2.3 Rollback Procedure
+### 2.3 Deployment (Admin Dashboard)
+
+The `croe-admin` Next.js frontend is configured alongside the API in `render.yaml` for continuous deployment. Alternatively, it can be deployed to Vercel.
+
+| Step | Action | Command / Details |
+|------|--------|-------------------|
+| 1 | Render Blueprint Sync | Push to `main` auto-triggers `croe-admin` and `croe-api` builds on Render. |
+| 2 | Next.js Standalone Build | Vercel or Render runs `pnpm build` pulling the workspace deps. |
+| 3 | Container Deploy (Optional) | Build via `admin/Dockerfile` and deploy image to container registry. |
+
+### 2.4 Deployment (Mobile App / Expo EAS)
+
+Mobile builds are not continuous; they are cut intentionally via Expo Application Services (EAS).
+
+| Step | Action | Command / Details |
+|------|--------|-------------------|
+| 1 | Install EAS CLI | `npm install -g eas-cli` |
+| 2 | Login to Expo | `eas login` |
+| 3 | Configure project | `eas build:configure` (if not already done via `eas.json`) |
+| 4 | Build Android APK/AAB | `cd mobile && eas build --platform android --profile production` |
+| 5 | Build iOS IPA | `cd mobile && eas build --platform ios --profile production` |
+| 6 | Submit to stores | `eas submit -p android` / `eas submit -p ios` |
+
+### 2.5 Rollback Procedure
 
 | Step | Action | Command / Details |
 |------|--------|-------------------|

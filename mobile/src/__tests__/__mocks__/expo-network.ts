@@ -1,0 +1,1 @@
+module.exports = { getNetworkStateAsync: jest.fn().mockResolvedValue({ type: "UNKNOWN" }) };

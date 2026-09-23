@@ -1,5 +1,6 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
+import { authenticate } from "../middleware/auth.js";
 import { requireIdempotencyKey, idempotencyGuard } from "../middleware/idempotency.js";
 import { disputeRateLimiter } from "../middleware/rate-limiter.js";
 import { openDispute, getDispute } from "../services/disputes.js";
@@ -24,6 +25,7 @@ function validateId(id: string | undefined): string {
  */
 router.post(
   "/disputes",
+  authenticate,
   disputeRateLimiter,
   requireIdempotencyKey,
   idempotencyGuard,
@@ -63,7 +65,7 @@ router.post(
 
     const dispute = await openDispute({
       transactionId: transaction_id,
-      initiatedBy: "00000000-0000-0000-0000-000000000001", // placeholder until auth
+      initiatedBy: req.userId!,
       reasonCode: reason_code as DisputeReasonCode,
       claimDescription: claim_description,
       evidenceArtifactIds: evidence_artifact_ids,
@@ -83,7 +85,7 @@ router.post(
 /**
  * GET /v1/disputes/:id — Get dispute status
  */
-router.get("/disputes/:id", async (req: Request, res: Response) => {
+router.get("/disputes/:id", authenticate, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const dispute = await getDispute(id);
 

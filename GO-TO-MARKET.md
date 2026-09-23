@@ -582,13 +582,14 @@ Production TypeScript, PostgreSQL, payments, and infrastructure skills are direc
 
 | # | Asset | Status | Notes |
 |---|-------|--------|-------|
-| 1 | One-page summary | [x] | [`pitch/ONE-PAGER.md`](pitch/ONE-PAGER.md) — **contains `[FILL: …]` placeholders; complete before sending** |
-| 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes; apply brand tokens from [`20-Design-System.md`](for_agents/20-Design-System.md). **Contains `[FILL: …]` placeholders** |
+| 1 | One-page summary | [x] | [`pitch/ONE-PAGER.md`](pitch/ONE-PAGER.md) — 2.0% standard statement, GHS 1,200 lead ticket, dual-track ask |
+| 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes with locked metrics & dual asks |
 | 3 | **Live demo on sandbox** | [ ] | The strongest asset — a working app, not a mockup |
-| 4 | Due-diligence pack | [ ] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
-| 5 | Vendor commitment letters | [x] template · [ ] collected | Template + WhatsApp version + portfolio tracker: [`pitch/VENDOR-COMMITMENT-LETTER.md`](pitch/VENDOR-COMMITMENT-LETTER.md). **Non-binding by design** — Croe is pre-incorporation and pre-licence. Collected numbers feed §5, §7.2, §10.7 |
-| 6 | Unit economics one-pager | [ ] | From §10.4–10.7, with real confirmed fees |
-| 7 | Regulatory position summary | [ ] | The P0→P3 custody chain — see §11.9 |
+| 4 | Due-diligence pack | [x] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
+| 5 | Vendor commitment letters | [x] template · [ ] collected | Template + WhatsApp version + portfolio tracker: [`pitch/VENDOR-COMMITMENT-LETTER.md`](pitch/VENDOR-COMMITMENT-LETTER.md). Locked 2.0% commission acceptance. |
+| 6 | Unit economics reference | [x] | [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) — 3-tier unit economics, break-even sensitivity, dual-track budget |
+| 7 | Regulatory & custody brief | [x] | [`pitch/BANK-AND-PARTNER-BRIEF.md`](pitch/BANK-AND-PARTNER-BRIEF.md) — P0→P3 custody chain, trust account, compliance controls |
+| 8 | Vendor onboarding flyer | [x] | [`pitch/VENDOR-ONE-PAGER.md`](pitch/VENDOR-ONE-PAGER.md) — High-conversion sales flyer for pilot merchants |
 
 ### 11.9 The Two Things That Decide the Outcome
 

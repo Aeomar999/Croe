@@ -15,16 +15,15 @@ import { logger } from "../config/logger.js";
 export async function enqueueWebhook(p: {
   provider: string;
   providerRef: string;
-  transactionId: string;
+  signatureValid: boolean;
   payload: unknown;
-  headers: Record<string, string>;
 }): Promise<{ alreadyProcessed: boolean }> {
-  const { rows } = await pool.query<{ inbox_id: number }>(
-    `INSERT INTO webhook_inbox (provider, provider_ref, transaction_id, payload, headers)
-     VALUES ($1, $2, $3, $4, $5)
+  const { rows } = await pool.query<{ webhook_id: string }>(
+    `INSERT INTO webhook_inbox (provider, provider_ref, signature_valid, payload)
+     VALUES ($1, $2, $3, $4)
      ON CONFLICT (provider, provider_ref) DO NOTHING
-     RETURNING inbox_id`,
-    [p.provider, p.providerRef, p.transactionId, JSON.stringify(p.payload), JSON.stringify(p.headers)],
+     RETURNING webhook_id`,
+    [p.provider, p.providerRef, p.signatureValid, JSON.stringify(p.payload)],
   );
 
   if (rows.length === 0) {
@@ -32,7 +31,7 @@ export async function enqueueWebhook(p: {
     return { alreadyProcessed: true };
   }
 
-  logger.info({ provider: p.provider, providerRef: p.providerRef, inboxId: rows[0].inbox_id }, "Webhook enqueued");
+  logger.info({ provider: p.provider, providerRef: p.providerRef, webhookId: rows[0].webhook_id }, "Webhook enqueued");
   return { alreadyProcessed: false };
 }
 

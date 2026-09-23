@@ -194,14 +194,21 @@ export async function uploadEvidence(p: {
         ],
       );
 
+      const { rows: escrowRows } = await client.query<{ current_status: string }>(
+        `SELECT current_status FROM escrow_transactions WHERE transaction_id = $1`,
+        [p.transactionId]
+      );
+      const currentStatus = escrowRows[0]?.current_status ?? "DISPUTE_OPENED";
+
       // EVIDENCE_ADDED ledger entry (AUD-01: append-only)
       await client.query(
         `INSERT INTO transaction_ledger
            (transaction_id, actor_id, event_type, previous_status, new_status, ip_address, device_id, network_type)
-         VALUES ($1, $2, 'EVIDENCE_ADDED', NULL, NULL, $3, $4, $5)`,
+         VALUES ($1, $2, 'EVIDENCE_ADDED', $3, $3, $4, $5, $6)`,
         [
           p.transactionId,
           p.uploaderId,
+          currentStatus,
           p.forensic?.ip ?? null,
           p.forensic?.deviceId ?? null,
           p.forensic?.networkType ?? null,

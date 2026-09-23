@@ -28,6 +28,7 @@ export function Dots({ count, activeIndex }: DotsProps) {
         return (
           <View
             key={i}
+            testID={`onboarding-dot-${i}${isActive ? '-active' : ''}`}
             style={[
               styles.dot,
               isActive && styles.dotActive,

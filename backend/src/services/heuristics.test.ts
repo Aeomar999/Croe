@@ -31,7 +31,8 @@ beforeEach(async () => {
     await client.query("DELETE FROM transaction_ledger");
     await client.query("DELETE FROM payouts");
     await client.query("DELETE FROM escrow_transactions");
-    await client.query("DELETE FROM users");
+    await client.query("DELETE FROM idempotency_keys");
+    await client.query("DELETE FROM users CASCADE");
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
@@ -44,7 +45,8 @@ beforeEach(async () => {
   await pool.query(
     `INSERT INTO users (user_id, phone_number, full_name, trust_score, is_frozen)
      VALUES ($1, '+233240000001', 'Test Vendor', 50, false),
-            ($2, '+233240000002', 'Test Buyer', 50, false)`,
+            ($2, '+233240000002', 'Test Buyer', 50, false)
+     ON CONFLICT (phone_number) DO UPDATE SET user_id = EXCLUDED.user_id`,
     [VENDOR_ID, BUYER_ID],
   );
 

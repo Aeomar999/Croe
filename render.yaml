@@ -32,6 +32,17 @@ services:
       # - S3_ENDPOINT
       # - CORS_ORIGIN
 
+  - type: web
+    name: croe-admin
+    env: node
+    buildCommand: cd admin && corepack prepare pnpm@11.1.2 --activate && pnpm install && pnpm build
+    startCommand: cd admin && pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.croe.co/v1
+
   - type: redis
     name: croe-redis
     plan: free # Change to a paid plan for persistence in production

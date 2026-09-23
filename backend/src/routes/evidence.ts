@@ -1,5 +1,6 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
+import { authenticate } from "../middleware/auth.js";
 import multer from "multer";
 import { requireIdempotencyKey, idempotencyGuard } from "../middleware/idempotency.js";
 import { evidenceRateLimiter } from "../middleware/rate-limiter.js";
@@ -23,6 +24,7 @@ const upload = multer({
  */
 router.post(
   "/evidence/upload",
+  authenticate,
   evidenceRateLimiter,
   requireIdempotencyKey,
   idempotencyGuard,
@@ -62,7 +64,7 @@ router.post(
 
     const artifact = await uploadEvidence({
       transactionId: transaction_id,
-      uploaderId: "00000000-0000-0000-0000-000000000001", // placeholder until auth
+      uploaderId: req.userId!,
       artifactType: artifact_type,
       fileName: file.originalname,
       mimeType: file.mimetype,

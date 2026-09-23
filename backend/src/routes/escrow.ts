@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { AppError } from "../middleware/error-handler.js";
 import { requireIdempotencyKey, idempotencyGuard } from "../middleware/idempotency.js";
 import { paymentRateLimiter } from "../middleware/rate-limiter.js";
+import { authenticate } from "../middleware/auth.js";
 import {
   createEscrow,
   getEscrow,
@@ -36,7 +37,7 @@ function validateId(id: string | undefined): string {
  * POST /v1/escrow — Create escrow contract (vendor)
  * 18-API-Reference.md §2 Escrow
  */
-router.post("/escrow", paymentRateLimiter, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow", authenticate, paymentRateLimiter, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const { item_description, amount, currency } = req.body as {
     item_description?: string;
     amount?: string;
@@ -54,7 +55,7 @@ router.post("/escrow", paymentRateLimiter, requireIdempotencyKey, idempotencyGua
   }
 
   const tx = await createEscrow({
-    vendorId: "00000000-0000-0000-0000-000000000000", // placeholder until auth (Phase 6)
+    vendorId: req.userId!,
     itemDescription: item_description,
     amount,
     currency: currency as Currency,
@@ -73,7 +74,7 @@ router.post("/escrow", paymentRateLimiter, requireIdempotencyKey, idempotencyGua
 /**
  * GET /v1/escrow/:id — Get escrow status
  */
-router.get("/escrow/:id", async (req: Request, res: Response) => {
+router.get("/escrow/:id", authenticate, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await getEscrow(id);
 
@@ -98,7 +99,7 @@ router.get("/escrow/:id", async (req: Request, res: Response) => {
  * Guard: must be in LINK_CREATED. Calls PaymentRail.initiateDeposit().
  * Returns 202 {collectionRef, status} per 18-API-Reference.md §2.
  */
-router.post("/escrow/:id/deposit", paymentRateLimiter, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/deposit", authenticate, paymentRateLimiter, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const { msisdn, carrier } = req.body as { msisdn?: string; carrier?: string };
 
@@ -111,7 +112,7 @@ router.post("/escrow/:id/deposit", paymentRateLimiter, requireIdempotencyKey, id
 
   const { collectionRef, status } = await initiateDeposit({
     transactionId: id,
-    buyerId: "00000000-0000-0000-0000-000000000001", // placeholder until auth
+    buyerId: req.userId!,
     msisdn,
     carrier: carrier as Carrier,
     forensic: req.forensic,
@@ -127,11 +128,11 @@ router.post("/escrow/:id/deposit", paymentRateLimiter, requireIdempotencyKey, id
  * POST /v1/escrow/:id/ship — Mark shipped (vendor)
  * Guard: must be in FUNDS_SECURED
  */
-router.post("/escrow/:id/ship", requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/ship", authenticate, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await shipEscrow({
     transactionId: id,
-    vendorId: "00000000-0000-0000-0000-000000000000", // placeholder until auth
+    vendorId: req.userId!,
     forensic: req.forensic,
   });
 
@@ -145,11 +146,11 @@ router.post("/escrow/:id/ship", requireIdempotencyKey, idempotencyGuard, async (
  * POST /v1/escrow/:id/confirm-delivery — Confirm delivery (buyer)
  * Guard: must be in SHIPPED
  */
-router.post("/escrow/:id/confirm-delivery", requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/confirm-delivery", authenticate, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await confirmDelivery({
     transactionId: id,
-    buyerId: "00000000-0000-0000-0000-000000000000", // placeholder until auth
+    buyerId: req.userId!,
     forensic: req.forensic,
   });
 
@@ -163,11 +164,11 @@ router.post("/escrow/:id/confirm-delivery", requireIdempotencyKey, idempotencyGu
  * POST /v1/escrow/:id/cancel — Cancel (vendor)
  * Guard: must be in LINK_CREATED
  */
-router.post("/escrow/:id/cancel", requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/cancel", authenticate, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await cancelEscrow({
     transactionId: id,
-    vendorId: "00000000-0000-0000-0000-000000000000", // placeholder until auth
+    vendorId: req.userId!,
     forensic: req.forensic,
   });
 
@@ -181,7 +182,7 @@ router.post("/escrow/:id/cancel", requireIdempotencyKey, idempotencyGuard, async
  * POST /v1/escrow/:id/release — Release funds to vendor
  * Guard: must be in DELIVERED_CONFIRMED. MONEY-01: pay then ledger.
  */
-router.post("/escrow/:id/release", requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/release", authenticate, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await releaseFunds({
     transactionId: id,
@@ -198,7 +199,7 @@ router.post("/escrow/:id/release", requireIdempotencyKey, idempotencyGuard, asyn
  * POST /v1/escrow/:id/refund — Refund buyer
  * Guard: must be in RESOLVED_AUTO or UNDER_HUMAN_REVIEW. MONEY-01: pay then ledger.
  */
-router.post("/escrow/:id/refund", requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
+router.post("/escrow/:id/refund", authenticate, requireIdempotencyKey, idempotencyGuard, async (req: Request, res: Response) => {
   const id = validateId(req.params["id"] as string);
   const tx = await refundFunds({
     transactionId: id,

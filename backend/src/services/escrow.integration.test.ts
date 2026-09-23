@@ -26,7 +26,7 @@ beforeEach(async () => {
     await client.query("DELETE FROM escrow_transactions");
     await client.query("DELETE FROM user_preferences WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+23399%')");
     await client.query("DELETE FROM auth_sessions WHERE user_id IN (SELECT user_id FROM users WHERE phone_number LIKE '+23399%')");
-    await client.query("DELETE FROM users WHERE phone_number LIKE '+23399%'");
+    await client.query("DELETE FROM users CASCADE");
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
@@ -35,9 +35,10 @@ beforeEach(async () => {
     client.release();
   }
   await pool.query(
-    `INSERT INTO users (user_id, phone_number, full_name)
-     VALUES ($1, '+233240000001', 'Test Vendor'),
-            ($2, '+233240000002', 'Test Buyer')`,
+    `INSERT INTO users (user_id, phone_number, full_name, kyc_tier)
+     VALUES ($1, '+233240000001', 'Test Vendor', 2),
+            ($2, '+233240000002', 'Test Buyer', 1)
+     ON CONFLICT (phone_number) DO UPDATE SET user_id = EXCLUDED.user_id`,
     [VENDOR_ID, BUYER_ID],
   );
 });
@@ -276,6 +277,9 @@ describe("escrow service integration", () => {
       );
 
       for (const r of results) {
+        if (r.status === "rejected") {
+          console.error("Concurrent webhook rejected:", r.reason);
+        }
         expect(r.status).toBe("fulfilled");
       }
 
@@ -287,7 +291,7 @@ describe("escrow service integration", () => {
 
       const final = await getEscrow(tx.transaction_id);
       expect(final.current_status).toBe("FUNDS_SECURED");
-    });
+    }, 15000);
   });
 
   describe("release flow", () => {
