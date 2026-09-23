@@ -155,8 +155,8 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">42</p>
-                  <p className="text-[10px] font-medium text-state-danger-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowUpRight className="w-2.5 h-2.5 text-state-danger-deep" /> <span className="text-state-danger-deep font-semibold">8</span> vs last week
+                  <p className="text-[10px] font-medium text-ink-secondary mt-2 flex items-center gap-0.5">
+                    <ArrowUpRight className="w-2.5 h-2.5 text-[#E94E41]" /> <span className="text-[#E94E41] font-semibold">8</span> vs last week
                   </p>
                 </div>
               </div>
@@ -174,8 +174,8 @@ export default function DashboardPage() {
                     <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">87.4</p>
                     <span className="text-[12px] font-medium text-ink-tertiary">%</span>
                   </div>
-                  <p className="text-[10px] font-medium text-state-secure-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowUpRight className="w-2.5 h-2.5" /> 2.1 pts last 30 days
+                  <p className="text-[10px] font-medium text-ink-secondary mt-2 flex items-center gap-0.5">
+                    <ArrowUpRight className="w-2.5 h-2.5 text-[#2ECA6A]" /> <span className="text-[#2ECA6A] font-semibold">2.1 pts</span> last 30 days
                   </p>
                 </div>
               </div>
@@ -193,8 +193,8 @@ export default function DashboardPage() {
                     <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">8</p>
                     <span className="text-[12px] font-medium text-ink-tertiary">cases</span>
                   </div>
-                  <p className="text-[10px] font-medium text-state-secure-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowDownRight className="w-2.5 h-2.5" /> 3 vs last week
+                  <p className="text-[10px] font-medium text-ink-secondary mt-2 flex items-center gap-0.5">
+                    <ArrowDownRight className="w-2.5 h-2.5 text-[#2ECA6A]" /> <span className="text-[#2ECA6A] font-semibold">3</span> vs last week
                   </p>
                 </div>
               </div>
@@ -212,8 +212,8 @@ export default function DashboardPage() {
                     <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">3.2</p>
                     <span className="text-[12px] font-medium text-ink-tertiary">days</span>
                   </div>
-                  <p className="text-[10px] font-medium text-state-secure-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowDownRight className="w-2.5 h-2.5" /> 0.4 d to decision
+                  <p className="text-[10px] font-medium text-ink-secondary mt-2 flex items-center gap-0.5">
+                    <ArrowDownRight className="w-2.5 h-2.5 text-[#2ECA6A]" /> <span className="text-[#2ECA6A] font-semibold">0.4 d</span> to decision
                   </p>
                 </div>
               </div>
@@ -232,8 +232,8 @@ export default function DashboardPage() {
                 <p className="text-[12px] text-ink-tertiary font-medium mt-0.5">Sorted by procedure date, then approval odds</p>
               </div>
               <div className="flex items-center gap-2">
-                <div className="bg-[#FF9A24] text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-[0_2px_8px_rgba(255,154,36,0.2)]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-black/60" />
+                <div className="bg-[#FF9A24] text-ink-primary px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-[0_2px_8px_rgba(255,154,36,0.2)]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-ink-primary" />
                   8 cases need action
                 </div>
                 <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-primary hover:bg-[#F0F1F3] transition-colors">
@@ -244,11 +244,11 @@ export default function DashboardPage() {
 
             {/* Header row */}
             <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[11px] font-semibold tracking-wide text-ink-tertiary flex-shrink-0">
-              <div className="col-span-4">Case</div>
+              <div className="col-span-3">Case</div>
               <div className="col-span-3">Blocking issue</div>
               <div className="col-span-2">Payer</div>
               <div className="col-span-2">Approval odds</div>
-              <div className="col-span-1">Due</div>
+              <div className="col-span-2">Due</div>
             </div>
 
             {/* Scrollable Rows Container */}
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                 <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
                   
                   {/* Case Info */}
-                  <div className="col-span-4 flex items-center gap-3">
+                  <div className="col-span-3 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
                       <row.icon className="w-4 h-4" />
                     </div>
@@ -295,20 +295,20 @@ export default function DashboardPage() {
                   {/* Approval Odds */}
                   <div className="col-span-2 flex items-center gap-2">
                     <span className="text-[13px] font-bold text-ink-primary w-8">{row.odds}%</span>
-                    <div className="flex gap-0.5">
+                    <div className="flex gap-[3px]">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((bar) => (
                         <div 
                           key={bar} 
-                          className={cn("w-1 h-2.5 rounded-sm", bar <= row.segments ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
+                          className={cn("w-[3px] h-2.5 rounded-[1px]", bar <= row.segments ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
                         />
                       ))}
                     </div>
                   </div>
 
                   {/* Due & Action */}
-                  <div className="col-span-1 flex items-center justify-between min-w-[110px]">
+                  <div className="col-span-2 flex items-center justify-between min-w-[110px]">
                     <span className="text-[12px] font-medium text-ink-secondary">{row.due}</span>
-                    <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-bold text-ink-primary shadow-sm hover:shadow-md transition-all absolute right-4 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100">
+                    <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all">
                       Review case
                     </button>
                   </div>

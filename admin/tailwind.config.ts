@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         // Surfaces
-        page: '#EEF3F9',
+        page: '#EBEAE5',
         canvas: '#F7F9FC',
         surface: '#FFFFFF',
         sunken: '#F1F5F9',
