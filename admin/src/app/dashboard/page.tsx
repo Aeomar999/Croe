@@ -21,7 +21,8 @@ import {
   User,
   Sparkles,
   CircleDollarSign,
-  Heart
+  Heart,
+  CheckCheck
 } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
@@ -100,7 +101,7 @@ export default function DashboardPage() {
                 <div className="hidden sm:flex flex-col items-end opacity-100">
                   <div className="flex items-end gap-1.5 h-16 mb-2">
                     {[30, 45, 60, 50, 80, 100].map((h, i) => (
-                      <div key={i} className={cn("w-3.5 rounded-sm opacity-90", i === 5 ? "bg-[#D8F04B]" : "bg-white/30")} style={{ height: `${h}%` }} />
+                      <div key={i} className={cn("w-3.5 rounded-[2px] opacity-90", i === 5 ? "bg-[#D8F04B]" : "bg-white/10 bg-hatch border border-white/30")} style={{ height: `${h}%` }} />
                     ))}
                   </div>
                   <div className="flex items-center gap-2 text-[9px] text-white/50 font-medium w-full justify-between pr-1 uppercase tracking-wider">
@@ -149,7 +150,7 @@ export default function DashboardPage() {
               <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Pending<br/>authorizations</p>
-                  <div className="w-6 h-6 rounded-full bg-[#FFD700] flex items-center justify-center text-amber-800 shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-[#FFD700] flex items-center justify-center text-ink-primary shrink-0">
                     <Hourglass className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </div>
                 </div>
@@ -165,8 +166,8 @@ export default function DashboardPage() {
               <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Approval rate<br/>&nbsp;</p>
-                  <div className="w-6 h-6 rounded-full bg-[#2ECA6A] flex items-center justify-center text-white shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <div className="w-6 h-6 rounded-full bg-[#2ECA6A] flex items-center justify-center text-ink-primary shrink-0">
+                    <CheckCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </div>
                 </div>
                 <div>
@@ -184,7 +185,7 @@ export default function DashboardPage() {
               <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">At risk<br/>&nbsp;</p>
-                  <div className="w-6 h-6 rounded-full bg-[#FF9A24] flex items-center justify-center text-white shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-[#FF9A24] flex items-center justify-center text-ink-primary shrink-0">
                     <AlertTriangle className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </div>
                 </div>
@@ -276,8 +277,8 @@ export default function DashboardPage() {
 
                   {/* Blocking Issue */}
                   <div className="col-span-3 flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-[#FFF0DB] flex items-center justify-center text-[#FF9A24] flex-shrink-0">
-                      <AlertTriangle className="w-2.5 h-2.5" strokeWidth={3} />
+                    <div className="w-4 h-4 rounded-full bg-[#FF9A24] flex items-center justify-center text-ink-primary flex-shrink-0">
+                      <AlertTriangle className="w-2.5 h-2.5" strokeWidth={2.5} />
                     </div>
                     <span className="text-[12px] font-medium text-ink-secondary truncate">{row.issue}</span>
                   </div>
@@ -326,92 +327,28 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="relative border-l border-line-primary ml-3 flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
-              <div className="space-y-6 pb-2">
-                {/* Activity Item 1 */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#2ECA6A] flex items-center justify-center border-4 border-white shadow-sm">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 divide-y divide-black/[0.04] -mt-2">
+              {[
+                { icon: CheckCircle2, title: 'Authorization approved', sub: 'MRI &middot; Linda Park', time: '9:12 AM', color: 'bg-[#2ECA6A]' },
+                { icon: AlertTriangle, title: 'More documentation requested', sub: 'CT Scan &middot; Emma Wilson', time: '8:47 AM', color: 'bg-[#FF9A24]' },
+                { icon: XCircle, title: 'Authorization denied', sub: 'Physical Therapy &middot; Robert Smith', time: '8:05 AM', color: 'bg-[#F36960]' },
+                { icon: Sparkles, title: 'AI review completed', sub: 'Knee Arthroscopy &middot; Maria Gonzal...', time: 'Yesterday', color: 'bg-[#B292FA]' },
+                { icon: CheckCircle2, title: 'Appeal overturned', sub: 'Epidural Injection &middot; Noah Davis', time: 'Yesterday', color: 'bg-[#2ECA6A]' },
+                { icon: Hourglass, title: 'Submitted to payer portal', sub: 'PET Scan &middot; Olivia Brown', time: 'Yesterday', color: 'bg-[#FFD700]' },
+              ].map((item, i) => (
+                <div key={i} className="py-3 flex items-start gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${item.color}`}>
+                    <item.icon className="w-4 h-4 text-ink-primary" strokeWidth={1.5} />
                   </div>
-                  <div className="flex justify-between items-start">
+                  <div className="flex-1 flex justify-between items-start mt-0.5">
                     <div>
-                      <p className="text-[12px] font-bold text-ink-primary">Authorization approved</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'MRI &middot; Linda Park' }}></p>
+                      <p className="text-[13px] font-bold text-ink-primary">{item.title}</p>
+                      <p className="text-[12px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: item.sub }}></p>
                     </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">9:12 AM</span>
+                    <span className="text-[11px] font-medium text-ink-tertiary shrink-0 ml-2">{item.time}</span>
                   </div>
                 </div>
-
-                {/* Activity Item 2 */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#FF9A24] flex items-center justify-center border-4 border-white shadow-sm">
-                    <AlertTriangle className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[12px] font-bold text-ink-primary">More documentation requested</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'CT Scan &middot; Emma Wilson' }}></p>
-                    </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">8:47 AM</span>
-                  </div>
-                </div>
-
-                {/* Activity Item 3 */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#F36960] flex items-center justify-center border-4 border-white shadow-sm">
-                    <XCircle className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[12px] font-bold text-ink-primary">Authorization denied</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Physical Therapy &middot; Robert Smith' }}></p>
-                    </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">8:05 AM</span>
-                  </div>
-                </div>
-
-                {/* Activity Item 4 */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#B292FA] flex items-center justify-center border-4 border-white shadow-sm">
-                    <Sparkles className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[12px] font-bold text-ink-primary">AI review completed</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Knee Arthroscopy &middot; Maria Gonzal...' }}></p>
-                    </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
-                  </div>
-                </div>
-
-                {/* Activity Item 5 */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#2ECA6A] flex items-center justify-center border-4 border-white shadow-sm">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[12px] font-bold text-ink-primary">Appeal overturned</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Epidural Injection &middot; Noah Davis' }}></p>
-                    </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
-                  </div>
-                </div>
-                
-                {/* Activity Item 6 (Extra for scrolling proof) */}
-                <div className="relative pl-5">
-                  <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center border-4 border-white shadow-sm">
-                    <Hourglass className="w-2.5 h-2.5 text-amber-800" strokeWidth={3} />
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="text-[12px] font-bold text-ink-primary">Submitted to payer portal</p>
-                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'PET Scan &middot; Olivia Brown' }}></p>
-                    </div>
-                    <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </motion.div>
         </div>
