@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
@@ -16,6 +16,8 @@ import {
   XCircle,
   Stethoscope,
   BriefcaseMedical,
+  HeartPulse,
+  ActivitySquare,
   User,
   Sparkles,
   CircleDollarSign,
@@ -134,10 +136,10 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[17px] font-bold text-ink-primary">Today</h3>
               <div className="flex items-center gap-2">
-                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
+                <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                 </button>
-                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
+                <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </div>
@@ -145,7 +147,7 @@ export default function DashboardPage() {
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-1 h-full min-h-0">
               {/* KPI 1 */}
-              <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
+              <div className="bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Pending<br/>authorizations</p>
                   <div className="w-6 h-6 rounded-full bg-[#FFD700] flex items-center justify-center text-ink-primary shrink-0">
@@ -161,7 +163,7 @@ export default function DashboardPage() {
               </div>
 
               {/* KPI 2 */}
-              <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
+              <div className="bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Approval rate<br/>&nbsp;</p>
                   <div className="w-6 h-6 rounded-full bg-[#2ECA6A] flex items-center justify-center text-ink-primary shrink-0">
@@ -180,7 +182,7 @@ export default function DashboardPage() {
               </div>
 
               {/* KPI 3 */}
-              <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
+              <div className="bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">At risk<br/>&nbsp;</p>
                   <div className="w-6 h-6 rounded-full bg-[#FF9A24] flex items-center justify-center text-ink-primary shrink-0">
@@ -199,7 +201,7 @@ export default function DashboardPage() {
               </div>
 
               {/* KPI 4 */}
-              <div className="bg-[#F6F7F9] rounded-[24px] p-4 flex flex-col justify-between h-full">
+              <div className="bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col justify-between h-full">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Avg. turnaround<br/>&nbsp;</p>
                   <div className="w-6 h-6 rounded-full bg-[#B292FA] flex items-center justify-center text-white shrink-0">
@@ -235,7 +237,7 @@ export default function DashboardPage() {
                   <div className="w-1.5 h-1.5 rounded-full bg-ink-primary" />
                   8 cases need action
                 </div>
-                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-primary hover:bg-[#F0F1F3] transition-colors">
+                <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
@@ -260,7 +262,7 @@ export default function DashboardPage() {
                 { icon: Stethoscope, name: 'Sleep Study &middot; In lab', sub: 'David Kim &middot; PA-48263', issue: 'Treatment history missing', payer: 'Anthem', color: 'text-[#0060A9]', odds: 54, segments: 5, due: 'Sep 28' },
                 { icon: BriefcaseMedical, name: 'Hip Replacement', sub: 'Robert Taylor &middot; PA-48299', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-[#9C3886]', odds: 32, segments: 3, due: 'Oct 01' },
               ].map((row, i) => (
-                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
+                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#EBEAE5] hover:brightness-95 transition-all cursor-pointer relative shrink-0">
                   
                   {/* Case Info */}
                   <div className="col-span-3 flex items-center gap-3">
@@ -320,12 +322,13 @@ export default function DashboardPage() {
           <motion.div variants={item} className="xl:col-span-4 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
               <h3 className="text-[18px] font-bold text-ink-primary">Recent activity</h3>
-              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F6F7F9] text-ink-secondary hover:text-ink-primary transition-colors">
+              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-[#EBEAE5] text-ink-secondary hover:text-ink-primary transition-colors">
                 <MoreVertical className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 divide-y divide-black/[0.04] -mt-2">
+            <div className="flex-1 bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 divide-y divide-black/[0.04]">
               {[
                 { icon: CheckCircle2, title: 'Authorization approved', sub: 'MRI &middot; Linda Park', time: '9:12 AM', color: 'bg-[#2ECA6A]' },
                 { icon: AlertTriangle, title: 'More documentation requested', sub: 'CT Scan &middot; Emma Wilson', time: '8:47 AM', color: 'bg-[#FF9A24]' },
@@ -347,6 +350,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </motion.div>
         </div>
