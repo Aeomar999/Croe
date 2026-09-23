@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
@@ -74,12 +74,12 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-shrink-0">
           
           {/* GREEN HERO CARD */}
-          <motion.div variants={item} className="xl:col-span-6 bg-[#4A8B63] rounded-[32px] p-2.5 flex flex-col relative overflow-hidden h-[280px]">
+          <motion.div variants={item} className="xl:col-span-6 bg-[#4A8B63] rounded-[32px] p-3.5 flex flex-col relative overflow-hidden">
             {/* Decorative background curve */}
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
             
             {/* Pill and link */}
-            <div className="flex items-center justify-between px-3 pt-2 pb-3 relative z-10 flex-shrink-0">
+            <div className="flex items-center justify-between px-2 pt-1 pb-3 relative z-10 flex-shrink-0">
               <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
                 <CircleDollarSign className="w-3.5 h-3.5 text-ink-primary" />
                 <span className="text-[12px] font-bold text-ink-primary">Revenue at risk</span>
@@ -134,7 +134,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* KPI CARDS CONTAINER */}
-          <motion.div variants={item} className="xl:col-span-6 bg-white rounded-[32px] p-6 flex flex-col shadow-[0_2px_12px_rgba(0,0,0,0.02)] h-[280px]">
+          <motion.div variants={item} className="xl:col-span-6 bg-white rounded-[32px] p-6 flex flex-col shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[17px] font-bold text-ink-primary">Today</h3>
               <div className="flex items-center gap-2">
