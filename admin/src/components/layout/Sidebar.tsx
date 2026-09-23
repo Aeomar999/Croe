@@ -36,7 +36,7 @@ export function Sidebar() {
         key={item.name}
         href={item.href}
         className={cn(
-          'px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors',
+          'px-5 py-2 rounded-full text-[13px] font-medium transition-colors',
           isActive
             ? 'bg-ink-primary text-white'
             : 'text-ink-secondary hover:text-ink-primary hover:bg-black/5'
@@ -49,41 +49,37 @@ export function Sidebar() {
 
   return (
     <div className="w-full px-6 lg:px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        {/* Logo */}
-        <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 bg-ink-primary text-white rounded-full flex-shrink-0">
+      
+      {/* Desktop Nav in a single white pill including the logo */}
+      <nav className="hidden lg:flex items-center bg-white rounded-full p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02]">
+        <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 bg-ink-primary text-white rounded-full flex-shrink-0 mr-2 ml-0.5">
           <span className="font-bold text-[18px]">C</span>
         </Link>
-
-        {/* Desktop Nav in a white pill */}
-        <nav className="hidden lg:flex items-center bg-white rounded-full p-1 border border-black/[0.04]">
-          {navLinks()}
-        </nav>
-      </div>
+        {navLinks()}
+      </nav>
 
       <div className="flex items-center gap-3">
         {/* Search */}
         <div className="hidden md:flex relative items-center">
-          <Search className="absolute left-3.5 w-4 h-4 text-ink-tertiary" />
+          <Search className="absolute left-4 w-4 h-4 text-ink-tertiary" />
           <input 
             type="text" 
             placeholder="Search cases, patients, payers" 
-            className="pl-9 pr-4 py-2 rounded-full bg-white border border-black/[0.04] text-[13px] font-medium w-[240px] xl:w-[280px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
+            className="pl-10 pr-4 py-3 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] text-[13px] font-medium w-[240px] xl:w-[320px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
           />
         </div>
 
         {/* Icons */}
-        <button className="flex items-center justify-center w-10 h-10 bg-white border border-black/[0.04] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
+        <button className="flex items-center justify-center w-11 h-11 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
           <Bell className="w-4 h-4" />
         </button>
-        <button className="flex items-center justify-center w-10 h-10 bg-white border border-black/[0.04] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
+        <button className="flex items-center justify-center w-11 h-11 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] rounded-full text-ink-primary hover:bg-black/5 transition-colors">
           <Settings className="w-4 h-4" />
         </button>
 
         {/* Profile Pill */}
-        <div className="flex items-center gap-2 bg-white border border-black/[0.04] rounded-full p-1 pr-3 cursor-pointer hover:bg-black/[0.02] transition-colors" onClick={logout}>
+        <div className="flex items-center gap-2 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] rounded-full p-1.5 pr-4 cursor-pointer hover:bg-black/[0.02] transition-colors" onClick={logout}>
           <div className="w-8 h-8 rounded-full bg-[#E88C43] flex items-center justify-center text-white font-bold text-xs overflow-hidden">
-             {/* If we have an image, use it, otherwise initial */}
              <img src="https://i.pravatar.cc/150?u=sarah" alt="Profile" className="w-full h-full object-cover" />
           </div>
           <span className="text-[13px] font-medium text-ink-primary ml-1">{user?.name?.split(' ')[0] || 'Sarah'}</span>
