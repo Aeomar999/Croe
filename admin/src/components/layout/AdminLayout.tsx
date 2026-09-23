@@ -2,7 +2,6 @@
 
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
-import { PageContainer } from './Header';
 import { useAuth } from '@/context/AuthContext';
 import { Squiggles } from '@/components/brand';
 
@@ -19,7 +18,7 @@ export function AdminLayout({ children, title, subtitle, headerAction, isSplashS
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
+      <div className="min-h-screen bg-[#E5E3DB] flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-ink-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -28,23 +27,26 @@ export function AdminLayout({ children, title, subtitle, headerAction, isSplashS
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-canvas relative">
+    <div className="min-h-screen bg-[#E5E3DB] p-4 lg:p-6 flex flex-col relative font-sans">
       <Squiggles isSplashScreen={isSplashScreen} />
-      <Sidebar />
-      <PageContainer>
-        <header className="sticky top-[65px] lg:top-0 z-30 border-b border-line-primary/30 bg-surface/80 backdrop-blur-xl shadow-[0_4px_24px_rgba(15,23,42,0.02)]">
-          <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      
+      <div className="relative z-10 w-full max-w-[1500px] mx-auto bg-[#F1F2F4] rounded-[32px] shadow-sm border border-white/40 flex-1 flex flex-col overflow-hidden">
+        <Sidebar />
+        
+        <div className="px-6 lg:px-10 pb-12 flex-1 flex flex-col">
+          <header className="py-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
-              <h1 className="text-title font-extrabold tracking-tight text-ink-primary">{title}</h1>
-              {subtitle && <p className="text-body text-ink-secondary mt-1">{subtitle}</p>}
+              {subtitle && <p className="text-[14px] font-semibold text-ink-tertiary mb-1 uppercase tracking-wide">{subtitle}</p>}
+              <h1 className="text-[32px] lg:text-[40px] leading-none font-medium tracking-tight text-ink-primary">{title}</h1>
             </div>
             {headerAction && <div className="w-full lg:w-auto lg:flex-shrink-0">{headerAction}</div>}
-          </div>
-        </header>
-        <div className="relative z-10 mx-auto max-w-[1600px] px-4 pb-12 pt-8 sm:px-6 lg:px-8 lg:pb-16 lg:pt-10">
-          {children}
+          </header>
+          
+          <main className="flex-1 mt-4">
+            {children}
+          </main>
         </div>
-      </PageContainer>
+      </div>
     </div>
   );
 }
