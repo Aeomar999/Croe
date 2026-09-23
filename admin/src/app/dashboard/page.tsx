@@ -8,16 +8,18 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   CheckCircle2,
-  Clock, 
-  Filter,
+  Hourglass, 
+  SlidersHorizontal,
   MoreVertical,
-  Activity,
+  Timer,
   AlertTriangle,
   XCircle,
   Stethoscope,
   BriefcaseMedical,
   HeartPulse,
-  ActivitySquare
+  ActivitySquare,
+  User,
+  Sparkles
 } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
@@ -46,8 +48,8 @@ export default function DashboardPage() {
         <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary">Week</button>
         <button className="px-5 py-1.5 rounded-full text-ink-secondary text-[13px] font-medium hover:text-ink-primary">Month</button>
       </div>
-      <button className="px-5 py-2 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        + New Authorization
+      <button className="px-5 py-2 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex items-center gap-1.5">
+        <span className="text-[16px] font-light leading-none">+</span> New Authorization
       </button>
     </div>
   );
@@ -60,7 +62,7 @@ export default function DashboardPage() {
     >
       {/* Date sub-header underneath the title */}
       <div className="-mt-1 mb-4">
-        <p className="text-[13px] font-medium text-ink-tertiary">42 active authorization cases • Monday, Sep 21</p>
+        <p className="text-[13px] font-medium text-ink-tertiary">42 active authorization cases &middot; Monday, Sep 21</p>
       </div>
 
       <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-4 flex-1 min-h-0">
@@ -78,7 +80,7 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-[12px] font-bold text-ink-primary">Revenue at risk</span>
               </div>
-              <button className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink-primary hover:bg-white/90 transition-colors">
+              <button className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink-primary hover:bg-white/90 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
                 <ArrowUpRight className="w-4 h-4" />
               </button>
             </div>
@@ -108,18 +110,18 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Bottom Darker Section */}
-            <div className="bg-[#38734E] rounded-[24px] px-5 py-4 flex items-center justify-between mt-auto relative z-10">
-              <div>
-                <p className="text-white/60 text-[11px] font-medium mb-1">Recoverable this week</p>
+            {/* Bottom Section */}
+            <div className="border border-white/20 bg-white/5 rounded-[16px] p-4 grid grid-cols-3 mt-auto relative z-10">
+              <div className="pr-4">
+                <p className="text-white/70 text-[11px] font-medium mb-1">Recoverable this week</p>
                 <p className="text-white text-[14px] font-bold">{formatCurrency('121300', 'USD').replace('.00', '')}</p>
               </div>
-              <div>
-                <p className="text-white/60 text-[11px] font-medium mb-1">Largest case</p>
-                <p className="text-white text-[14px] font-bold">{formatCurrency('48200', 'USD').replace('.00', '')} · Spinal fusion</p>
+              <div className="border-l border-white/20 px-4">
+                <p className="text-white/70 text-[11px] font-medium mb-1">Largest case</p>
+                <p className="text-white text-[14px] font-bold truncate">{formatCurrency('48200', 'USD').replace('.00', '')} &middot; Spinal fusion</p>
               </div>
-              <div>
-                <p className="text-white/60 text-[11px] font-medium mb-1">Earliest procedure</p>
+              <div className="border-l border-white/20 pl-4">
+                <p className="text-white/70 text-[11px] font-medium mb-1">Earliest procedure</p>
                 <p className="text-white text-[14px] font-bold">Sep 24</p>
               </div>
             </div>
@@ -133,11 +135,11 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[17px] font-bold text-ink-primary">Today</h3>
               <div className="flex items-center gap-2">
-                <button className="w-7 h-7 rounded-full bg-[#F4F5F6] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
-                  <Filter className="w-3.5 h-3.5" />
+                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
                 </button>
-                <button className="w-7 h-7 rounded-full bg-[#F4F5F6] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
-                  <MoreVertical className="w-3.5 h-3.5" />
+                <button className="w-8 h-8 rounded-full bg-[#F6F7F9] flex items-center justify-center text-ink-secondary hover:text-ink-primary transition-all">
+                  <MoreVertical className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -148,13 +150,13 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Pending<br/>authorizations</p>
                   <div className="w-6 h-6 rounded-full bg-[#FFD700] flex items-center justify-center text-amber-800 shrink-0">
-                    <Clock className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <Hourglass className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </div>
                 </div>
                 <div>
                   <p className="text-[36px] font-medium text-ink-primary leading-none tracking-tight">42</p>
                   <p className="text-[10px] font-medium text-state-danger-deep mt-2 flex items-center gap-0.5 opacity-80">
-                    <ArrowUpRight className="w-2.5 h-2.5" /> 6 vs last week
+                    <ArrowUpRight className="w-2.5 h-2.5 text-state-danger-deep" /> 8 vs last week
                   </p>
                 </div>
               </div>
@@ -202,7 +204,7 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-medium text-ink-secondary leading-snug">Avg. turnaround<br/>&nbsp;</p>
                   <div className="w-6 h-6 rounded-full bg-[#B292FA] flex items-center justify-center text-white shrink-0">
-                    <Activity className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <Timer className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </div>
                 </div>
                 <div>
@@ -237,7 +239,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Header row */}
-            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary flex-shrink-0">
+            <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[11px] font-semibold tracking-wide text-ink-tertiary flex-shrink-0">
               <div className="col-span-4">Case</div>
               <div className="col-span-3">Blocking issue</div>
               <div className="col-span-2">Payer</div>
@@ -248,24 +250,23 @@ export default function DashboardPage() {
             {/* Scrollable Rows Container */}
             <div className="flex flex-col gap-2 overflow-y-auto min-h-0 pr-2 pb-2 custom-scrollbar flex-1">
               {[
-                { icon: Stethoscope, name: 'MRI · Lumbar Spine', sub: 'James Carter · PA-48291', issue: 'Missing imaging report', payer: 'United Healthcare', odds: 78, due: 'Sep 24' },
-                { icon: BriefcaseMedical, name: 'Knee Arthroscopy', sub: 'Maria Gonzalez · PA-48277', issue: 'Missing clinical notes', payer: 'Aetna', odds: 61, due: 'Sep 25' },
-                { icon: HeartPulse, name: 'Spinal Fusion · L4 to L5', sub: 'Thomas Reed · PA-48102', issue: 'Peer to peer review requested', payer: 'United Healthcare', odds: 47, due: 'Sep 25' },
-                { icon: ActivitySquare, name: 'CT · Abdomen and Pelvis', sub: 'Emma Wilson · PA-48240', issue: 'Payer requested documents', payer: 'Cigna', odds: 66, due: 'Sep 26' },
-                { icon: Stethoscope, name: 'Sleep Study · In lab', sub: 'David Kim · PA-48263', issue: 'Treatment history missing', payer: 'Anthem', odds: 54, due: 'Sep 28' },
-                { icon: BriefcaseMedical, name: 'Hip Replacement', sub: 'Robert Taylor · PA-48299', issue: 'Missing clinical notes', payer: 'Aetna', odds: 32, due: 'Oct 01' },
-                { icon: ActivitySquare, name: 'MRI · Cervical Spine', sub: 'Linda Brown · PA-48301', issue: 'Missing imaging report', payer: 'United Healthcare', odds: 85, due: 'Oct 02' },
+                { icon: User, name: 'MRI &middot; Lumbar Spine', sub: 'James Carter &middot; PA-48291', issue: 'Missing imaging report', payer: 'UnitedHealthcare', color: 'text-blue-700', odds: 78, segments: 8, due: 'Sep 24' },
+                { icon: BriefcaseMedical, name: 'Knee Arthroscopy', sub: 'Maria Gonzalez &middot; PA-48277', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-purple-700', odds: 61, segments: 6, due: 'Sep 25' },
+                { icon: HeartPulse, name: 'Spinal Fusion &middot; L4 to L5', sub: 'Thomas Reed &middot; PA-48102', issue: 'Peer to peer review requested', payer: 'UnitedHealthcare', color: 'text-blue-700', odds: 47, segments: 5, due: 'Sep 25' },
+                { icon: ActivitySquare, name: 'CT &middot; Abdomen and Pelvis', sub: 'Emma Wilson &middot; PA-48240', issue: 'Payer requested documents', payer: 'Cigna', color: 'text-teal-700', odds: 66, segments: 7, due: 'Sep 26' },
+                { icon: Stethoscope, name: 'Sleep Study &middot; In lab', sub: 'David Kim &middot; PA-48263', issue: 'Treatment history missing', payer: 'Anthem', color: 'text-blue-500', odds: 54, segments: 5, due: 'Sep 28' },
+                { icon: BriefcaseMedical, name: 'Hip Replacement', sub: 'Robert Taylor &middot; PA-48299', issue: 'Missing clinical notes', payer: 'Aetna', color: 'text-purple-700', odds: 32, segments: 3, due: 'Oct 01' },
               ].map((row, i) => (
-                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
+                <div key={i} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-[16px] bg-[#F6F7F9] hover:bg-[#F0F1F3] transition-colors cursor-pointer relative shrink-0">
                   
                   {/* Case Info */}
                   <div className="col-span-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white border border-black/5 flex items-center justify-center text-ink-primary shrink-0 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
                       <row.icon className="w-3.5 h-3.5" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-ink-primary truncate">{row.name}</p>
-                      <p className="text-[11px] text-ink-tertiary truncate">{row.sub}</p>
+                      <p className="text-[13px] font-bold text-ink-primary truncate" dangerouslySetInnerHTML={{ __html: row.name }}></p>
+                      <p className="text-[11px] text-ink-tertiary truncate" dangerouslySetInnerHTML={{ __html: row.sub }}></p>
                     </div>
                   </div>
 
@@ -280,21 +281,21 @@ export default function DashboardPage() {
                   {/* Payer */}
                   <div className="col-span-2 flex items-center">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-sm bg-blue-100 flex items-center justify-center text-blue-700 text-[8px] font-bold shrink-0">
-                        {row.payer.charAt(0)}
+                      <div className="w-4 h-4 rounded-sm bg-blue-50 flex items-center justify-center shrink-0">
+                        <span className={cn("text-[10px] font-black tracking-tighter", row.color)}>{row.payer.charAt(0)}</span>
                       </div>
-                      <span className="text-[11px] font-medium text-ink-primary truncate">{row.payer}</span>
+                      <span className={cn("text-[11px] font-bold tracking-tight truncate", row.color)}>{row.payer}</span>
                     </div>
                   </div>
 
                   {/* Approval Odds */}
                   <div className="col-span-2 flex items-center gap-2">
-                    <span className="text-[13px] font-medium text-ink-primary w-8">{row.odds}%</span>
+                    <span className="text-[13px] font-bold text-ink-primary w-8">{row.odds}%</span>
                     <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5, 6, 7].map((bar) => (
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((bar) => (
                         <div 
                           key={bar} 
-                          className={cn("w-1.5 h-2.5 rounded-sm", bar * 14 <= row.odds + 10 ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
+                          className={cn("w-1 h-2.5 rounded-sm", bar <= row.segments ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
                         />
                       ))}
                     </div>
@@ -303,7 +304,7 @@ export default function DashboardPage() {
                   {/* Due & Action */}
                   <div className="col-span-1 flex items-center justify-between min-w-[110px]">
                     <span className="text-[12px] font-medium text-ink-secondary">{row.due}</span>
-                    <button className="px-3 py-1 rounded-full bg-white border border-black/5 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all absolute right-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100">
+                    <button className="px-3 py-1 rounded-[10px] bg-white border border-black/10 text-[11px] font-bold text-ink-primary shadow-sm hover:shadow-md transition-all absolute right-2 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100">
                       Review case
                     </button>
                   </div>
@@ -316,8 +317,8 @@ export default function DashboardPage() {
           <motion.div variants={item} className="xl:col-span-4 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
               <h3 className="text-[18px] font-bold text-ink-primary">Recent activity</h3>
-              <button className="w-7 h-7 rounded-full flex items-center justify-center bg-[#F4F5F6] text-ink-secondary hover:text-ink-primary transition-colors">
-                <MoreVertical className="w-3.5 h-3.5" />
+              <button className="w-8 h-8 rounded-full flex items-center justify-center bg-[#F6F7F9] text-ink-secondary hover:text-ink-primary transition-colors">
+                <MoreVertical className="w-4 h-4" />
               </button>
             </div>
 
@@ -330,8 +331,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">Authorization approved</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">MRI · Linda Park</p>
+                      <p className="text-[12px] font-bold text-ink-primary">Authorization approved</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'MRI &middot; Linda Park' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">9:12 AM</span>
                   </div>
@@ -344,8 +345,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">More documentation requested</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">CT Scan · Emma Wilson</p>
+                      <p className="text-[12px] font-bold text-ink-primary">More documentation requested</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'CT Scan &middot; Emma Wilson' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">8:47 AM</span>
                   </div>
@@ -358,8 +359,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">Authorization denied</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">Physical Therapy · Robert Smith</p>
+                      <p className="text-[12px] font-bold text-ink-primary">Authorization denied</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Physical Therapy &middot; Robert Smith' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">8:05 AM</span>
                   </div>
@@ -368,12 +369,12 @@ export default function DashboardPage() {
                 {/* Activity Item 4 */}
                 <div className="relative pl-5">
                   <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#B292FA] flex items-center justify-center border-4 border-white shadow-sm">
-                    <Activity className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                    <Sparkles className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">AI review completed</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">Knee Arthroscopy · Maria Gonzal...</p>
+                      <p className="text-[12px] font-bold text-ink-primary">AI review completed</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Knee Arthroscopy &middot; Maria Gonzal...' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
                   </div>
@@ -386,8 +387,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">Appeal overturned</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">Epidural Injection · Noah Davis</p>
+                      <p className="text-[12px] font-bold text-ink-primary">Appeal overturned</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'Epidural Injection &middot; Noah Davis' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
                   </div>
@@ -396,12 +397,12 @@ export default function DashboardPage() {
                 {/* Activity Item 6 (Extra for scrolling proof) */}
                 <div className="relative pl-5">
                   <div className="absolute left-[-11px] top-0 w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center border-4 border-white shadow-sm">
-                    <Clock className="w-2.5 h-2.5 text-amber-800" strokeWidth={3} />
+                    <Hourglass className="w-2.5 h-2.5 text-amber-800" strokeWidth={3} />
                   </div>
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-[12px] font-medium text-ink-primary">Submitted to payer portal</p>
-                      <p className="text-[11px] text-ink-tertiary mt-0.5">PET Scan · Olivia Brown</p>
+                      <p className="text-[12px] font-bold text-ink-primary">Submitted to payer portal</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary mt-0.5" dangerouslySetInnerHTML={{ __html: 'PET Scan &middot; Olivia Brown' }}></p>
                     </div>
                     <span className="text-[10px] font-medium text-ink-tertiary mt-0.5">Yesterday</span>
                   </div>

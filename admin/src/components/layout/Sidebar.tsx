@@ -52,8 +52,9 @@ export function Sidebar() {
       
       {/* Desktop Nav in a single white pill including the logo */}
       <nav className="hidden lg:flex items-center bg-white rounded-full p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02]">
-        <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 bg-ink-primary text-white rounded-full flex-shrink-0 mr-2 ml-0.5">
+        <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 bg-ink-primary text-white rounded-full flex-shrink-0 mr-2 ml-0.5 relative">
           <span className="font-bold text-[18px]">C</span>
+          <div className="absolute top-[16px] left-[17px] w-1.5 h-1.5 rounded-full bg-[#D8F04B]"></div>
         </Link>
         {navLinks()}
       </nav>
