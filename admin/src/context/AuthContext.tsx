@@ -39,10 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
     } catch (error) {
       // Fallback for UI testing when backend is offline
-      if (credentials.email === 'admin@croe.app') {
+      if (credentials.email === 'amoahjerry@croe.app') {
         const mockUser: AdminUser = {
           userId: '00000000-0000-0000-0000-000000000099',
-          email: 'admin@croe.app',
+          email: 'amoahjerry@croe.app',
           name: 'Jerry Amoah',
           role: 'admin',
         };

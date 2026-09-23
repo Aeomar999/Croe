@@ -57,7 +57,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              placeholder="admin@croe.app"
+              placeholder="amoahjerry@croe.app"
               required
               autoComplete="email"
               leftElement={<Mail className="w-5 h-5" />}
