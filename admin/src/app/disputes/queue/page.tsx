@@ -215,7 +215,7 @@ export default function DisputesQueuePage() {
                     <span className="text-[12px] font-medium text-ink-secondary whitespace-nowrap">
                       {formatRelativeTime(dispute.createdAt)}
                     </span>
-                    <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all whitespace-nowrap">
+                    <button onClick={(e) => { e.stopPropagation(); router.push(`/disputes/${dispute.disputeId}`); }} className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all whitespace-nowrap">
                       Review
                     </button>
                   </div>

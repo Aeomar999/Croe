@@ -6,6 +6,7 @@ import { kycApi, type KYCQueueItem } from '@/lib/api';
 import { formatDate, cn, formatRelativeTime } from '@/lib/utils';
 import { FileText, Search, CheckCircle, XCircle, ArrowUpRight, Loader2, ShieldCheck, FileKey, Contact } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, Variants } from 'framer-motion';
 
 const itemVariants: Variants = {
@@ -37,6 +38,7 @@ function KYCSkeleton() {
 
 export default function KYCPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [search, setSearch] = useState('');
   
   // Note: Modals would be implemented in a complete app, but we are focusing on the UI revamp of the main page
@@ -183,7 +185,7 @@ export default function KYCPage() {
                         >
                           <CheckCircle className="w-5 h-5" />
                         </button>
-                        <button className="ml-1 w-9 h-9 rounded-full bg-ink-primary flex items-center justify-center text-white shadow-sm hover:bg-ink-primary/90 transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); router.push('/fraud'); }} className="ml-1 w-9 h-9 rounded-full bg-ink-primary flex items-center justify-center text-white shadow-sm hover:bg-ink-primary/90 transition-all" title="View Trust Profile">
                           <ArrowUpRight className="w-4 h-4" />
                         </button>
                       </>

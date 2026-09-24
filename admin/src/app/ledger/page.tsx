@@ -37,7 +37,18 @@ function getEventIcon(type: string) {
 
 export default function LedgerPage() {
   const [search, setSearch] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   
+  const handleExport = () => {
+    setExporting(true);
+    setTimeout(() => {
+      window.alert('CSV Export generated and downloaded.');
+      setExporting(false);
+    }, 800);
+  };
+
   const headerAction = (
     <div className="flex items-center gap-3">
       <div className="relative">
@@ -50,11 +61,11 @@ export default function LedgerPage() {
           className="pl-10 pr-4 py-2.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] text-[13px] font-medium w-[240px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
         />
       </div>
-      <button className="px-5 py-2.5 rounded-full bg-white border border-black/10 text-[13px] font-medium text-ink-primary hover:bg-black/5 transition-colors shadow-sm flex items-center gap-2">
-        <Filter className="w-4 h-4 text-ink-secondary" /> Filters
+      <button onClick={() => setShowFilters(!showFilters)} className={cn("px-5 py-2.5 rounded-full border text-[13px] font-medium transition-colors shadow-sm flex items-center gap-2", showFilters ? "bg-ink-primary text-white border-ink-primary" : "bg-white border-black/10 text-ink-primary hover:bg-black/5")}>
+        <Filter className={cn("w-4 h-4", showFilters ? "text-white" : "text-ink-secondary")} /> Filters
       </button>
-      <button className="px-5 py-2.5 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-sm flex items-center gap-2">
-        <ArrowDownToLine className="w-4 h-4" /> Export CSV
+      <button onClick={handleExport} disabled={exporting} className="px-5 py-2.5 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50">
+        <ArrowDownToLine className="w-4 h-4" /> {exporting ? 'Exporting...' : 'Export CSV'}
       </button>
     </div>
   );
@@ -81,11 +92,11 @@ export default function LedgerPage() {
           
           <div className="flex items-center gap-2">
             <div className="bg-[#2ECA6A]/20 text-[#2ECA6A] px-3 py-1.5 rounded-full flex items-center gap-1.5 text-[11px] font-bold">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#2ECA6A] animate-pulse" />
-              Real-time connected
+              <div className={cn("w-1.5 h-1.5 rounded-full bg-[#2ECA6A]", isPlaying && "animate-pulse")} />
+              {isPlaying ? "Real-time connected" : "Streaming paused"}
             </div>
-            <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
-              <Play className="w-4 h-4" fill="currentColor" />
+            <button onClick={() => setIsPlaying(!isPlaying)} className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
+              {isPlaying ? <span className="w-2.5 h-3 border-l-[3px] border-r-[3px] border-ink-primary"></span> : <Play className="w-4 h-4" fill="currentColor" />}
             </button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { reconciliationApi, type ReconciliationReport, type CustodyAccountBalanc
 import { formatCurrency, cn } from '@/lib/utils';
 import { Calculator, Calendar, RefreshCw, AlertTriangle, Shield, TrendingUp, TrendingDown, Layers, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, Variants } from 'framer-motion';
 
 const containerVariants: Variants = {
@@ -19,6 +20,7 @@ const itemVariants: Variants = {
 };
 
 export default function ReconciliationPage() {
+  const router = useRouter();
   const [from, setFrom] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() - 7);
@@ -172,7 +174,7 @@ export default function ReconciliationPage() {
                       {formatCurrency(report?.summary.netHeld || '0')}
                     </p>
                   </div>
-                  <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all">
+                  <button onClick={() => router.push('/ledger')} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all" title="View Ledger">
                     <ArrowUpRight className="w-5 h-5" />
                   </button>
                 </div>

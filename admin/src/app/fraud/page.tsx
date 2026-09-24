@@ -6,7 +6,7 @@ import { usersApi, type UserListItem } from '@/lib/api';
 import { formatRelativeTime, cn } from '@/lib/utils';
 import { Search, Loader2, ShieldAlert, ShieldCheck, UserX, SlidersHorizontal, Lock, CheckCircle2, User as UserIcon } from 'lucide-react';
 import { useState } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
@@ -17,6 +17,9 @@ export default function FraudPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [trustScoreModal, setTrustScoreModal] = useState<{ user: UserListItem | null; score: number }>({ user: null, score: 0 });
+  const [trustScoreReason, setTrustScoreReason] = useState('');
+  const [trustScoreLoading, setTrustScoreLoading] = useState(false);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users'],
@@ -32,6 +35,16 @@ export default function FraudPage() {
     },
   });
 
+  const trustScoreMutation = useMutation({
+    mutationFn: ({ userId, trust_score, reason }: { userId: string; trust_score: number; reason: string }) =>
+      usersApi.adjustTrustScore(userId, { trust_score, reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      setTrustScoreModal({ user: null, score: 0 });
+      setTrustScoreReason('');
+    },
+  });
+
   const filteredUsers = users
     .filter((u) =>
       u.userId.toLowerCase().includes(search.toLowerCase()) ||
@@ -42,6 +55,17 @@ export default function FraudPage() {
   const handleQuickFreeze = async (userId: string, frozen: boolean) => {
     setActionLoading(userId);
     await freezeMutation.mutateAsync({ userId, frozen });
+  };
+
+  const handleTrustScore = async () => {
+    if (!trustScoreModal.user || !trustScoreReason.trim()) return;
+    setTrustScoreLoading(true);
+    await trustScoreMutation.mutateAsync({
+      userId: trustScoreModal.user.userId,
+      trust_score: trustScoreModal.score,
+      reason: trustScoreReason,
+    });
+    setTrustScoreLoading(false);
   };
 
   const headerAction = (
@@ -159,13 +183,16 @@ export default function FraudPage() {
                       </div>
                     ) : (
                       <>
-                        <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-bold text-ink-secondary shadow-sm hover:shadow-md hover:text-ink-primary transition-all flex items-center gap-1.5">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setTrustScoreModal({ user, score: user.trustScore }); setTrustScoreReason(''); }}
+                          className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-bold text-ink-secondary shadow-sm hover:shadow-md hover:text-ink-primary transition-all flex items-center gap-1.5"
+                        >
                           <SlidersHorizontal className="w-3 h-3" /> Adjust Score
                         </button>
                         
                         {user.isFrozen ? (
                           <button 
-                            onClick={() => handleQuickFreeze(user.userId, false)}
+                            onClick={(e) => { e.stopPropagation(); handleQuickFreeze(user.userId, false); }}
                             className="w-8 h-8 rounded-full bg-white border border-black/10 flex items-center justify-center text-[#2ECA6A] shadow-sm hover:shadow-md hover:bg-[#2ECA6A]/10 transition-all"
                             title="Unfreeze Account"
                           >
@@ -173,7 +200,7 @@ export default function FraudPage() {
                           </button>
                         ) : (
                           <button 
-                            onClick={() => handleQuickFreeze(user.userId, true)}
+                            onClick={(e) => { e.stopPropagation(); handleQuickFreeze(user.userId, true); }}
                             className="w-8 h-8 rounded-full bg-[#F36960] border border-black/10 flex items-center justify-center text-white shadow-sm hover:shadow-md hover:bg-[#F36960]/90 transition-all"
                             title="Freeze Account"
                           >
@@ -189,6 +216,63 @@ export default function FraudPage() {
           )}
         </div>
       </motion.div>
+
+      {/* Inline Trust Score Modal */}
+      <AnimatePresence>
+        {trustScoreModal.user && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-[32px] p-6 shadow-2xl w-full max-w-sm">
+              <div className="w-12 h-12 rounded-full bg-ink-primary flex items-center justify-center text-white mb-4">
+                <SlidersHorizontal className="w-6 h-6" />
+              </div>
+              <h3 className="text-[20px] font-bold text-ink-primary mb-1">Adjust Trust Score</h3>
+              <p className="text-[12px] font-medium text-ink-secondary mb-6 leading-relaxed">
+                Modifying score for {trustScoreModal.user.phoneNumber}. This is audit-logged and impacts transaction velocity limits.
+              </p>
+              
+              <div className="flex flex-col gap-4 mb-6">
+                <div>
+                  <label className="text-[11px] font-bold text-ink-secondary ml-1 block mb-1">New Score (0-100)</label>
+                  <input 
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={trustScoreModal.score}
+                    onChange={(e) => setTrustScoreModal({ ...trustScoreModal, score: parseInt(e.target.value) || 0 })}
+                    className="w-full rounded-[20px] bg-[#EBEAE5] p-3 text-[14px] font-bold text-ink-primary focus:outline-none focus:ring-2 focus:ring-ink-primary/20"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-ink-secondary ml-1 block mb-1">Audit Reason</label>
+                  <textarea 
+                    value={trustScoreReason}
+                    onChange={(e) => setTrustScoreReason(e.target.value)}
+                    placeholder="Enter justification..."
+                    rows={2}
+                    className="w-full rounded-[20px] bg-[#EBEAE5] p-3 text-[13px] font-medium text-ink-primary resize-none focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setTrustScoreModal({ user: null, score: 0 })}
+                  className="flex-1 py-3 rounded-full bg-[#EBEAE5] text-ink-primary text-[13px] font-bold hover:brightness-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleTrustScore}
+                  disabled={trustScoreLoading || !trustScoreReason.trim()}
+                  className="flex-1 py-3 rounded-full bg-ink-primary text-white text-[13px] font-bold hover:bg-ink-primary/90 transition-all flex items-center justify-center disabled:opacity-50"
+                >
+                  {trustScoreLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Confirm'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </AdminLayout>
   );
 }
