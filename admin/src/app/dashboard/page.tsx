@@ -244,25 +244,27 @@ export default function DashboardPage() {
                 { id: 'TXN-8201', icon: Wallet, name: 'TXN-8201 &middot; Freelance Design', sub: 'Buyer: @sarah &middot; Vendor: @creatives', issue: 'Dispute over revisions', payer: 'Bank Transfer', color: 'text-[#008985]', odds: 54, segments: 5, due: '1d ago' },
                 { id: 'TXN-5510', icon: Package, name: 'TXN-5510 &middot; Gucci Handbag', sub: 'Buyer: @chloe &middot; Vendor: @luxurybag', issue: 'Vendor unresponsive', payer: 'Telecel Cash', color: 'text-[#E31221]', odds: 32, segments: 3, due: '2d ago' },
               ].map((row, i) => (
-                <div key={i} onClick={() => router.push(`/disputes/${row.id}`)} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#EBEAE5] hover:brightness-95 transition-all cursor-pointer relative shrink-0">
+                <div key={i} onClick={() => router.push(`/disputes/${row.id}`)} className="group grid grid-cols-12 gap-4 items-center px-4 py-2.5 rounded-full bg-[#EBEAE5] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-px transition-all duration-300 cursor-pointer relative shrink-0 border border-transparent hover:border-black/5">
                   
                   {/* Case Info */}
                   <div className="col-span-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:scale-105 transition-transform duration-300">
                       <row.icon className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[13px] font-bold text-ink-primary truncate" dangerouslySetInnerHTML={{ __html: row.name }}></p>
-                      <p className="text-[11px] text-ink-tertiary truncate" dangerouslySetInnerHTML={{ __html: row.sub }}></p>
+                      <p className="text-[11px] text-ink-tertiary truncate group-hover:text-ink-secondary transition-colors" dangerouslySetInnerHTML={{ __html: row.sub }}></p>
                     </div>
                   </div>
 
                   {/* Blocking Issue */}
-                  <div className="col-span-3 flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-[#FF9A24] flex items-center justify-center text-ink-primary flex-shrink-0">
-                      <AlertTriangle className="w-2.5 h-2.5" strokeWidth={2.5} />
+                  <div className="col-span-3 flex items-center">
+                    <div className="flex items-center gap-2 bg-white px-2.5 py-1 rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.02)] max-w-[95%]">
+                      <div className="w-4 h-4 rounded-full bg-[#FF9A24]/10 flex items-center justify-center text-[#FF9A24] flex-shrink-0">
+                        <AlertTriangle className="w-2.5 h-2.5" strokeWidth={3} />
+                      </div>
+                      <span className="text-[11px] font-bold text-ink-secondary truncate">{row.issue}</span>
                     </div>
-                    <span className="text-[12px] font-medium text-ink-secondary truncate">{row.issue}</span>
                   </div>
 
                   {/* Payer / Rail */}
@@ -299,18 +301,18 @@ export default function DashboardPage() {
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((bar) => (
                         <div 
                           key={bar} 
-                          className={cn("w-[3px] h-2.5 rounded-[1px]", bar <= row.segments ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
+                          className={cn("w-[3px] h-2.5 rounded-[1px] transition-colors duration-300", bar <= row.segments ? (row.odds > 70 ? 'bg-[#2ECA6A]' : row.odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
                         />
                       ))}
                     </div>
                   </div>
 
                   {/* Due & Action */}
-                  <div className="col-span-2 flex items-center justify-between min-w-[110px]">
-                    <span className="text-[12px] font-medium text-ink-secondary">{row.due}</span>
-                    <button onClick={(e) => { e.stopPropagation(); router.push(`/disputes/${row.id}`); }} className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all">
-                      Review case
-                    </button>
+                  <div className="col-span-2 flex items-center justify-between min-w-0 pr-2">
+                    <span className="text-[12px] font-medium text-ink-secondary group-hover:-translate-x-2 transition-transform duration-300">{row.due}</span>
+                    <div className="w-7 h-7 rounded-full bg-ink-primary flex items-center justify-center text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-4 transition-all duration-300 shadow-md">
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </div>
               ))}
