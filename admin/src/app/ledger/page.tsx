@@ -117,16 +117,16 @@ export default function LedgerPage() {
             return (
               <div 
                 key={event.id} 
-                className="group grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-[24px] bg-[#EBEAE5] hover:brightness-95 transition-all cursor-pointer relative shrink-0"
+                className="group grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-[24px] bg-[#EBEAE5] hover:bg-white hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:-translate-y-px transition-all duration-300 cursor-pointer relative shrink-0 border border-transparent hover:border-black/5"
               >
                 {/* Event Type & TXN */}
                 <div className="col-span-3 flex items-center gap-3">
-                  <div className={cn("w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 shadow-sm", bg)}>
-                    <Icon className={cn("w-5 h-5", color)} />
+                  <div className={cn("w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform duration-300", bg)}>
+                    <Icon className={cn("w-5 h-5", color)} strokeWidth={2.5} />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[13px] font-bold text-ink-primary truncate">{event.type.replace(/_/g, ' ')}</p>
-                    <p className="text-[11px] font-medium text-ink-tertiary truncate">{event.txId}</p>
+                    <p className="text-[11px] font-medium text-ink-tertiary truncate group-hover:text-ink-secondary transition-colors">{event.txId}</p>
                   </div>
                 </div>
 
@@ -134,10 +134,10 @@ export default function LedgerPage() {
                 <div className="col-span-3 flex flex-col justify-center">
                   {event.amount ? (
                     <>
-                      <span className={cn("text-[14px] font-bold", event.type.includes('RELEASED') || event.type.includes('SECURED') ? "text-[#2ECA6A]" : event.type.includes('REFUND') ? "text-[#F36960]" : "text-ink-primary")}>
+                      <span className={cn("text-[14px] font-bold group-hover:scale-[1.02] origin-left transition-transform duration-300", event.type.includes('RELEASED') || event.type.includes('SECURED') ? "text-[#2ECA6A]" : event.type.includes('REFUND') ? "text-[#F36960]" : "text-ink-primary")}>
                         {formatCurrency(event.amount, event.currency!)}
                       </span>
-                      <span className="text-[10px] font-medium text-ink-tertiary uppercase mt-0.5">Numeric(15,2)</span>
+                      <span className="text-[10px] font-bold text-ink-tertiary uppercase mt-0.5 tracking-wider">Numeric(15,2)</span>
                     </>
                   ) : (
                     <span className="text-[14px] font-bold text-ink-tertiary">--</span>
@@ -146,17 +146,17 @@ export default function LedgerPage() {
 
                 {/* Actor */}
                 <div className="col-span-3 flex items-center">
-                  <span className="px-3 py-1 bg-white rounded-full text-[11px] font-bold text-ink-secondary border border-black/[0.05]">
+                  <span className="px-3.5 py-1.5 bg-white rounded-full text-[11px] font-bold text-ink-secondary shadow-[0_2px_4px_rgba(0,0,0,0.02)] group-hover:text-ink-primary transition-colors">
                     {event.user}
                   </span>
                 </div>
 
                 {/* Timestamp & Hash */}
                 <div className="col-span-3 flex flex-col items-end justify-center pr-2">
-                  <span className="text-[12px] font-medium text-ink-secondary whitespace-nowrap mb-1 flex items-center gap-1.5">
-                    <Calendar className="w-3 h-3 text-ink-tertiary" /> {formatRelativeTime(event.timestamp.toISOString())}
+                  <span className="text-[12px] font-medium text-ink-secondary whitespace-nowrap mb-1 flex items-center gap-1.5 group-hover:-translate-x-1 transition-transform duration-300">
+                    <Calendar className="w-3.5 h-3.5 text-ink-tertiary group-hover:text-ink-secondary transition-colors" /> {formatRelativeTime(event.timestamp.toISOString())}
                   </span>
-                  <span className="text-[9px] font-mono font-medium text-ink-tertiary px-2 py-0.5 bg-black/5 rounded uppercase tracking-wider">
+                  <span className="text-[9px] font-mono font-bold text-ink-tertiary px-2 py-0.5 bg-black/5 rounded uppercase tracking-wider group-hover:bg-black/10 group-hover:text-ink-secondary transition-colors">
                     {Array.from({ length: 8 }, () => Math.random().toString(36).charAt(2)).join('')}
                   </span>
                 </div>
