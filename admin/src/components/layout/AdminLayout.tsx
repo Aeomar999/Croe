@@ -3,7 +3,6 @@
 import { cn } from '@/lib/utils';
 import { Sidebar } from './Sidebar';
 import { useAuth } from '@/context/AuthContext';
-import { Squiggles } from '@/components/brand';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -28,7 +27,6 @@ export function AdminLayout({ children, title, subtitle, headerAction, isSplashS
 
   return (
     <div className="h-screen overflow-hidden bg-[#EBEAE5] flex flex-col relative font-sans text-ink-primary">
-      <Squiggles isSplashScreen={isSplashScreen} />
       
       <div className="relative z-10 w-full max-w-[1600px] mx-auto h-full flex flex-col">
         <div className="flex-shrink-0">
