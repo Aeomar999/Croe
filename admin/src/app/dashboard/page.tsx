@@ -89,36 +89,118 @@ export default function DashboardPage() {
     >
       <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-4 flex-1 min-h-0">
         
-        {/* KPI Row (4 Columns) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-shrink-0">
-          {[
-            { title: 'Total Secured Vol.', value: '2.4M', label: 'GHS', change: '+12%', up: true, link: '/reconciliation' },
-            { title: 'Active Disputes', value: queue?.length || 0, label: 'CASES', change: '-4%', up: true, link: '/disputes/queue' },
-            { title: 'AI Resolution Rate', value: '84', label: '%', change: '+2%', up: true, link: '/metrics' },
-            { title: 'Fraud Lockouts', value: '12', label: 'USERS', change: '+3', up: false, link: '/fraud' },
-          ].map((stat, i) => (
-            <motion.div key={i} variants={item} className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between">
-              <div className="flex items-start justify-between mb-8">
-                <p className="text-[14px] font-bold text-ink-secondary">{stat.title}</p>
-                <button onClick={() => router.push(stat.link)} className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink-primary hover:bg-black/5 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.1)]">
-                  <ArrowUpRight className="w-4 h-4" />
+        {/* Split KPI Row (God-Tier UI) */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-shrink-0">
+          
+          {/* LEFT: Revenue at Risk (Green Feature Card) */}
+          <motion.div variants={item} className="xl:col-span-5 bg-[#4A8B63] rounded-[32px] p-2 flex flex-col justify-between relative overflow-hidden shadow-lg border border-black/5">
+            {/* Top row */}
+            <div className="flex justify-between items-start mb-2 px-3 pt-2">
+              <button className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 text-ink-primary text-[12px] font-medium shadow-sm">
+                <CircleDollarSign className="w-3.5 h-3.5 text-ink-primary" strokeWidth={2} /> Escrow Volume at Risk
+              </button>
+              <button onClick={() => router.push('/disputes/queue')} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-ink-primary hover:bg-black/5 transition-colors shadow-sm">
+                <ArrowUpRight className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Dark Nest */}
+            <div className="bg-[#3A7550] rounded-[24px] p-4 flex flex-col relative border border-white/5 shadow-inner">
+              <div className="flex items-end justify-between mb-1">
+                <h2 className="text-[56px] font-light leading-none tracking-tight text-white flex items-baseline">
+                  <span className="text-[40px] font-light mr-1">₵</span>184,500
+                </h2>
+                {/* Mini Bar Chart */}
+                <div className="flex items-end gap-1 pb-3 pl-2">
+                  {[
+                    { month: 'Apr', h: 'h-6' },
+                    { month: 'May', h: 'h-4' },
+                    { month: 'Jun', h: 'h-8' },
+                    { month: 'Jul', h: 'h-5' },
+                    { month: 'Aug', h: 'h-10' }
+                  ].map(bar => (
+                    <div key={bar.month} className="relative flex flex-col items-center">
+                      <div 
+                        className={cn("w-3 rounded-full border border-white/30", bar.h)}
+                        style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.15) 2px, rgba(255,255,255,0.15) 4px)' }}
+                      />
+                      <span className="absolute -bottom-4 text-[9px] text-white/60">{bar.month}</span>
+                    </div>
+                  ))}
+                  {/* Current Month Active Bar */}
+                  <div className="relative flex flex-col items-center ml-0.5">
+                    <div className="w-3 h-12 bg-[#D7FF26] rounded-full shadow-[0_0_8px_rgba(215,255,38,0.4)]" />
+                    <span className="absolute -bottom-4 text-[9px] text-white/60">Sep</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[12px] text-white/90 mb-3 font-medium">
+                across {queue?.length || 8} cases that may miss their delivery SLA
+              </p>
+
+              {/* Bottom Split Stats */}
+              <div className="grid grid-cols-3 border border-white/20 rounded-[12px] overflow-hidden">
+                <div className="p-2.5 border-r border-white/20">
+                  <p className="text-[10px] font-medium text-white/80 mb-0.5">Resolved this week</p>
+                  <p className="text-[12px] font-bold text-white">₵121,300</p>
+                </div>
+                <div className="p-2.5 border-r border-white/20">
+                  <p className="text-[10px] font-medium text-white/80 mb-0.5">Largest case</p>
+                  <p className="text-[12px] font-bold text-white truncate">₵48,200 &middot; TXN-8829</p>
+                </div>
+                <div className="p-2.5">
+                  <p className="text-[10px] font-medium text-white/80 mb-0.5">Oldest procedure</p>
+                  <p className="text-[12px] font-bold text-white">Sep 24</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* RIGHT: Today's Metrics (White Nested Container) */}
+          <motion.div variants={item} className="xl:col-span-7 bg-white rounded-[32px] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col">
+            <div className="flex justify-between items-center mb-3 px-2">
+              <h2 className="text-[18px] font-bold text-ink-primary">Today</h2>
+              <div className="flex gap-2">
+                <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                </button>
+                <button className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center text-ink-primary hover:brightness-95 transition-all">
+                  <MoreVertical className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <div>
-                <div className="flex items-baseline gap-1.5 mb-2">
-                  <h2 className="text-[48px] font-medium leading-none tracking-tight text-ink-primary">{stat.value}</h2>
-                  <span className="text-[14px] font-bold text-ink-tertiary">{stat.label}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className={cn("px-2 py-0.5 rounded-full flex items-center gap-1 text-[11px] font-bold", stat.up ? "bg-[#2ECA6A]/20 text-[#2ECA6A]" : "bg-[#F36960]/20 text-[#F36960]")}>
-                    {stat.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    {stat.change}
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
+              {[
+                { title: 'Pending L3 Reviews', value: queue?.length || 42, label: '', change: '6 vs last week', up: false, icon: Hourglass, bg: 'bg-[#FFCC00]' },
+                { title: 'AI Automation Rate', value: '87.4', label: '%', change: '2.1 pts last 30 days', up: true, icon: Bot, bg: 'bg-[#2ECA6A]' },
+                { title: 'Active Fraud Locks', value: '12', label: 'users', change: '3 vs last week', up: false, icon: ShieldAlert, bg: 'bg-[#FF9A24]' },
+                { title: 'Avg. turnaround', value: '3.2', label: 'days', change: '0.4 d to decision', up: true, icon: CheckCircle2, bg: 'bg-[#B292FA]' },
+              ].map((stat, i) => (
+                <div key={i} className="bg-[#EBEAE5] rounded-[20px] p-4 flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-[11px] font-bold text-ink-secondary leading-tight pr-1">{stat.title}</p>
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0", stat.bg)}>
+                      <stat.icon className="w-2.5 h-2.5 text-ink-primary" strokeWidth={2.5} />
+                    </div>
                   </div>
-                  <span className="text-[12px] font-medium text-ink-tertiary">vs last {period.toLowerCase()}</span>
+                  <div>
+                    <div className="flex items-baseline gap-1 mb-1">
+                      <h3 className="text-[28px] font-medium leading-none tracking-tight text-ink-primary">{stat.value}</h3>
+                      {stat.label && <span className="text-[11px] font-bold text-ink-secondary">{stat.label}</span>}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className={cn("flex items-center text-[9px] font-bold", stat.up ? "text-[#2ECA6A]" : "text-[#F36960]")}>
+                        {stat.up ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                      </div>
+                      <span className="text-[9px] font-medium text-ink-tertiary truncate">{stat.change}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              ))}
+            </div>
+          </motion.div>
         </div>
 
         {/* Bottom Split (9 col / 3 col) */}
