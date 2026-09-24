@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
@@ -227,7 +227,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 flex-1 min-h-0">
           
           {/* LEFT: Attention Required List */}
-          <motion.div variants={item} className="xl:col-span-8 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
+          <motion.div variants={item} className="xl:col-span-9 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
               <div>
                 <h3 className="text-[18px] font-bold text-ink-primary">L3 Review Queue</h3>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* RIGHT: Recent Activity */}
-          <motion.div variants={item} className="xl:col-span-4 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
+          <motion.div variants={item} className="xl:col-span-3 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] min-h-0">
             <div className="flex items-center justify-between mb-6 flex-shrink-0">
               <h3 className="text-[18px] font-bold text-ink-primary">Platform Ledger Log</h3>
               <button className="w-8 h-8 rounded-full flex items-center justify-center bg-[#EBEAE5] text-ink-secondary hover:text-ink-primary transition-colors">
