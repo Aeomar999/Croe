@@ -146,10 +146,10 @@ export default function DisputesQueuePage() {
           {isLoading ? (
             <QueueSkeleton />
           ) : filteredDisputes.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary">
-              <ShieldAlert className="w-12 h-12 mb-3 opacity-20" />
-              <p className="text-[14px] font-bold text-ink-primary">No cases match these filters</p>
-              <p className="text-[12px] font-medium mt-1">Try clearing your search or switching tabs.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary pt-12">
+              <img src="/assets/Admin_states/Inbox Zero (Empty Queue).png" alt="Empty Queue" className="w-[300px] h-[300px] object-contain mb-6 drop-shadow-sm" />
+              <p className="text-[20px] font-bold text-ink-primary">Queue is cleared</p>
+              <p className="text-[13px] font-medium mt-1 text-ink-secondary">No cases match your current filters. Great job!</p>
             </div>
           ) : (
             filteredDisputes.map((dispute) => {

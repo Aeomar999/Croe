@@ -120,10 +120,10 @@ export default function KYCPage() {
           {isLoading ? (
             <KYCSkeleton />
           ) : filteredQueue.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary">
-              <ShieldCheck className="w-12 h-12 mb-3 opacity-20" />
-              <p className="text-[14px] font-bold text-ink-primary">No pending KYC submissions</p>
-              <p className="text-[12px] font-medium mt-1">The queue is clear. All users have been verified.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary pt-12">
+              <img src="/assets/Admin_states/KYC Review.png" alt="KYC Review" className="w-[300px] h-[300px] object-contain mb-6 drop-shadow-sm" />
+              <p className="text-[20px] font-bold text-ink-primary">No pending KYC submissions</p>
+              <p className="text-[13px] font-medium mt-1 text-ink-secondary">The queue is clear. All users have been verified.</p>
             </div>
           ) : (
             filteredQueue.map((item) => {

@@ -81,8 +81,8 @@ export default function ReconciliationPage() {
       headerAction={headerAction}
     >
       {!report && !isLoading ? (
-        <div className="flex-1 min-h-0 flex flex-col items-center justify-center bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border-2 border-dashed border-black/5">
-          <Layers className="w-16 h-16 text-ink-tertiary/30 mb-6" strokeWidth={1.5} />
+        <div className="flex-1 min-h-0 flex flex-col items-center justify-center bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+          <img src="/assets/Admin_states/Ledger Reconciliation.png" alt="Ledger Reconciliation" className="w-[300px] h-[300px] object-contain mb-6 drop-shadow-sm" />
           <h2 className="text-[20px] font-bold text-ink-primary mb-2">Ready to Reconcile</h2>
           <p className="text-[13px] text-ink-secondary text-center max-w-sm font-medium">
             Select a date range and click Generate Match to cryptographically verify aggregator balances against the internal append-only ledger.
@@ -132,22 +132,32 @@ export default function ReconciliationPage() {
                     No active custody accounts
                   </div>
                 ) : (
-                  report?.custodyAccounts.map((account) => (
-                    <div key={`${account.provider}-${account.currency}`} className="bg-white rounded-full px-5 py-3 flex items-center justify-between shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center shrink-0">
-                          <Shield className="w-4 h-4 text-ink-primary" />
+                  report?.custodyAccounts.map((account) => {
+                    let logoUrl = null;
+                    if (account.provider.includes('MTN')) logoUrl = '/assets/money trails/momo_mtnb.png';
+                    else if (account.provider.includes('Telecel')) logoUrl = '/assets/money trails/telecel-cash.png';
+                    
+                    return (
+                      <div key={`${account.provider}-${account.currency}`} className="bg-white rounded-full px-5 py-3 flex items-center justify-between shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#EBEAE5] flex items-center justify-center shrink-0 overflow-hidden">
+                            {logoUrl ? (
+                              <img src={logoUrl} alt={account.provider} className="w-full h-full object-cover" />
+                            ) : (
+                              <Shield className="w-4 h-4 text-ink-primary" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-ink-primary">{account.provider}</p>
+                            <p className="text-[11px] font-medium text-ink-tertiary">Currency: {account.currency}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[13px] font-bold text-ink-primary">{account.provider}</p>
-                          <p className="text-[11px] font-medium text-ink-tertiary">Currency: {account.currency}</p>
-                        </div>
+                        <p className="text-[14px] font-bold text-ink-primary">
+                          {formatCurrency(account.balance, account.currency)}
+                        </p>
                       </div>
-                      <p className="text-[14px] font-bold text-ink-primary">
-                        {formatCurrency(account.balance, account.currency)}
-                      </p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </motion.div>

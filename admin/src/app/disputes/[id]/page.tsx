@@ -171,25 +171,30 @@ export default function DisputeDetailPage() {
             </div>
           )}
 
-          {/* AI Assessment Panel */}
-          <div className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex-shrink-0">
-             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[18px] font-bold text-ink-primary flex items-center gap-2">
-                <Bot className="w-5 h-5 text-[#B292FA]" /> AI Assessment
-              </h3>
-              <div className="bg-[#B292FA]/20 text-[#B292FA] px-2 py-0.5 rounded-full text-[10px] font-bold">L2 Output</div>
-            </div>
-            
-            <div className="bg-[#EBEAE5] rounded-[24px] p-5">
-              <p className="text-[12px] font-bold text-ink-secondary mb-1">Confidence Score: <span className="text-[#FF9A24]">82%</span></p>
-              <div className="w-full h-2 bg-black/10 rounded-full mb-4 overflow-hidden">
-                <div className="h-full bg-[#FF9A24]" style={{ width: '82%' }} />
+            {/* AI Assessment Panel */}
+            <div className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex-shrink-0 flex gap-6 items-center">
+              <div className="w-24 h-24 shrink-0 flex items-center justify-center">
+                <img src="/assets/Admin_states/AI Reasoning Payload.png" alt="AI Reasoning" className="w-full h-full object-contain drop-shadow-sm" />
               </div>
-              <p className="text-[13px] font-medium text-ink-primary leading-relaxed">
-                The buyer claims the item was never received, but the vendor has provided a waybill receipt. However, the signature on the waybill does not match the buyer&apos;s KYC record. Escalated to human review due to conflicting evidence.
-              </p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[18px] font-bold text-ink-primary flex items-center gap-2">
+                    <Bot className="w-5 h-5 text-[#B292FA]" /> AI Assessment
+                  </h3>
+                  <div className="bg-[#B292FA]/20 text-[#B292FA] px-2 py-0.5 rounded-full text-[10px] font-bold">L2 Output</div>
+                </div>
+                
+                <div className="bg-[#EBEAE5] rounded-[24px] p-5">
+                  <p className="text-[12px] font-bold text-ink-secondary mb-1">Confidence Score: <span className="text-[#FF9A24]">82%</span></p>
+                  <div className="w-full h-2 bg-black/10 rounded-full mb-4 overflow-hidden">
+                    <div className="h-full bg-[#FF9A24]" style={{ width: '82%' }} />
+                  </div>
+                  <p className="text-[13px] font-medium text-ink-primary leading-relaxed">
+                    The buyer claims the item was never received, but the vendor has provided a waybill receipt. However, the signature on the waybill does not match the buyer&apos;s KYC record. Escalated to human review due to conflicting evidence.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
         </motion.div>
 
         {/* RIGHT COLUMN: Evidence & Timeline */}
@@ -274,6 +279,14 @@ export default function DisputeDetailPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-0 border-l-2 border-black/5 ml-4 pl-6 relative">
+                
+                {/* Forensic Audit Illustration Header */}
+                <div className="mb-8 -ml-8 bg-white rounded-[24px] overflow-hidden flex flex-col items-center justify-center p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border-2 border-dashed border-black/5 relative">
+                  <img src="/assets/Admin_states/Forensic Timeline Audit.png" alt="Forensic Timeline Audit" className="h-[140px] object-contain drop-shadow-sm mb-4" />
+                  <h4 className="text-[16px] font-bold text-ink-primary">Forensic Ledger Log</h4>
+                  <p className="text-[12px] font-medium text-ink-secondary text-center max-w-sm mt-1">Immutable cryptographic history of all actions related to this transaction.</p>
+                </div>
+
                 {dispute.timeline.map((event, i) => (
                   <div key={i} className="mb-6 relative">
                     {/* Timeline dot */}
@@ -305,27 +318,39 @@ export default function DisputeDetailPage() {
       {/* Confirmation Modal */}
       {showAdjudicate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[32px] p-6 shadow-2xl w-full max-w-md">
-            <div className="w-12 h-12 rounded-full bg-[#F36960]/10 flex items-center justify-center text-[#F36960] mb-4">
-              <AlertTriangle className="w-6 h-6" />
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-[#EBEAE5] rounded-[32px] p-2 shadow-2xl w-full max-w-[420px]">
+            <div className="w-full h-[200px] bg-white rounded-[24px] mb-4 flex flex-col items-center justify-center overflow-hidden relative">
+              <img 
+                src={adjudicateAction === 'REFUND_BUYER' 
+                  ? '/assets/Admin_states/Adjudication Refund Buyer.png' 
+                  : '/assets/Admin_states/Adjudication Release to Vendor.png'
+                } 
+                alt="Adjudication"
+                className="w-[80%] h-[80%] object-contain drop-shadow-sm"
+              />
             </div>
-            <h3 className="text-[20px] font-bold text-ink-primary mb-2">Execute Irreversible Action?</h3>
-            <p className="text-[13px] font-medium text-ink-secondary mb-6 leading-relaxed">
-              You are about to <span className="font-bold text-ink-primary">{adjudicateAction.replace('_', ' ')}</span>. This will immediately mutate the ledger and execute payout via the custody provider. This cannot be undone.
-            </p>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setShowAdjudicate(false)}
-                className="flex-1 py-3 rounded-full bg-[#EBEAE5] text-ink-primary text-[13px] font-bold hover:brightness-95 transition-all"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleResolve}
-                className="flex-1 py-3 rounded-full bg-[#F36960] text-white text-[13px] font-bold hover:bg-[#F36960]/90 transition-all flex items-center justify-center"
-              >
-                {adjudicateLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Confirm Execution'}
-              </button>
+            
+            <div className="px-4 pb-4">
+              <h3 className="text-[20px] font-bold text-ink-primary mb-2">Execute Irreversible Action?</h3>
+              <p className="text-[13px] font-medium text-ink-secondary mb-6 leading-relaxed">
+                You are about to <span className="font-bold text-ink-primary">{adjudicateAction.replace('_', ' ')}</span>. This will immediately mutate the ledger and execute payout via the custody provider. This cannot be undone.
+              </p>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowAdjudicate(false)}
+                  className="flex-1 py-3.5 rounded-full bg-white text-ink-primary text-[13px] font-bold hover:brightness-95 transition-all shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleResolve}
+                  className={cn("flex-1 py-3.5 rounded-full text-white text-[13px] font-bold transition-all flex items-center justify-center shadow-sm",
+                    adjudicateAction === 'REFUND_BUYER' ? "bg-[#F36960] hover:bg-[#F36960]/90" : "bg-[#2ECA6A] hover:bg-[#2ECA6A]/90"
+                  )}
+                >
+                  {adjudicateLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Confirm Execution'}
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>

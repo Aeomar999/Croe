@@ -221,16 +221,20 @@ export default function FraudPage() {
       <AnimatePresence>
         {trustScoreModal.user && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-[32px] p-6 shadow-2xl w-full max-w-sm">
-              <div className="w-12 h-12 rounded-full bg-ink-primary flex items-center justify-center text-white mb-4">
-                <SlidersHorizontal className="w-6 h-6" />
-              </div>
-              <h3 className="text-[20px] font-bold text-ink-primary mb-1">Adjust Trust Score</h3>
-              <p className="text-[12px] font-medium text-ink-secondary mb-6 leading-relaxed">
-                Modifying score for {trustScoreModal.user.phoneNumber}. This is audit-logged and impacts transaction velocity limits.
-              </p>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-[#EBEAE5] rounded-[32px] p-2 shadow-2xl w-full max-w-[400px]">
               
-              <div className="flex flex-col gap-4 mb-6">
+              {/* Illustration Header */}
+              <div className="w-full h-[200px] bg-white rounded-[24px] mb-4 flex flex-col items-center justify-center overflow-hidden relative">
+                <img src="/assets/Admin_states/Trust Score Adjustment.png" alt="Trust Score" className="w-[80%] h-[80%] object-contain" />
+              </div>
+
+              <div className="px-4 pb-4">
+                <h3 className="text-[20px] font-bold text-ink-primary mb-1">Adjust Trust Score</h3>
+                <p className="text-[12px] font-medium text-ink-secondary mb-6 leading-relaxed">
+                  Modifying score for {trustScoreModal.user.phoneNumber}. This is audit-logged and impacts transaction velocity limits.
+                </p>
+                
+                <div className="flex flex-col gap-4 mb-6">
                 <div>
                   <label className="text-[11px] font-bold text-ink-secondary ml-1 block mb-1">New Score (0-100)</label>
                   <input 
