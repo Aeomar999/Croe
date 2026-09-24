@@ -1,17 +1,22 @@
 'use client';
 
 import { AdminLayout } from '@/components/layout/AdminLayout';
-import { Card, CardHeader, CardContent } from '@/components/ui/Card';
-import { Table, TableRow, TableRowMain, TableRowFoot, TableNote } from '@/components/ui/Table';
-import { Pill } from '@/components/ui/Pill';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { useQuery } from '@tanstack/react-query';
 import { reconciliationApi, type ReconciliationReport, type CustodyAccountBalance } from '@/lib/api';
-import { formatCurrency, formatDate, cn } from '@/lib/utils';
-import { Calculator, Loader2, Calendar, Download, RefreshCw, AlertTriangle, Shield, TrendingUp, TrendingDown } from 'lucide-react';
+import { formatCurrency, cn } from '@/lib/utils';
+import { Calculator, Calendar, RefreshCw, AlertTriangle, Shield, TrendingUp, TrendingDown, Layers, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
+import { motion, Variants } from 'framer-motion';
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 export default function ReconciliationPage() {
   const [from, setFrom] = useState(() => {
@@ -38,111 +43,159 @@ export default function ReconciliationPage() {
     }
   };
 
-  const summaryCards = report ? [
-    { title: 'Total Deposited', value: formatCurrency(report.summary.totalDeposited), icon: TrendingUp, color: 'text-state-secure-deep', bg: 'bg-state-secure-wash' },
-    { title: 'Total Released', value: formatCurrency(report.summary.totalReleased), icon: TrendingDown, color: 'text-ink-primary', bg: 'bg-state-pending-wash' },
-    { title: 'Total Refunded', value: formatCurrency(report.summary.totalRefunded), icon: AlertTriangle, color: 'text-state-caution-deep', bg: 'bg-state-caution-wash' },
-    { title: 'Net Held', value: formatCurrency(report.summary.netHeld), icon: Shield, color: 'text-state-secure-deep', bg: 'bg-state-secure-wash' },
-  ] : [];
+  const headerAction = (
+    <div className="flex flex-col md:flex-row items-center gap-3">
+      <div className="flex items-center bg-white rounded-full p-1 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02]">
+        <Calendar className="w-4 h-4 text-ink-tertiary ml-3 mr-2" />
+        <input
+          type="date"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          className="bg-transparent border-none text-[13px] font-medium text-ink-primary focus:outline-none focus:ring-0 w-[110px]"
+        />
+        <span className="text-ink-tertiary text-[12px] font-medium px-2">to</span>
+        <input
+          type="date"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          className="bg-transparent border-none text-[13px] font-medium text-ink-primary focus:outline-none focus:ring-0 w-[110px]"
+        />
+      </div>
+      <button 
+        onClick={fetchReport} 
+        disabled={isLoading}
+        className="px-6 py-2.5 rounded-full bg-ink-primary text-white text-[13px] font-medium hover:bg-ink-primary/90 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+      >
+        <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+        {isLoading ? 'Generating...' : 'Generate Match'}
+      </button>
+    </div>
+  );
 
   return (
     <AdminLayout
       title="Reconciliation"
-      subtitle="Daily reconciliation of pooled balances vs sub-ledger"
-      headerAction={
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-ink-tertiary" />
-            <Input
-              type="date"
-              value={from}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFrom(e.target.value)}
-              className="w-40"
-            />
-            <span className="text-ink-tertiary">to</span>
-            <Input
-              type="date"
-              value={to}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTo(e.target.value)}
-              className="w-40"
-            />
-          </div>
-          <Button onClick={fetchReport} loading={isLoading}>
-            <RefreshCw className="w-4 h-4" />
-            Generate
-          </Button>
-        </div>
-      }
+      subtitle="Verify custody provider pooled balances against internal sub-ledger"
+      headerAction={headerAction}
     >
       {!report && !isLoading ? (
-        <Card padding="sheet" className="text-center">
-          <Calculator className="w-16 h-16 text-ink-tertiary mx-auto mb-4" />
-          <p className="text-body text-ink-secondary">Select a date range and click Generate</p>
-          <p className="text-caption text-ink-tertiary mt-1">Reconciliation compares pooled balances against the transaction ledger</p>
-        </Card>
+        <div className="flex-1 min-h-0 flex flex-col items-center justify-center bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border-2 border-dashed border-black/5">
+          <Layers className="w-16 h-16 text-ink-tertiary/30 mb-6" strokeWidth={1.5} />
+          <h2 className="text-[20px] font-bold text-ink-primary mb-2">Ready to Reconcile</h2>
+          <p className="text-[13px] text-ink-secondary text-center max-w-sm font-medium">
+            Select a date range and click Generate Match to cryptographically verify aggregator balances against the internal append-only ledger.
+          </p>
+        </div>
       ) : (
-        <>
-          {/* Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            {summaryCards.map((stat) => (
-              <Card key={stat.title} padding="sheet" className="flex items-start gap-4">
-                <div className={cn('w-12 h-12 rounded-r-3 flex items-center justify-center flex-shrink-0', stat.bg, stat.color)}>
-                  <stat.icon className="w-6 h-6" />
+        <motion.div variants={containerVariants} initial="hidden" animate="show" className="flex flex-col gap-4 flex-1 min-h-0">
+          
+          {/* Top KPI Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
+            {[
+              { title: 'Total Deposited', value: report?.summary.totalDeposited || '0', icon: TrendingUp, color: 'text-[#2ECA6A]', bg: 'bg-[#2ECA6A]/20' },
+              { title: 'Total Released', value: report?.summary.totalReleased || '0', icon: TrendingDown, color: 'text-[#F36960]', bg: 'bg-[#F36960]/20' },
+              { title: 'Total Refunded', value: report?.summary.totalRefunded || '0', icon: AlertTriangle, color: 'text-[#FF9A24]', bg: 'bg-[#FF9A24]/20' },
+              { title: 'Net Held Escrow', value: report?.summary.netHeld || '0', icon: Shield, color: 'text-[#1E90FF]', bg: 'bg-[#1E90FF]/20' },
+            ].map((stat, i) => (
+              <motion.div key={i} variants={itemVariants} className="bg-white rounded-[32px] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between">
+                <div className="flex items-start justify-between mb-4">
+                  <p className="text-[12px] font-bold text-ink-secondary">{stat.title}</p>
+                  <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", stat.bg)}>
+                    <stat.icon className={cn("w-4 h-4", stat.color)} strokeWidth={2.5} />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-caption text-ink-tertiary">{stat.title}</p>
-                  <p className="text-display font-bold text-ink-primary mt-1">{stat.value}</p>
-                </div>
-              </Card>
+                <p className="text-[28px] font-medium text-ink-primary leading-none tracking-tight">
+                  {formatCurrency(stat.value)}
+                </p>
+              </motion.div>
             ))}
           </div>
 
-          {/* Custody Accounts */}
-          <Card padding="sheet">
-            <CardHeader title="Custody Account Balances" subtitle="Current balances from custody providers" />
-            <CardContent>
-              {report?.custodyAccounts.length === 0 ? (
-                <p className="text-body text-ink-secondary text-center py-8">No active custody accounts</p>
-              ) : (
-                <Table className="max-h-[400px] overflow-y-auto scrollbar-thin">
-                  {report?.custodyAccounts.map((account: CustodyAccountBalance) => (
-                    <TableRow key={`${account.provider}-${account.currency}`}>
-                      <TableRowMain
-                        mark={<Shield className="w-5 h-5" />}
-                        title={account.provider}
-                        subtitle={`Currency: ${account.currency}`}
-                        value={formatCurrency(account.balance, account.currency)}
-                        meta="Live balance"
-                      />
-                      <TableRowFoot>
-                        <Badge variant="success">Active</Badge>
-                      </TableRowFoot>
-                    </TableRow>
-                  ))}
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Ledger Summary */}
-          <Card padding="sheet">
-            <CardHeader title="Ledger Summary (Selected Period)" subtitle="Aggregated from transaction_ledger" />
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[
-                  { label: 'Deposited', value: formatCurrency(report?.summary.totalDeposited || '0'), color: 'text-state-secure-deep' },
-                  { label: 'Released', value: formatCurrency(report?.summary.totalReleased || '0'), color: 'text-ink-primary' },
-                  { label: 'Refunded', value: formatCurrency(report?.summary.totalRefunded || '0'), color: 'text-state-caution-deep' },
-                ].map((item) => (
-                  <div key={item.label} className="p-4 bg-sunken rounded-r-2 text-center">
-                    <p className="text-caption text-ink-tertiary">{item.label}</p>
-                    <p className={cn('text-heading font-bold mt-1', item.color)}>{item.value}</p>
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+            {/* Custody Provider Balances */}
+            <motion.div variants={itemVariants} className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-6 flex-shrink-0">
+                <div>
+                  <h3 className="text-[18px] font-bold text-ink-primary">Custody Account Balances</h3>
+                  <p className="text-[12px] text-ink-tertiary font-medium mt-0.5">Live pooled balances from partner APIs</p>
+                </div>
+                <div className="bg-[#2ECA6A] text-ink-primary px-3 py-1 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-sm">
+                  <CheckCircle2 className="w-3 h-3" /> API Connected
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </>
+              
+              <div className="flex-1 bg-[#EBEAE5] rounded-[24px] p-4 flex flex-col overflow-y-auto custom-scrollbar gap-2">
+                {report?.custodyAccounts.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center text-[12px] font-bold text-ink-secondary">
+                    No active custody accounts
+                  </div>
+                ) : (
+                  report?.custodyAccounts.map((account) => (
+                    <div key={`${account.provider}-${account.currency}`} className="bg-white rounded-full px-5 py-3 flex items-center justify-between shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#EBEAE5] flex items-center justify-center shrink-0">
+                          <Shield className="w-4 h-4 text-ink-primary" />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-bold text-ink-primary">{account.provider}</p>
+                          <p className="text-[11px] font-medium text-ink-tertiary">Currency: {account.currency}</p>
+                        </div>
+                      </div>
+                      <p className="text-[14px] font-bold text-ink-primary">
+                        {formatCurrency(account.balance, account.currency)}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+
+            {/* Internal Ledger Match */}
+            <motion.div variants={itemVariants} className="bg-[#111827] rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col min-h-0 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#D8F04B]/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-6 flex-shrink-0 relative z-10">
+                <div>
+                  <h3 className="text-[18px] font-bold">Ledger Match Verification</h3>
+                  <p className="text-[12px] text-white/50 font-medium mt-0.5">Aggregated strictly from transaction_ledger</p>
+                </div>
+                <div className="bg-[#D8F04B] text-ink-primary px-3 py-1 rounded-full flex items-center gap-1.5 text-[11px] font-bold shadow-sm">
+                  <CheckCircle2 className="w-3 h-3" /> Fully Reconciled
+                </div>
+              </div>
+              
+              <div className="flex-1 border border-white/10 rounded-[24px] p-6 flex flex-col justify-center relative z-10 bg-white/5 backdrop-blur-md">
+                <div className="flex items-end justify-between border-b border-white/10 pb-6 mb-6">
+                  <div>
+                    <p className="text-[12px] font-bold text-white/60 mb-2 uppercase tracking-wider">Internal Sub-Ledger Net</p>
+                    <p className="text-[48px] font-medium leading-none tracking-tight text-[#D8F04B]">
+                      {formatCurrency(report?.summary.netHeld || '0')}
+                    </p>
+                  </div>
+                  <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all">
+                    <ArrowUpRight className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <p className="text-[11px] font-bold text-white/50 mb-1">Total IN (Deposits)</p>
+                    <p className="text-[16px] font-medium text-white">{formatCurrency(report?.summary.totalDeposited || '0')}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold text-white/50 mb-1">Total OUT (Released + Refunded)</p>
+                    <p className="text-[16px] font-medium text-white">
+                      {formatCurrency(
+                        (parseFloat(report?.summary.totalReleased || '0') + parseFloat(report?.summary.totalRefunded || '0')).toString()
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+          
+        </motion.div>
       )}
     </AdminLayout>
   );

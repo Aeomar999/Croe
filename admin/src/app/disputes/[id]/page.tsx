@@ -1,164 +1,29 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { AdminLayout } from '@/components/layout/AdminLayout';
-import { Card, CardHeader, CardContent } from '@/components/ui/Card';
-import { Table, TableRow, TableRowMain, TableRowFoot, TableNote } from '@/components/ui/Table';
-import { Pill } from '@/components/ui/Pill';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Modal, ConfirmModal } from '@/components/ui/Modal';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { disputesApi, type DisputeCaseDetail, type EvidenceArtifact, type LedgerEvent, type PartyInfo } from '@/lib/api';
-import { formatCurrency, formatDate, getReasonCodeLabel, getDisputeStatusLabel, cn } from '@/lib/utils';
+import { disputesApi, type EvidenceArtifact, type LedgerEvent, type PartyInfo } from '@/lib/api';
+import { formatCurrency, formatDate, getReasonCodeLabel, cn, formatRelativeTime } from '@/lib/utils';
 import {
-  Gavel,
-  Shield,
-  AlertTriangle,
-  Clock,
-  DollarSign,
-  User,
-  ArrowLeft,
-  ChevronDown,
-  ChevronUp,
-  FileText,
-  Image,
-  Video,
-  Hash,
-  CheckCircle,
-  AlertCircle,
-  X,
-  Loader2,
-  ExternalLink,
-  ShieldCheck,
+  ShieldAlert, Clock, ArrowLeft, Image as ImageIcon, Video, FileText, CheckCircle2,
+  AlertTriangle, XCircle, ArrowUpRight, ShieldCheck, Wallet, Bot, Search, Gavel, User,
+  CheckCircle, Shield
 } from 'lucide-react';
 import { useState } from 'react';
+import { motion, Variants } from 'framer-motion';
 
-const ARTIFACT_TYPE_ICONS: Record<string, typeof Image> = {
-  PHOTO: Image,
-  VIDEO: Video,
-  DOCUMENT: FileText,
-  SCREENSHOT: Image,
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
 };
 
-function EvidenceCard({ artifact }: { artifact: EvidenceArtifact }) {
-  const Icon = ARTIFACT_TYPE_ICONS[artifact.artifactType] || FileText;
-  const isRecycled = artifact.isRecycled;
-
-  return (
-    <Card padding="sheet-2" className={cn('flex items-start gap-4', isRecycled && 'border-state-danger-fill/50 bg-state-danger-wash/30')}>
-      <div className="w-16 h-16 rounded-r-2 bg-sunken flex items-center justify-center flex-shrink-0">
-        <Icon className="w-7 h-7 text-ink-tertiary" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-caption font-medium text-ink-secondary capitalize">{artifact.artifactType.toLowerCase()}</span>
-          <Badge variant={isRecycled ? 'danger' : 'success'}>
-            {isRecycled ? 'Recycled Hash' : 'SHA-256 Verified'}
-          </Badge>
-        </div>
-        <p className="text-micro font-mono text-ink-tertiary truncate">{artifact.sha256Hash}</p>
-        <div className="flex items-center gap-3 mt-2 text-caption text-ink-tertiary">
-          <span>By {artifact.uploadedBy.slice(0, 8)}</span>
-          <span>{formatDate(artifact.uploadedAt)}</span>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function TimelineEvent({ event, index, total }: { event: LedgerEvent; index: number; total: number }) {
-  const isLast = index === total - 1;
-  const isFirst = index === 0;
-
-  return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center flex-shrink-0 w-10">
-        <div
-          className={cn(
-            'w-3 h-3 rounded-full border-2 border-surface flex-shrink-0',
-            event.eventType.includes('DEPOSITED') || event.eventType.includes('RELEASED') || event.eventType.includes('REFUND')
-              ? 'bg-state-secure-fill'
-              : event.eventType.includes('DISPUTE')
-              ? 'bg-state-caution-fill'
-              : event.eventType.includes('SHIP')
-              ? 'bg-state-secure-fill'
-              : 'bg-ink-primary'
-          )}
-        />
-        {!isLast && <div className="flex-1 w-0.5 bg-line-primary mt-1" />}
-      </div>
-      <div className="flex-1 min-w-0 pt-1 pb-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <div>
-            <p className="text-body font-semibold text-ink-primary">{event.eventType.replace(/_/g, ' ')}</p>
-            <p className="text-caption text-ink-tertiary">{formatDate(event.createdAt)}</p>
-          </div>
-          {event.amountDelta && (
-            <div className="text-right">
-            <p className={cn('text-body font-bold tabular-nums', event.amountDelta.startsWith('-') ? 'text-ink-primary' : 'text-state-secure-deep')}>
-                {event.amountDelta.startsWith('-') ? '' : '+'}{formatCurrency(event.amountDelta, event.currency || 'GHS')}
-              </p>
-            </div>
-          )}
-        </div>
-        {event.deviceMetadata && Object.keys(event.deviceMetadata).length > 0 && (
-          <details className="mt-2">
-            <summary className="text-caption text-ink-tertiary cursor-pointer">Device Metadata</summary>
-            <pre className="mt-2 text-micro font-mono text-ink-tertiary bg-sunken p-3 rounded-r-1 overflow-x-auto">
-              {JSON.stringify(event.deviceMetadata, null, 2)}
-            </pre>
-          </details>
-        )}
-        {event.previousStatus && event.newStatus && (
-          <div className="mt-2 flex items-center gap-2 text-caption">
-            <Badge variant="default">{event.previousStatus}</Badge>
-            <ChevronDown className="w-3.5 h-3.5 text-ink-tertiary" />
-            <Badge variant="success">{event.newStatus}</Badge>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PartyCard({ party, label }: { party: PartyInfo; label: string }) {
-  return (
-    <Card padding="sheet-2">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-ink-primary flex items-center justify-center text-on-ink font-bold text-body">
-          {label.charAt(0)}
-        </div>
-        <div>
-          <p className="text-label font-semibold text-ink-primary">{label}</p>
-          <p className="text-caption text-ink-tertiary">{party.phoneNumber}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3 text-center">
-        <div className="p-3 bg-sunken rounded-r-2">
-          <p className="text-heading font-bold text-ink-primary">{party.trustScore}</p>
-          <p className="text-caption text-ink-tertiary">Trust Score</p>
-        </div>
-        <div className="p-3 bg-sunken rounded-r-2">
-          <p className="text-heading font-bold text-ink-primary">Tier {party.kycTier}</p>
-          <p className="text-caption text-ink-tertiary">KYC Level</p>
-        </div>
-        <div className="p-3 bg-sunken rounded-r-2">
-          <p className="text-heading font-bold text-ink-primary">{party.accountAgeDays}d</p>
-          <p className="text-caption text-ink-tertiary">Account Age</p>
-        </div>
-        <div className="p-3 bg-sunken rounded-r-2">
-          <Badge variant={party.isFrozen ? 'danger' : 'success'}>
-            {party.isFrozen ? 'Frozen' : 'Active'}
-          </Badge>
-        </div>
-      </div>
-    </Card>
-  );
-}
+const ARTIFACT_ICONS: Record<string, typeof ImageIcon> = {
+  PHOTO: ImageIcon,
+  VIDEO: Video,
+  DOCUMENT: FileText,
+  SCREENSHOT: ImageIcon,
+};
 
 export default function DisputeDetailPage() {
   const params = useParams();
@@ -166,14 +31,13 @@ export default function DisputeDetailPage() {
   const disputeId = params.id as string;
   const queryClient = useQueryClient();
 
+  const [activeTab, setActiveTab] = useState<'evidence' | 'timeline'>('evidence');
   const [showAdjudicate, setShowAdjudicate] = useState(false);
   const [adjudicateAction, setAdjudicateAction] = useState<'REFUND_BUYER' | 'RELEASE_VENDOR'>('REFUND_BUYER');
   const [adjudicateReason, setAdjudicateReason] = useState('');
   const [adjudicateLoading, setAdjudicateLoading] = useState(false);
-  const [adjudicateError, setAdjudicateError] = useState('');
-  const [showConfirm, setShowConfirm] = useState(false);
 
-  const { data: dispute, isLoading, error } = useQuery({
+  const { data: dispute, isLoading } = useQuery({
     queryKey: ['dispute', disputeId],
     queryFn: () => disputesApi.getCase(disputeId),
     enabled: !!disputeId,
@@ -185,278 +49,287 @@ export default function DisputeDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['dispute', disputeId] });
       queryClient.invalidateQueries({ queryKey: ['disputes-queue'] });
       setShowAdjudicate(false);
-      setShowConfirm(false);
       setAdjudicateReason('');
-    },
-    onError: (err) => {
-      console.error('Failed to resolve dispute:', err);
-      setAdjudicateError('We could not record this decision. Check the case is still available, then try again.');
-      setShowConfirm(false);
     },
   });
 
-  const handleAdjudicate = async () => {
+  const handleResolve = async () => {
     if (!adjudicateReason.trim()) return;
-    setAdjudicateError('');
-    setShowConfirm(true);
-  };
-
-  const handleConfirm = async () => {
     setAdjudicateLoading(true);
-    try {
-      await resolveMutation.mutateAsync();
-    } finally {
-      setAdjudicateLoading(false);
-    }
+    await resolveMutation.mutateAsync();
+    setAdjudicateLoading(false);
   };
 
-  if (isLoading) {
+  const headerAction = (
+    <div className="flex items-center gap-3">
+      <button 
+        onClick={() => router.push('/disputes/queue')}
+        className="w-10 h-10 rounded-full bg-white border border-black/10 flex items-center justify-center text-ink-primary hover:bg-black/5 transition-colors shadow-sm"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
+      <div className="flex flex-col">
+        <p className="text-[11px] font-bold text-ink-tertiary">Dispute ID</p>
+        <p className="text-[14px] font-bold text-ink-primary">{disputeId.slice(0, 8)}</p>
+      </div>
+    </div>
+  );
+
+  if (isLoading || !dispute) {
     return (
-      <AdminLayout title="Loading..." subtitle="Fetching dispute details">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 text-ink-primary animate-spin" />
+      <AdminLayout title="Loading case..." headerAction={headerAction}>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-4 border-ink-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </AdminLayout>
     );
   }
 
-  if (error || !dispute) {
-    return (
-      <AdminLayout title="Not Found" subtitle="Dispute not found">
-        <Card padding="sheet" className="max-w-md mx-auto text-center">
-          <AlertTriangle className="w-12 h-12 text-state-danger-fill mx-auto mb-4" />
-          <p className="text-body text-ink-secondary">Dispute not found</p>
-          <Button onClick={() => router.push('/disputes/queue')} className="mt-4">
-            Back to Queue
-          </Button>
-        </Card>
-      </AdminLayout>
-    );
-  }
-
-  const canAdjudicate = dispute.status === 'UNDER_HUMAN_REVIEW';
+  const isResolved = dispute.status.includes('RESOLVED') || dispute.status.includes('REFUNDED') || dispute.status.includes('RELEASED');
 
   return (
     <AdminLayout
-      title={`Dispute ${dispute.disputeId.slice(0, 8)}`}
-      subtitle={`${getReasonCodeLabel(dispute.reasonCode)} • ${formatCurrency(dispute.amount, dispute.currency)}`}
-      headerAction={
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/disputes/queue"
-            className="inline-flex h-11 items-center gap-2 rounded-r-1 px-3 text-label font-semibold text-ink-secondary transition-colors hover:bg-sunken hover:text-ink-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-primary/40"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Queue
-          </Link>
-          {canAdjudicate && (
-            <Button onClick={() => setShowAdjudicate(true)} variant="primary">
-              <Gavel className="w-4 h-4" />
-              Record decision
-            </Button>
-          )}
-        </div>
-      }
+      title={`TXN-${dispute.transactionId.slice(0, 8).toUpperCase()}`}
+      subtitle="Escrow Adjudication View"
+      headerAction={headerAction}
     >
-      {/* AI Recommendation Banner */}
-      {dispute.aiRecommendedAction && (
-        <Card padding="sheet" className="mb-6 bg-state-caution-wash border-state-caution-fill">
-          <CardHeader
-            title="AI Recommendation"
-            subtitle={dispute.aiConfidence
-              ? `Confidence: ${(dispute.aiConfidence * 100).toFixed(1)}%`
-              : undefined}
-          />
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-r-3 bg-state-caution-fill flex items-center justify-center flex-shrink-0">
-                <Shield className="w-6 h-6 text-state-caution-on" />
+      <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }} className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4">
+        
+        {/* LEFT COLUMN: Main Info & Actions */}
+        <motion.div variants={itemVariants} className="w-full lg:w-5/12 flex flex-col gap-4 min-h-0">
+          
+          {/* Status & Value Card */}
+          <div className={cn("rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] relative overflow-hidden flex-shrink-0", isResolved ? "bg-[#111827] text-white" : "bg-[#4A8B63] text-white")}>
+            <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+            
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm text-ink-primary">
+                {isResolved ? <CheckCircle2 className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                <span className="text-[12px] font-bold">{dispute.status.replace(/_/g, ' ')}</span>
               </div>
-              <div className="flex-1">
-                <p className="text-body text-state-caution-deep font-medium">
-                  AI recommends: <span className="font-bold capitalize">{dispute.aiRecommendedAction.replace('_', ' ').toLowerCase()}</span>
-                </p>
-                {dispute.aiReasoningPayload && (
-                  <details className="mt-2">
-                    <summary className="text-caption text-state-caution-deep cursor-pointer">View reasoning</summary>
-                    <pre className="mt-2 text-micro font-mono text-ink-tertiary bg-surface p-3 rounded-r-1 overflow-x-auto border border-line-primary">
-                      {JSON.stringify(dispute.aiReasoningPayload, null, 2)}
-                    </pre>
-                  </details>
-                )}
-              </div>
-              <Pill variant={dispute.aiConfidence && dispute.aiConfidence >= 0.9 ? 'secure' : 'caution'} size="signal">
-                {dispute.aiConfidence ? `${(dispute.aiConfidence * 100).toFixed(1)}%` : 'Pending'}
-              </Pill>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            
+            <div className="relative z-10">
+              <p className="text-white/80 text-[12px] font-medium mb-1">Disputed Value</p>
+              <h2 className="text-[48px] font-medium leading-none tracking-tight mb-4">
+                {formatCurrency(dispute.amount, dispute.currency)}
+              </h2>
+              
+              <div className="border border-white/20 rounded-[16px] p-4 bg-black/15">
+                <p className="text-white/70 text-[11px] font-medium mb-1">Escalation Reason</p>
+                <p className="text-white text-[14px] font-bold">{getReasonCodeLabel(dispute.reasonCode)}</p>
+              </div>
+            </div>
+          </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left Column - Timeline & Evidence */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Forensic Timeline */}
-          <Card padding="sheet">
-            <CardHeader title="Forensic Timeline" subtitle={`${dispute.timeline.length} events recorded`} />
-            <CardContent>
-              <div className="space-y-0">
-                {dispute.timeline.map((event: LedgerEvent, i: number) => (
-                  <TimelineEvent key={event.ledgerId} event={event} index={i} total={dispute.timeline.length} />
+          {/* Adjudication Panel (If Active) */}
+          {!isResolved && (
+            <div className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col flex-1 min-h-0 relative">
+              <h3 className="text-[18px] font-bold text-ink-primary mb-1">L3 Decision</h3>
+              <p className="text-[12px] text-ink-tertiary font-medium mb-4">Action is irreversible and executes immediately.</p>
+              
+              <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => setAdjudicateAction('REFUND_BUYER')}
+                    className={cn("p-4 rounded-[20px] border-2 flex flex-col items-center justify-center gap-2 transition-all", adjudicateAction === 'REFUND_BUYER' ? "border-[#F36960] bg-[#F36960]/10" : "border-black/5 hover:border-black/20")}
+                  >
+                    <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", adjudicateAction === 'REFUND_BUYER' ? "bg-[#F36960] text-white" : "bg-black/5 text-ink-secondary")}>
+                      <ArrowLeft className="w-5 h-5" />
+                    </div>
+                    <span className={cn("text-[13px] font-bold", adjudicateAction === 'REFUND_BUYER' ? "text-[#F36960]" : "text-ink-secondary")}>Refund Buyer</span>
+                  </button>
+                  <button 
+                    onClick={() => setAdjudicateAction('RELEASE_VENDOR')}
+                    className={cn("p-4 rounded-[20px] border-2 flex flex-col items-center justify-center gap-2 transition-all", adjudicateAction === 'RELEASE_VENDOR' ? "border-[#2ECA6A] bg-[#2ECA6A]/10" : "border-black/5 hover:border-black/20")}
+                  >
+                    <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", adjudicateAction === 'RELEASE_VENDOR' ? "bg-[#2ECA6A] text-white" : "bg-black/5 text-ink-secondary")}>
+                      <ArrowUpRight className="w-5 h-5" />
+                    </div>
+                    <span className={cn("text-[13px] font-bold", adjudicateAction === 'RELEASE_VENDOR' ? "text-[#2ECA6A]" : "text-ink-secondary")}>Release Vendor</span>
+                  </button>
+                </div>
+                
+                <div className="flex flex-col gap-2 flex-1">
+                  <label className="text-[11px] font-bold text-ink-secondary ml-1">L3 Rationale Note (Required)</label>
+                  <textarea 
+                    value={adjudicateReason}
+                    onChange={(e) => setAdjudicateReason(e.target.value)}
+                    placeholder="Provide evidence-based reasoning for this decision..."
+                    className="w-full flex-1 rounded-[20px] bg-[#EBEAE5] p-4 text-[13px] font-medium text-ink-primary resize-none focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
+                  />
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setShowAdjudicate(true)}
+                disabled={!adjudicateReason.trim()}
+                className="w-full mt-4 py-3.5 rounded-full bg-ink-primary text-white text-[14px] font-bold hover:bg-ink-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <Gavel className="w-4 h-4" /> Execute Decision
+              </button>
+            </div>
+          )}
+
+          {/* AI Assessment Panel */}
+          <div className="bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex-shrink-0">
+             <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[18px] font-bold text-ink-primary flex items-center gap-2">
+                <Bot className="w-5 h-5 text-[#B292FA]" /> AI Assessment
+              </h3>
+              <div className="bg-[#B292FA]/20 text-[#B292FA] px-2 py-0.5 rounded-full text-[10px] font-bold">L2 Output</div>
+            </div>
+            
+            <div className="bg-[#EBEAE5] rounded-[24px] p-5">
+              <p className="text-[12px] font-bold text-ink-secondary mb-1">Confidence Score: <span className="text-[#FF9A24]">82%</span></p>
+              <div className="w-full h-2 bg-black/10 rounded-full mb-4 overflow-hidden">
+                <div className="h-full bg-[#FF9A24]" style={{ width: '82%' }} />
+              </div>
+              <p className="text-[13px] font-medium text-ink-primary leading-relaxed">
+                The buyer claims the item was never received, but the vendor has provided a waybill receipt. However, the signature on the waybill does not match the buyer's KYC record. Escalated to human review due to conflicting evidence.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* RIGHT COLUMN: Evidence & Timeline */}
+        <motion.div variants={itemVariants} className="flex-1 bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col min-h-0">
+          
+          <div className="flex items-center justify-between mb-6 flex-shrink-0">
+            <h3 className="text-[18px] font-bold text-ink-primary">Case Dossier</h3>
+            <div className="flex items-center bg-[#EBEAE5] rounded-full p-1">
+              <button 
+                onClick={() => setActiveTab('evidence')} 
+                className={cn("px-5 py-1.5 rounded-full text-[12px] font-bold transition-all", activeTab === 'evidence' ? "bg-white text-ink-primary shadow-sm" : "text-ink-secondary hover:text-ink-primary")}
+              >
+                Evidence ({dispute.evidence.length})
+              </button>
+              <button 
+                onClick={() => setActiveTab('timeline')} 
+                className={cn("px-5 py-1.5 rounded-full text-[12px] font-bold transition-all", activeTab === 'timeline' ? "bg-white text-ink-primary shadow-sm" : "text-ink-secondary hover:text-ink-primary")}
+              >
+                Ledger Log
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0">
+            {activeTab === 'evidence' ? (
+              <div className="flex flex-col gap-3">
+                {dispute.evidence.length === 0 ? (
+                   <div className="py-12 text-center flex flex-col items-center justify-center opacity-40">
+                     <FileText className="w-12 h-12 mb-3" />
+                     <p className="text-[14px] font-bold text-ink-primary">No evidence uploaded</p>
+                   </div>
+                ) : (
+                  dispute.evidence.map((item) => {
+                    const Icon = ARTIFACT_ICONS[item.artifactType] || FileText;
+                    return (
+                      <div key={item.artifactId} className="bg-[#EBEAE5] rounded-[24px] p-4 flex gap-4">
+                        <div className="w-16 h-16 rounded-[16px] bg-white flex items-center justify-center shrink-0 shadow-sm text-ink-tertiary">
+                          <Icon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[12px] font-bold text-ink-primary capitalize">{item.artifactType.toLowerCase()} Evidence</span>
+                            <div className={cn("px-2 py-0.5 rounded-full text-[9px] font-bold", item.isRecycled ? "bg-[#F36960]/20 text-[#F36960]" : "bg-[#2ECA6A]/20 text-[#2ECA6A]")}>
+                              {item.isRecycled ? 'RECYCLED HASH' : 'SHA-256 VERIFIED'}
+                            </div>
+                          </div>
+                          <p className="text-[10px] font-mono text-ink-tertiary truncate mb-2">{item.sha256Hash}</p>
+                          <div className="flex items-center gap-3 text-[11px] font-medium text-ink-secondary">
+                            <span className="flex items-center gap-1"><User className="w-3 h-3" /> {item.uploadedBy.slice(0, 8)}</span>
+                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatRelativeTime(item.uploadedAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                
+                {/* Party Context Cards appended at the bottom of evidence for L3 */}
+                <h4 className="text-[14px] font-bold text-ink-primary mt-4 mb-2 ml-2">Party Context</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white border border-black/5 rounded-[24px] p-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-ink-primary text-white flex items-center justify-center text-[10px] font-bold">B</div>
+                      <p className="text-[12px] font-bold text-ink-primary">Buyer</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-[#EBEAE5] rounded-xl py-2"><p className="text-[14px] font-bold text-ink-primary">{dispute.buyer.trustScore}</p><p className="text-[9px] font-bold text-ink-secondary uppercase">Trust</p></div>
+                      <div className="bg-[#EBEAE5] rounded-xl py-2"><p className="text-[14px] font-bold text-ink-primary">T{dispute.buyer.kycTier}</p><p className="text-[9px] font-bold text-ink-secondary uppercase">KYC</p></div>
+                    </div>
+                  </div>
+                  <div className="bg-white border border-black/5 rounded-[24px] p-4 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-ink-primary text-white flex items-center justify-center text-[10px] font-bold">V</div>
+                      <p className="text-[12px] font-bold text-ink-primary">Vendor</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-[#EBEAE5] rounded-xl py-2"><p className="text-[14px] font-bold text-ink-primary">{dispute.vendor.trustScore}</p><p className="text-[9px] font-bold text-ink-secondary uppercase">Trust</p></div>
+                      <div className="bg-[#EBEAE5] rounded-xl py-2"><p className="text-[14px] font-bold text-ink-primary">T{dispute.vendor.kycTier}</p><p className="text-[9px] font-bold text-ink-secondary uppercase">KYC</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-0 border-l-2 border-black/5 ml-4 pl-6 relative">
+                {dispute.ledger.map((event, i) => (
+                  <div key={i} className="mb-6 relative">
+                    {/* Timeline dot */}
+                    <div className="absolute -left-[31px] w-[11px] h-[11px] bg-ink-primary rounded-full border-2 border-white shadow-sm" />
+                    
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[13px] font-bold text-ink-primary">{event.eventType.replace(/_/g, ' ')}</p>
+                      {event.amountDelta && (
+                        <span className={cn("text-[13px] font-bold", event.amountDelta.startsWith('-') ? "text-ink-primary" : "text-[#2ECA6A]")}>
+                           {event.amountDelta.startsWith('-') ? '' : '+'}{formatCurrency(event.amountDelta, event.currency || 'GHS')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] font-medium text-ink-secondary mb-2">{formatRelativeTime(event.createdAt)}</p>
+                    
+                    {event.deviceMetadata && Object.keys(event.deviceMetadata).length > 0 && (
+                      <div className="bg-[#EBEAE5] rounded-xl p-3 text-[10px] font-mono text-ink-tertiary overflow-x-auto">
+                        <pre>{JSON.stringify(event.deviceMetadata, null, 2)}</pre>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Evidence */}
-          <Card padding="sheet">
-            <CardHeader title="Evidence" subtitle={`${dispute.evidence.length} artifacts submitted`} />
-            <CardContent>
-              {dispute.evidence.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="w-12 h-12 text-ink-tertiary mx-auto mb-3" />
-                  <p className="text-body text-ink-secondary">No evidence submitted</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {dispute.evidence.map((artifact: EvidenceArtifact) => (
-                    <EvidenceCard key={artifact.artifactId} artifact={artifact} />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Parties & Actions */}
-        <div className="space-y-6">
-          {/* Parties */}
-          <Card padding="sheet">
-            <CardHeader title="Parties Involved" />
-            <CardContent className="space-y-4">
-              <PartyCard party={dispute.vendor} label="Vendor" />
-              <PartyCard party={dispute.buyer} label="Buyer" />
-            </CardContent>
-          </Card>
-
-          {/* Dispute Details */}
-          <Card padding="sheet">
-            <CardHeader title="Dispute Details" />
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-caption text-ink-tertiary">Dispute ID</p>
-                <p className="text-body font-mono text-ink-primary">{dispute.disputeId}</p>
-              </div>
-              <div>
-                <p className="text-caption text-ink-tertiary">Transaction ID</p>
-                <p className="text-body font-mono text-ink-primary">{dispute.transactionId}</p>
-              </div>
-              <div>
-                <p className="text-caption text-ink-tertiary">Reason</p>
-                <p className="text-body text-ink-primary">{getReasonCodeLabel(dispute.reasonCode)}</p>
-              </div>
-              <div>
-                <p className="text-caption text-ink-tertiary">Claim Description</p>
-                <p className="text-body text-ink-secondary whitespace-pre-wrap">{dispute.claimDescription}</p>
-              </div>
-              <div>
-                <p className="text-caption text-ink-tertiary">Status</p>
-                <Pill
-                  variant={
-                    dispute.status === 'UNDER_HUMAN_REVIEW'
-                      ? 'caution'
-                      : dispute.status === 'AI_PROCESSING'
-                      ? 'caution'
-                      : dispute.status === 'RESOLVED_AUTO'
-                      ? 'done'
-                      : dispute.status === 'FRAUD_LOCKOUT'
-                      ? 'danger'
-                      : 'pending'
-                  }
-                  size="signal"
-                >
-                  {getDisputeStatusLabel(dispute.status)}
-                </Pill>
-              </div>
-              <div>
-                <p className="text-caption text-ink-tertiary">Created</p>
-                <p className="text-body text-ink-primary">{formatDate(dispute.createdAt)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Adjudication Modal */}
-      <Modal isOpen={showAdjudicate} onClose={() => setShowAdjudicate(false)} title="Adjudicate Dispute" size="lg">
-        <div className="space-y-6">
-          <div>
-            <p className="text-body text-ink-secondary mb-4">
-              Select the resolution action and provide a detailed reason. This action is irreversible and will be audit-logged.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button
-                variant={adjudicateAction === 'REFUND_BUYER' ? 'primary' : 'outline'}
-                className="w-full"
-                onClick={() => setAdjudicateAction('REFUND_BUYER')}
-              >
-                <Shield className="w-5 h-5" />
-                <div className="text-left">
-                  <p className="font-medium">Refund Buyer</p>
-                  <p className="text-caption text-ink-tertiary">Return funds to buyer</p>
-                </div>
-              </Button>
-              <Button
-                variant={adjudicateAction === 'RELEASE_VENDOR' ? 'primary' : 'outline'}
-                className="w-full"
-                onClick={() => setAdjudicateAction('RELEASE_VENDOR')}
-              >
-                <DollarSign className="w-5 h-5" />
-                <div className="text-left">
-                  <p className="font-medium">Release to Vendor</p>
-                  <p className="text-caption text-ink-tertiary">Pay out to vendor (net of commission)</p>
-                </div>
-              </Button>
-            </div>
+            )}
           </div>
-
-          <Textarea
-            label="Reason (required)"
-            value={adjudicateReason}
-            onChange={(e) => setAdjudicateReason(e.target.value)}
-            placeholder="Explain the basis for this decision..."
-            rows={4}
-            required
-          />
-
-          {adjudicateError && (
-            <div className="rounded-r-1 bg-state-danger-wash px-4 py-3 text-caption font-medium text-state-danger-deep" role="alert">
-              {adjudicateError}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-line-primary">
-            <Button variant="ghost" onClick={() => setShowAdjudicate(false)} disabled={adjudicateLoading}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleAdjudicate} disabled={adjudicateLoading || !adjudicateReason.trim()}>
-              {adjudicateAction === 'REFUND_BUYER' ? 'Refund Buyer' : 'Release to Vendor'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        </motion.div>
+      </motion.div>
 
       {/* Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={handleConfirm}
-        title="Confirm Adjudication"
-        message={`Are you sure you want to ${adjudicateAction === 'REFUND_BUYER' ? 'refund the buyer' : 'release funds to vendor'}? This action cannot be undone.`}
-        confirmText={adjudicateAction === 'REFUND_BUYER' ? 'Confirm Refund' : 'Confirm Release'}
-        variant="danger"
-        loading={adjudicateLoading}
-      />
+      {showAdjudicate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[32px] p-6 shadow-2xl w-full max-w-md">
+            <div className="w-12 h-12 rounded-full bg-[#F36960]/10 flex items-center justify-center text-[#F36960] mb-4">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <h3 className="text-[20px] font-bold text-ink-primary mb-2">Execute Irreversible Action?</h3>
+            <p className="text-[13px] font-medium text-ink-secondary mb-6 leading-relaxed">
+              You are about to <span className="font-bold text-ink-primary">{adjudicateAction.replace('_', ' ')}</span>. This will immediately mutate the ledger and execute payout via the custody provider. This cannot be undone.
+            </p>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setShowAdjudicate(false)}
+                className="flex-1 py-3 rounded-full bg-[#EBEAE5] text-ink-primary text-[13px] font-bold hover:brightness-95 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleResolve}
+                className="flex-1 py-3 rounded-full bg-[#F36960] text-white text-[13px] font-bold hover:bg-[#F36960]/90 transition-all flex items-center justify-center"
+              >
+                {adjudicateLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Confirm Execution'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

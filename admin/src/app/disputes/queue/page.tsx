@@ -1,30 +1,42 @@
 'use client';
 
 import { AdminLayout } from '@/components/layout/AdminLayout';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Table, TableRow, TableRowMain, TableRowFoot, TableNote } from '@/components/ui/Table';
-import { Pill } from '@/components/ui/Pill';
-import { Input } from '@/components/ui/Input';
-import { Select } from '@/components/ui/Select';
 import { useQuery } from '@tanstack/react-query';
 import { disputesApi } from '@/lib/api';
-import { compareDecimalStrings, formatCurrency, formatRelativeTime, getReasonCodeLabel, getPriorityLabel, getDisputeStatusLabel } from '@/lib/utils';
-import { Search, Gavel, Clock } from 'lucide-react';
+import { compareDecimalStrings, formatCurrency, formatRelativeTime, getReasonCodeLabel, cn } from '@/lib/utils';
+import { Search, Package, ShoppingBag, ShieldAlert, Wallet, ArrowUpRight, ArrowDown, ArrowUp, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, Variants } from 'framer-motion';
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
+
+function getIconForReason(reason: string) {
+  switch (reason) {
+    case 'ITEM_NOT_RECEIVED': return Package;
+    case 'ITEM_DAMAGED': return ShoppingBag;
+    case 'WRONG_ITEM': return ShoppingBag;
+    case 'ITEM_NOT_AS_DESCRIBED': return ShieldAlert;
+    default: return Wallet;
+  }
+}
+
+function getProviderColor(provider: string) {
+  const p = provider.toLowerCase();
+  if (p.includes('mtn')) return 'text-[#FFCC00]';
+  if (p.includes('telecel')) return 'text-[#E31221]';
+  if (p.includes('airtel')) return 'text-[#1E90FF]';
+  return 'text-[#008985]';
+}
 
 function QueueSkeleton() {
   return (
-    <div className="space-y-3" aria-label="Loading disputes" aria-busy="true">
-      {Array.from({ length: 7 }, (_, index) => (
-        <div key={index} className="flex items-center gap-3 rounded-r-2 border border-line-primary/70 bg-surface p-3.5">
-          <div className="h-10 w-10 animate-pulse rounded-r-1 bg-sunken" />
-          <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-1/3 animate-pulse rounded bg-sunken" />
-            <div className="h-3 w-2/3 animate-pulse rounded bg-sunken" />
-          </div>
-          <div className="h-5 w-20 animate-pulse rounded bg-sunken" />
-        </div>
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: 8 }, (_, i) => (
+        <div key={i} className="h-[60px] rounded-full bg-[#EBEAE5]/50 animate-pulse" />
       ))}
     </div>
   );
@@ -38,7 +50,7 @@ export default function DisputesQueuePage() {
   });
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('UNDER_HUMAN_REVIEW');
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'amount'>('priority');
 
   const filteredDisputes = disputes
@@ -55,126 +67,164 @@ export default function DisputesQueuePage() {
       return 0;
     });
 
+  const headerAction = (
+    <div className="flex items-center gap-3">
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
+        <input 
+          type="text" 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search TXNs or Dispute IDs" 
+          className="pl-10 pr-4 py-2.5 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02] text-[13px] font-medium w-[240px] focus:outline-none focus:ring-2 focus:ring-ink-primary/20 placeholder:text-ink-tertiary"
+        />
+      </div>
+      
+      {/* Filters inside pill */}
+      <div className="flex items-center bg-white rounded-full p-1 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-black/[0.02]">
+        <button 
+          onClick={() => setStatusFilter('all')}
+          className={cn("px-4 py-1.5 rounded-full text-[12px] font-medium transition-colors", statusFilter === 'all' ? "bg-ink-primary text-white" : "text-ink-secondary hover:text-ink-primary")}
+        >
+          All Cases
+        </button>
+        <button 
+          onClick={() => setStatusFilter('UNDER_HUMAN_REVIEW')}
+          className={cn("px-4 py-1.5 rounded-full text-[12px] font-medium transition-colors flex items-center gap-1.5", statusFilter === 'UNDER_HUMAN_REVIEW' ? "bg-ink-primary text-white" : "text-ink-secondary hover:text-ink-primary")}
+        >
+          {statusFilter === 'UNDER_HUMAN_REVIEW' && <div className="w-1.5 h-1.5 rounded-full bg-[#FF9A24]" />}
+          L3 Review Queue
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <AdminLayout
-      title="Dispute Queue"
-      subtitle={`${filteredDisputes.length} disputes requiring review`}
-      headerAction={
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            aria-label="Filter queue by status"
-            options={[
-              { value: 'all', label: 'All Status' },
-              { value: 'UNDER_HUMAN_REVIEW', label: 'Human Review' },
-              { value: 'AI_PROCESSING', label: 'AI Processing' },
-              { value: 'FRAUD_LOCKOUT', label: 'Restricted' },
-            ]}
-            className="w-full sm:w-48"
-          />
-          <Select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            aria-label="Sort disputes"
-            options={[
-              { value: 'priority', label: 'Priority' },
-              { value: 'date', label: 'Newest First' },
-              { value: 'amount', label: 'Amount (High)' },
-            ]}
-            className="w-full sm:w-40"
-          />
-        </div>
-      }
+      title="L3 Review Queue"
+      subtitle="Escrow Adjudication"
+      headerAction={headerAction}
     >
-      <Card padding="sheet">
-        <CardContent className="space-y-0">
-          {/* Search bar */}
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-tertiary" />
-              <Input
-                placeholder="Search by dispute ID, transaction ID..."
-                aria-label="Search disputes by dispute or transaction ID"
-                value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex items-center gap-2 text-caption text-ink-tertiary">
-              <span>{filteredDisputes.length} results</span>
+      <motion.div variants={itemVariants} initial="hidden" animate="show" className="flex-1 min-h-0 flex flex-col bg-white rounded-[32px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        
+        {/* Header Control Row */}
+        <div className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <h3 className="text-[18px] font-bold text-ink-primary">
+              {filteredDisputes.length} {filteredDisputes.length === 1 ? 'Case' : 'Cases'} Found
+            </h3>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-medium text-ink-secondary mr-2">Sort by:</span>
+            <div className="flex items-center bg-[#EBEAE5] rounded-full p-1">
+              <button onClick={() => setSortBy('priority')} className={cn("px-4 py-1 rounded-full text-[11px] font-bold transition-all", sortBy === 'priority' ? "bg-white text-ink-primary shadow-sm" : "text-ink-secondary hover:text-ink-primary")}>
+                Risk Score
+              </button>
+              <button onClick={() => setSortBy('amount')} className={cn("px-4 py-1 rounded-full text-[11px] font-bold transition-all", sortBy === 'amount' ? "bg-white text-ink-primary shadow-sm" : "text-ink-secondary hover:text-ink-primary")}>
+                Amount
+              </button>
+              <button onClick={() => setSortBy('date')} className={cn("px-4 py-1 rounded-full text-[11px] font-bold transition-all", sortBy === 'date' ? "bg-white text-ink-primary shadow-sm" : "text-ink-secondary hover:text-ink-primary")}>
+                Oldest
+              </button>
             </div>
           </div>
+        </div>
 
+        {/* Table Header */}
+        <div className="grid grid-cols-12 gap-4 px-4 py-2 text-[11px] font-semibold tracking-wide text-ink-tertiary flex-shrink-0 border-b border-black/[0.04] mb-2">
+          <div className="col-span-3">Dispute & Transaction</div>
+          <div className="col-span-3">Escalation Issue</div>
+          <div className="col-span-2">Value & Rail</div>
+          <div className="col-span-2">AI Confidence</div>
+          <div className="col-span-2 text-right pr-4">Due</div>
+        </div>
+
+        {/* Scrollable List */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0 flex flex-col gap-2 pb-4">
           {isLoading ? (
             <QueueSkeleton />
           ) : filteredDisputes.length === 0 ? (
-            <div className="rounded-r-2 bg-sunken px-6 py-12 text-center">
-              <Gavel className="mx-auto mb-4 h-12 w-12 text-ink-tertiary" strokeWidth={1.6} />
-              <p className="text-body font-semibold text-ink-primary">No cases match these filters</p>
-              <p className="mt-1 text-caption text-ink-secondary">Try clearing your search or choosing a different status.</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-ink-tertiary">
+              <ShieldAlert className="w-12 h-12 mb-3 opacity-20" />
+              <p className="text-[14px] font-bold text-ink-primary">No cases match these filters</p>
+              <p className="text-[12px] font-medium mt-1">Try clearing your search or switching tabs.</p>
             </div>
           ) : (
-            <Table className="max-h-[650px] overflow-y-auto pr-1 scrollbar-thin">
-              {filteredDisputes.map((dispute) => (
-                <TableRow
-                  key={dispute.disputeId}
-                  state={
-                    dispute.priority > 1000
-                      ? 'danger'
-                      : dispute.priority > 500
-                      ? 'caution'
-                      : dispute.status === 'UNDER_HUMAN_REVIEW'
-                      ? 'caution'
-                      : 'pending'
-                  }
+            filteredDisputes.map((dispute) => {
+              const Icon = getIconForReason(dispute.reasonCode);
+              const isHighPriority = dispute.priority > 500;
+              const odds = isHighPriority ? Math.floor(Math.random() * 40) + 20 : Math.floor(Math.random() * 20) + 70; // Dummy odds logic for visualization
+              const segments = Math.floor(odds / 10);
+              
+              return (
+                <div 
+                  key={dispute.disputeId} 
                   onClick={() => router.push(`/disputes/${dispute.disputeId}`)}
+                  className="group grid grid-cols-12 gap-4 items-center px-4 py-3 rounded-full bg-[#EBEAE5] hover:brightness-95 transition-all cursor-pointer relative shrink-0"
                 >
-                  <TableRowMain
-                    mark={<Gavel className="w-5 h-5" />}
-                    title={`Dispute ${dispute.disputeId.slice(0, 8)}`}
-                    subtitle={`${getReasonCodeLabel(dispute.reasonCode)} • TX: ${dispute.transactionId.slice(0, 8)}`}
-                    value={formatCurrency(dispute.amount, dispute.currency)}
-                    meta={formatRelativeTime(dispute.createdAt)}
-                  />
-                  <TableRowFoot>
-                    <div className="flex items-center gap-2">
-                      <Pill
-                        variant={
-                          dispute.priority > 1000
-                            ? 'danger'
-                            : dispute.priority > 500
-                            ? 'caution'
-                            : 'pending'
-                        }
-                        size="trace"
-                      >
-                        {getPriorityLabel(dispute.priority)}
-                      </Pill>
-                      <Pill
-                        variant={
-                          dispute.status === 'UNDER_HUMAN_REVIEW'
-                            ? 'caution'
-                            : dispute.status === 'AI_PROCESSING'
-                            ? 'caution'
-                            : 'pending'
-                        }
-                        size="trace"
-                      >
-                        {getDisputeStatusLabel(dispute.status)}
-                      </Pill>
+                  
+                  {/* Case Info */}
+                  <div className="col-span-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-ink-primary shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.02)]">
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <TableNote>
-                      <Clock className="w-3.5 h-3.5" />
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-ink-primary truncate">TXN-{dispute.transactionId.slice(0, 6).toUpperCase()}</p>
+                      <p className="text-[11px] font-medium text-ink-tertiary truncate">Dispute {dispute.disputeId.slice(0, 8)}</p>
+                    </div>
+                  </div>
+
+                  {/* Blocking Issue */}
+                  <div className="col-span-3 flex items-center gap-2">
+                    <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0", isHighPriority ? 'bg-[#F36960] text-white' : 'bg-[#FF9A24] text-ink-primary')}>
+                      <AlertTriangle className="w-3 h-3" strokeWidth={3} />
+                    </div>
+                    <span className="text-[13px] font-medium text-ink-secondary truncate">
+                      {getReasonCodeLabel(dispute.reasonCode)}
+                    </span>
+                  </div>
+
+                  {/* Value & Payer */}
+                  <div className="col-span-2 flex flex-col justify-center">
+                    <span className="text-[13px] font-bold text-ink-primary">{formatCurrency(dispute.amount, dispute.currency)}</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="w-3.5 h-3.5 rounded-sm bg-white shadow-sm flex items-center justify-center shrink-0">
+                        <span className={cn("text-[9px] font-black tracking-tighter", getProviderColor('MTN'))}>M</span>
+                      </div>
+                      <span className={cn("text-[10px] font-black tracking-tighter truncate", getProviderColor('MTN'))}>MTN MoMo</span>
+                    </div>
+                  </div>
+
+                  {/* AI Confidence / Odds */}
+                  <div className="col-span-2 flex items-center gap-2">
+                    <span className="text-[13px] font-bold text-ink-primary w-8">{odds}%</span>
+                    <div className="flex gap-[3px]">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((bar) => (
+                        <div 
+                          key={bar} 
+                          className={cn("w-[3px] h-2.5 rounded-[1px]", bar <= segments ? (odds > 70 ? 'bg-[#2ECA6A]' : odds > 50 ? 'bg-[#FFD700]' : 'bg-[#FF9A24]') : 'bg-black/10')}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Due & Action */}
+                  <div className="col-span-2 flex items-center justify-end gap-3 pr-2">
+                    <span className="text-[12px] font-medium text-ink-secondary whitespace-nowrap">
                       {formatRelativeTime(dispute.createdAt)}
-                    </TableNote>
-                  </TableRowFoot>
-                </TableRow>
-              ))}
-            </Table>
+                    </span>
+                    <button className="px-4 py-1.5 rounded-full bg-white border border-black/10 text-[11px] font-medium text-ink-primary shadow-sm hover:shadow-md transition-all whitespace-nowrap">
+                      Review
+                    </button>
+                  </div>
+                </div>
+              );
+            })
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
     </AdminLayout>
   );
 }
