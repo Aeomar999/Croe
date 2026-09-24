@@ -267,12 +267,29 @@ export default function DashboardPage() {
 
                   {/* Payer / Rail */}
                   <div className="col-span-2 flex items-center">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-sm bg-white shadow-sm flex items-center justify-center shrink-0">
-                        <span className={cn("text-[10px] font-black tracking-tighter", row.color)}>{row.payer.charAt(0)}</span>
-                      </div>
-                      <span className={cn("text-[11px] font-black tracking-tighter truncate", row.color)}>{row.payer}</span>
-                    </div>
+                    {(() => {
+                      let logoUrl = '';
+                      if (row.payer.includes('MTN')) logoUrl = '/assets/money trails/momo_mtnb.png';
+                      else if (row.payer.includes('Telecel')) logoUrl = '/assets/money trails/telecel-cash.png';
+                      else if (row.payer.includes('AirtelTigo')) logoUrl = '/assets/money trails/AT-Money-logo.png';
+                      
+                      if (logoUrl) {
+                        return (
+                          <div className="h-5 shrink-0 overflow-hidden rounded-[4px] shadow-sm flex items-center justify-center bg-white px-1">
+                            <img src={logoUrl} alt={row.payer} className="h-full object-contain" />
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-4 h-4 rounded-sm bg-white shadow-sm flex items-center justify-center shrink-0">
+                            <span className={cn("text-[10px] font-black tracking-tighter", row.color)}>{row.payer.charAt(0)}</span>
+                          </div>
+                          <span className={cn("text-[11px] font-black tracking-tighter truncate", row.color)}>{row.payer}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* AI Confidence / Odds */}
