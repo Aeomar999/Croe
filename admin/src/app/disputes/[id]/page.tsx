@@ -186,7 +186,7 @@ export default function DisputeDetailPage() {
                 <div className="h-full bg-[#FF9A24]" style={{ width: '82%' }} />
               </div>
               <p className="text-[13px] font-medium text-ink-primary leading-relaxed">
-                The buyer claims the item was never received, but the vendor has provided a waybill receipt. However, the signature on the waybill does not match the buyer's KYC record. Escalated to human review due to conflicting evidence.
+                The buyer claims the item was never received, but the vendor has provided a waybill receipt. However, the signature on the waybill does not match the buyer&apos;s KYC record. Escalated to human review due to conflicting evidence.
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export default function DisputeDetailPage() {
               </div>
             ) : (
               <div className="flex flex-col gap-0 border-l-2 border-black/5 ml-4 pl-6 relative">
-                {dispute.ledger.map((event, i) => (
+                {dispute.timeline.map((event, i) => (
                   <div key={i} className="mb-6 relative">
                     {/* Timeline dot */}
                     <div className="absolute -left-[31px] w-[11px] h-[11px] bg-ink-primary rounded-full border-2 border-white shadow-sm" />

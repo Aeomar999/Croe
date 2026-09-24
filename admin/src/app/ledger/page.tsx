@@ -143,7 +143,7 @@ export default function LedgerPage() {
                 {/* Timestamp & Hash */}
                 <div className="col-span-3 flex flex-col items-end justify-center pr-2">
                   <span className="text-[12px] font-medium text-ink-secondary whitespace-nowrap mb-1 flex items-center gap-1.5">
-                    <Calendar className="w-3 h-3 text-ink-tertiary" /> {formatRelativeTime(event.timestamp)}
+                    <Calendar className="w-3 h-3 text-ink-tertiary" /> {formatRelativeTime(event.timestamp.toISOString())}
                   </span>
                   <span className="text-[9px] font-mono font-medium text-ink-tertiary px-2 py-0.5 bg-black/5 rounded uppercase tracking-wider">
                     {Array.from({ length: 8 }, () => Math.random().toString(36).charAt(2)).join('')}

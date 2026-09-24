@@ -20,7 +20,7 @@ export default function FraudPage() {
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users'],
-    queryFn: () => usersApi.listUsers(),
+    queryFn: () => usersApi.getAll(),
   });
 
   const freezeMutation = useMutation({

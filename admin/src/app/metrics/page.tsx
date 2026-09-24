@@ -118,7 +118,7 @@ export default function MetricsPage() {
             <div className="flex-1 flex flex-col items-center justify-center opacity-30">
               <Terminal className="w-16 h-16 text-white mb-6" strokeWidth={1} />
               <p className="text-[14px] font-bold text-white">No metrics loaded</p>
-              <p className="text-[12px] font-medium mt-1">Click "Poll Metrics" to fetch real-time data.</p>
+              <p className="text-[12px] font-medium mt-1">Click &quot;Poll Metrics&quot; to fetch real-time data.</p>
             </div>
           )}
         </div>
