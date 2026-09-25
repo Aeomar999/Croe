@@ -37,15 +37,16 @@ We only make money when you make a sale.
 | :--- | :--- | :--- |
 | **Setup Fee** | **GHS 0.00 (Free)** | GHS 0.00 |
 | **Monthly Subscription** | **GHS 0.00 (Free)** | GHS 0.00 |
-| **Fee per Completed Sale** | **Flat 2.0%** | 0% (but you lose 20–30% of sales) |
+| **Fee per Completed Sale** | **2.5% of the sale** | 0% (but you lose 20–30% of sales) |
+| **Buyer Protection Fee** | **1.5%, paid by the buyer at checkout** | — |
 | **Cancelled / Refunded Order** | **GHS 0.00 (Free)** | Time lost, rider fee wasted |
 | **Payment Protection** | **Guaranteed funds locked before dispatch** | 100% risk on you |
 
 ### Worked Example:
 * You sell a pair of sneakers or an electronics accessory for **GHS 1,200.00**.
-* The buyer pays GHS 1,200 into escrow.
-* Once delivered, **GHS 1,176.00** lands straight in your MoMo wallet.
-* The GHS 24.00 fee turns an abandoned DM into GHS 1,176 in real cash.
+* The buyer pays GHS 1,218.00 into escrow: your price plus a GHS 18.00 protection fee.
+* Once delivered, **GHS 1,170.00** lands straight in your MoMo wallet.
+* Your GHS 30.00 fee turns an abandoned DM into GHS 1,170 in real cash.
 
 ---
 
@@ -68,7 +69,7 @@ We are currently onboarding an exclusive cohort of **10–20 verified vendors** 
 ### What You Get as a Pilot Vendor:
 * **Direct Access:** Founder-led dedicated WhatsApp support group for instant assistance.
 * **Verified Seller Badge:** Digital badging to post on your Instagram stories and WhatsApp status, proving to customers that buying from you is 100% risk-free.
-* **Zero Hidden Charges:** Locked 2.0% rate with personalized onboarding for your dispatch team.
+* **Zero Hidden Charges:** Locked 2.5% pilot rate with personalized onboarding for your dispatch team.
 
 **Ready to turn hesitant DM inquiries into completed sales?**
 

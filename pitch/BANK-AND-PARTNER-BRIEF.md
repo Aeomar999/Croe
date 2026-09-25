@@ -68,7 +68,7 @@ sequenceDiagram
     participant Bank as Partner Bank Pooled Trust
     actor Vendor
     
-    Buyer->>Croe: Initiates Escrow Payment (e.g. GHS 1,200)
+    Buyer->>Croe: Initiates Escrow Payment (e.g. GHS 1,200 + GHS 18 protection fee = GHS 1,218)
     Croe->>Bank: Inbound MoMo Collection Push
     Buyer->>Bank: Enters MoMo PIN on Handset
     Bank->>Bank: Funds Lock into Pooled Escrow Trust Account
@@ -78,9 +78,9 @@ sequenceDiagram
     Vendor->>Buyer: Dispatch Goods via Courier
     Buyer->>Croe: Confirms Receipt & Accepts Goods
     Croe->>Croe: Ledger Append (FUNDS_RELEASED) & State -> DELIVERED_CONFIRMED
-    Croe->>Bank: Instruct Payout: GHS 1,176 to Vendor, GHS 24 to Croe Fee
-    Bank->>Vendor: B2C MoMo Transfer (GHS 1,176)
-    Bank->>Bank: Retain / Sweep Commission (GHS 24)
+    Croe->>Bank: Instruct Payout: GHS 1,170 to Vendor, GHS 48 to Croe Fee
+    Bank->>Vendor: B2C MoMo Transfer (GHS 1,170)
+    Bank->>Bank: Retain / Sweep Croe Fee (GHS 48)
 ```
 
 **Key Safeguards for the Partner Bank:**
@@ -124,13 +124,13 @@ $$\text{Bank Pooled Balance} = \sum (\text{Active Sub-Ledger Escrow Balances}) +
 
 ## 7. Commercial & Float Projections for the Partner
 
-Croe is targeting the high-ticket social commerce segment in Ghana (smartphones, consumer electronics, premium streetwear), with an average order value (AOV) of **GHS 1,200.00**.
+Croe is targeting the high-ticket social commerce segment in Ghana (smartphones, consumer electronics, premium streetwear). Projections use a blended average order value (AOV) of **GHS 800.00** (GHS 1,200.00 in the lead vertical) and the volume plan in [`FINANCIAL-MODEL.md`](FINANCIAL-MODEL.md). Average float assumes funds are held 2–3 days between deposit and delivery confirmation.
 
 | Scale Stage | Monthly Completed Transactions | Monthly GMV Processed | Average Daily Float in Partner Bank | Annualized Processing Volume |
 | :--- | :--- | :--- | :--- | :--- |
-| **Supervised Pilot (Day 1–60)** | 100 txns / mo | GHS 120,000.00 | **GHS 8,000 – 12,000** | GHS 1.44M |
-| **Phase 2 Commercial Launch** | 1,000 txns / mo | GHS 1,200,000.00 | **GHS 80,000 – 120,000** | GHS 14.4M |
-| **Year 1 Expansion** | 5,000 txns / mo | GHS 6,000,000.00 | **GHS 400,000 – 600,000** | GHS 72.0M |
+| **Supervised Pilot (month 6)** | 250 txns / mo | GHS 200,000.00 | **GHS 13,000 – 20,000** | GHS 2.4M |
+| **Compliant Launch on Partner Rails (month 18)** | 5,000 txns / mo | GHS 4,000,000.00 | **GHS 267,000 – 400,000** | GHS 48.0M |
+| **Scale (month 36)** | 30,000 txns / mo | GHS 24,000,000.00 | **GHS 1.6M – 2.4M** | GHS 288.0M |
 
 ### Proposed Partnership Agreement Structure
 1. **Float Deposit Agreement:** Partner Bank provides the designated client trust account under Bank of Ghana escrow guidelines.

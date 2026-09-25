@@ -14,7 +14,7 @@ What a funder - and you - can use is a **quantified demand statement**:
 
 > ❌ *"I think Croe is a great idea and would use it."*
 >
-> ✅ *"I sell about 35 phone orders a month, averaging GHS 1,400. I lose roughly 8 sales a month to buyers who won't pay first. I would pay 2% to recover them."*
+> ✅ *"I sell about 35 phone orders a month, averaging GHS 1,400. I lose roughly 8 sales a month to buyers who won't pay first. I would pay 2.5% to recover them."*
 
 The second one is evidence. It also replaces the `[verify]` assumptions that currently drive your entire profitability case - average ticket in §10.7, and the pilot targets in §5. **Collect the numbers even from vendors who say no.**
 
@@ -58,7 +58,7 @@ The buyer knows they will not lose their money. The seller knows the money is re
 
 I sell goods online and I have experienced buyers refusing to pay before delivery, or not paying at all after delivery. I understand what Croe is trying to build.
 
-If Croe launches and the service works as described, **I intend to use it for my sales** and I accept the standard commission of **2.0%** on completed, successfully released orders.
+If Croe launches and the service works as described, **I intend to use it for my sales** and I accept the standard commission of **2.5%** on completed, successfully released orders. I understand my buyers would pay a separate **1.5% protection fee** at checkout.
 
 I understand that:
 - This letter is **not a contract**. Neither I nor Croe is obliged to anything.
@@ -83,7 +83,8 @@ I understand that:
 | Average order value (GHS) | `____________` |
 | Orders lost per month because the buyer wouldn't pay first | `____________` |
 | Orders per month where you shipped and were not paid | `____________` |
-| Acceptance of standard 2.0% commission | `[ ] Yes  [ ] No (Max acceptable: ____%)` |
+| Acceptance of standard 2.5% commission | `[ ] Yes  [ ] No (Max acceptable: ____%)` |
+| Would your buyers accept a 1.5% protection fee? | `[ ] Yes  [ ] No  [ ] Not sure` |
 
 **In your own words - what does this problem cost you?**
 
@@ -119,6 +120,7 @@ If yes, could you send me these - rough numbers are fine:
 3. How many sales a month do you lose because the buyer
    won't pay first?
 4. Highest commission you'd accept?
+5. Would your buyers pay a small 1.5% fee to be protected?
 
 And one line in your own words about what that problem costs you.
 
@@ -136,11 +138,11 @@ included) to funders?
 
 > Keep this current. It is what you screenshot into slide 11.
 
-| # | Vendor / business | Segment | Handle | Orders/mo | Avg order (GHS) | Lost sales/mo | Max commission | Capture method | Date | Strong? | F&F? |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | _ - _ | | | | | | | | | | |
-| 2 | _ - _ | | | | | | | | | | |
-| 3 | _ - _ | | | | | | | | | | |
+| # | Vendor / business | Segment | Handle | Orders/mo | Avg order (GHS) | Lost sales/mo | Max commission | Buyer fee OK? | Capture method | Date | Strong? | F&F? |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | _ - _ | | | | | | | | | | | |
+| 2 | _ - _ | | | | | | | | | | | |
+| 3 | _ - _ | | | | | | | | | | | |
 
 *(Extend as you go. **Strong?** = would genuinely change their behaviour, not just polite. **F&F?** = friend or family - excluded from headline counts.)*
 
@@ -151,10 +153,11 @@ included) to funders?
 | Vendors approached | _ - _ | Conversion rate on the pitch |
 | **Vendors committed** (excl. F&F) | _ - _ | Slide 11, §2.4 |
 | Of those, rated strong | _ - _ | Realistic pilot cohort |
-| **Weighted average order value (GHS)** | _ - _ | **§10.7 ticket-size lever - replaces the assumed 450** |
-| Combined orders/month across committed vendors | _ - _ | Pilot volume ceiling vs. the 63/mo break-even (§10.5) |
+| **Weighted average order value (GHS)** | _ - _ | **§10.7 ticket-size lever - replaces the assumed GHS 800 base** |
+| Combined orders/month across committed vendors | _ - _ | Pilot volume ceiling vs. the stage 1 target of 250 orders/month by month 6 ([`FINANCIAL-MODEL.md`](FINANCIAL-MODEL.md) §10) |
 | **Combined lost sales/month** | _ - _ | **The addressable demand number. Your strongest single figure** |
 | Median acceptable commission | _ - _ | **§7.2 - settles the pricing decision with data** |
+| Share who think buyers would accept the 1.5% fee | _ - _ | **The biggest open pricing risk** ([`FINANCIAL-MODEL.md`](FINANCIAL-MODEL.md) §2) |
 | Segment breakdown | _ - _ | Validates or corrects the §2.4 ranking |
 
 > **The line that does the work in a pitch:** *"Fourteen vendors, doing a combined GHS `___` a month, tell me they lose `___` sales a month to this exact problem, and would pay `___`% to recover them."* That is a market size built from primary evidence, not a top-down guess - and almost nobody at this stage has one.

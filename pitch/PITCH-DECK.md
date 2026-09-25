@@ -141,19 +141,22 @@ Most attempts do one of two things:
 
 # We earn only when a trade completes happily.
 
-**2.0% commission** on each successfully released transaction.
+**4.0% all-in** on each successfully released transaction: **2.5% from the vendor** (deducted from payout) + **1.5% buyer protection fee** (shown at checkout).
 
-- **No commission on refunds.** Buyer made whole → we earn GHS 0.
-- Vendor-pays by default (deducted from settlement payout); buyer-pays/split testable in pilot.
+- **No fees on refunds.** Buyer made whole → we earn GHS 0.
+- MoMo collection costs **1.95%** and each payout **GHS 1.00**, so a 2% fee would lose money on every order.
 
-| Segment | Avg Order Value (AOV) | Gross Commission (2%) | Net Margin / Txn | Monthly Txns to Break Even |
+| Segment | Avg Order Value | Croe Fee (4%) | Net / Order | Orders/mo to Company Break-Even |
 |---|---|---|---|---|
-| **Lead Vertical: Electronics & Streetwear** | **GHS 1,200** | **GHS 24.00** | **≈ GHS 22.50 – 23.00** | **~22 txns/mo** |
-| General Social Commerce | GHS 450 | GHS 9.00 | ≈ GHS 7.50 – 8.00 | ~63 txns/mo |
+| **Lead Vertical: Phones, Electronics & Sneakers** | **GHS 1,200** | **GHS 48.00** | **GHS 16.80** | **~37,900** |
+| Base case (blended) | GHS 800 | GHS 32.00 | GHS 10.33 | ~61,700 |
+| General Social Commerce | GHS 450 | GHS 18.00 | GHS 4.67 | ~136,300 |
 
-*Break-even volume modeled against target lean pilot fixed costs (< GHS 500/mo).*
+*Net is after collection, payout, fraud reserve, ID checks, refunds, SMS and hosting. Break-even is against a fully staffed month-36 cost base of GHS 637,000/month. See `FINANCIAL-MODEL.md`.*
 
-> **Speaker notes:** The key insight here is average ticket size. At GHS 450 general retail, net margin is ~GHS 8.00, requiring 63 transactions to clear fixed costs. By leading with smartphones, laptops, and streetwear (~GHS 1,200 avg), our net margin triples to ~GHS 23.00 and break-even drops to just 22 transactions per month. That is why our go-to-market is laser-focused on high-ticket resellers.
+> **Speaker notes:** Say the uncomfortable part first: MoMo collection costs 1.95%, so the 2% most people assume would lose money on every order. We price at 4% all-in, split so the vendor pays 2.5% and the buyer pays a small, visible 1.5% fee for protection. Whether buyers accept that fee is the first thing the pilot tests.
+>
+> Payments is a volume business: 1.29% net on a GHS 800 order means we need about 62,000 orders a month to carry a regulated team. The two levers that halve that are price (5% → ~34,800) and owning the rails (direct telco collection at ~1% → ~34,500). Ticket size is the third lever, which is why we lead with high-ticket resellers.
 
 ---
 
@@ -187,7 +190,9 @@ Most attempts do one of two things:
 
 | Metric | Target | Why It Matters |
 |---|---|---|
-| **Released Transactions / Mo** | **≥ 63 txns** | Clears the base break-even hurdle on real volume |
+| **Buyer Fee Acceptance** | **< 30% drop-off** with the 1.5% fee shown | Proves the 4% pricing that makes the unit economics positive |
+| **Released Transactions / Mo** | **≥ 250 by month 6** | Real volume on capped, disclosed live rails |
+| **Net per Order (measured)** | **≥ GHS 10.00** | Validates the model at real order values |
 | **Dispute Rate** | **< 8%** (ideal 3–5%) | Validates low operational load and fraud resistance |
 | **Adjudication Accuracy** | **> 95%** | Proves the 3-tier dispute triage resolves conflicts fairly |
 | **Buyer Checkout Drop-off** | **< 30%** | Proves mobile web/USSD payment flow removes friction |
@@ -196,30 +201,32 @@ Most attempts do one of two things:
 
 > **Speaker notes:** ⚠️ **Be straightforwardly honest here - we are pre-revenue.** In fintech, a single invented traction number ends the conversation at diligence.
 >
-> The strength of this slide is that we know exactly what we are testing and why. We are validating that high-ticket vendors recover lost sales, dispute rates stay below 8%, and unit economics deliver net profitability from transaction one.
+> The strength of this slide is that we know exactly what we are testing and why. We are validating that buyers accept a visible protection fee, high-ticket vendors recover lost sales, dispute rates stay below 8%, and each order makes money after every variable cost.
 
 ---
 
-## Slide 12 - The Ask: Dual-Track Pilot Funding
+## Slide 12 - The Ask: Pre-Seed to a Licensed Launch
 
-# Funding a 60-day supervised pilot on licensed rails.
+# US$387k takes Croe from sandbox to licensed, partner-held escrow.
 
-We have structured two distinct funding tracks based on partner & capital stage:
+18 months · range US$189k–713k · includes 15% contingency and working capital · FX US$1 = GHS 11.60
 
-| Category | Track A: Lean Bootstrap | Track B: Institutional / Accelerated |
+| | Stage 1 · Legal pilot (months 1–6) | Stage 2 · Compliant launch (months 7–18) |
 |---|---|---|
-| **Total Funding Needed** | **GHS 30,000 (~$2,500 USD)** | **GHS 150,000 (~$12,500 USD)** |
-| **Entity & Regulatory** | ORC company registration, TIN, DPC filing | Track A + formal fintech legal counsel (BoG PFTSP opinion & custody structuring) |
-| **Security Audit** | Internal audit & automated test suite | External professional penetration test |
-| **Working Float & Reserves** | T+2 settlement float (GHS 3k) | Float (GHS 10k) + funded 2% GMV loss reserve |
-| **Infrastructure & Run** | Lean CPU infra & SMS for 3 months | High-availability cloud infra + 6 months runway |
-| **Milestone Achieved** | First 100+ live transactions, measured conversion & dispute rate | Full de-risking for P2 partner bank onboarding & accelerator entry (MEST, YC) |
+| **Net capital need** | **US$26k** | **US$360k** |
+| **Entity & Regulatory** | ORC company, TIN, DPC registration, fintech lawyer's written custody opinion, BoG sandbox application or partner LOI | BoG PFTSP licence, partner-bank trust account (custody P2), full BoG policy set |
+| **Team** | Founders on stipends + part-time ops | The five BoG management roles, ~12 staff |
+| **Security** | Pre-pilot security review | External pentest (web, API, iOS, Android) + ISO 27001 |
+| **Working capital** | GHS 30k loss reserve + float | One day of order value + partner reserve (GHS 233k) |
+| **Milestone** | ~500 capped live orders; buyer fee acceptance, order value and dispute rate measured | ~5,000 orders/month on fully compliant rails |
+
+**Next:** a ~US$916k seed around month 15 funds scale to ~30,000 orders/month by month 36 (US$1.30M total over 36 months).
 
 **Founding Team** · **founders@croe.app** · **Accra, Ghana**
 
-> **Speaker notes:** Tie the number to the milestone, never to a runway period. Track A gets us to first live transactions on compliant rails with verified unit economics for under $2,500. Track B fully de-risks our regulatory and institutional bank-partner requirements for institutional pre-seed funds.
+> **Speaker notes:** Tie the number to the milestone, never to a runway period. Most of stage 2 is people: the Bank of Ghana names five management roles in its licensing pack, and a money business needs staff on disputes, ID checks and reconciliation every day. The low end of the range assumes lean salaries and deferring ISO 27001; the high end assumes top-of-range costs and half the expected volume.
 >
-> An itemized, granular budget breakdown exists in `FINANCIAL-MODEL.md` and `GO-TO-MARKET.md` §10.
+> Line items, sources and sensitivity: `FINANCIAL-MODEL.md` and `GO-TO-MARKET.md` §10.
 
 ---
 ---
@@ -253,7 +260,8 @@ We have structured two distinct funding tracks based on partner & capital stage:
 |---|---|
 | **Aggregator restricts escrow models** | Being confirmed in writing before spend. If restricted, we go directly to a licensed partner |
 | **P1 is legally thin at scale** | Deliberately so - low supervised volumes, disclosed to users, with P2 as the fast follow. It is a stopwatch, not a resting state |
-| **Thin margin per transaction** | Segment choice targets 3× average ticket. Minimum transaction size under consideration |
+| **Thin margin per transaction** | 1.29% net on a GHS 800 order. Levers: price (5% nearly halves break-even), direct telco rails via our own PSP licence, and high-ticket segments. Minimum transaction size under consideration |
+| **Buyers reject the 1.5% protection fee** | Tested first in the pilot. Fallback is a 4% vendor-only commission |
 | **Incumbent ships escrow as a feature** | Defensibility is the vendor network and a reputation for fair adjudication - not the code |
 | **Ops load as volume grows** | Automated tiers 1–2 handle the bulk; staffing trigger volume defined in advance |
 | **Wrong adjudication** | Written adjudication policy, loss reserve, and appeal path |
@@ -274,7 +282,8 @@ Payment rails and currency sit behind abstractions from day one. **Kenya (M-Pesa
 |---|---|
 | *"Isn't this unlicensed money transmission?"* | Slides 6–7. We never hold funds on our own account; a licensed entity always holds the float |
 | *"What stops the buyer confirming delivery and then lying?"* | Dispute window, forensic evidence, hashed media, trust scoring, and an auto-release timer so funds never sit forever |
-| *"Why would a vendor pay 2% and wait?"* | Because they currently lose the sale entirely. We're testing buyer-pays in the pilot too |
+| *"Why would a vendor pay 2.5% and wait?"* | Because they currently lose the sale entirely. The buyer pays a separate 1.5% for protection, so the vendor carries only part of the cost |
+| *"Why 4%? Isn't 2% standard?"* | MoMo collection alone costs 1.95% and each payout GHS 1.00. At 2% we'd lose GHS 4–7 per order |
 | *"Why won't MTN/Paystack/Hubtel just build this?"* | They might. The moat is the vendor network and adjudication reputation - and a partnership is a good outcome, not a bad one |
 | *"You're a final-year student - is this full time?"* | **[FILL: your genuine answer. Prepare it. You will be asked every single time]** |
 | *"What happens if you get a dispute wrong?"* | Written policy, appeal path, loss reserve, and a liability cap in the terms of service |

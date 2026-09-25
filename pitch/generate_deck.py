@@ -250,7 +250,7 @@ steps = [
     ("01", "LINK", "Vendor generates link", "Shared directly in the WhatsApp / Instagram chat where the sale is happening."),
     ("02", "PAY", "Buyer pays via MoMo", "Standard USSD prompt. Funds are secured in escrow - vendor sees it, but cannot touch it."),
     ("03", "SHIP", "Vendor dispatches", "Vendor dispatches goods against guaranteed money instead of an empty promise."),
-    ("04", "RELEASE", "Delivery confirmed", "Buyer confirms delivery in app; vendor is paid automatically, less 2.0% commission.")
+    ("04", "RELEASE", "Delivery confirmed", "Buyer confirms delivery in app; vendor is paid automatically, less 2.5% commission.")
 ]
 
 for idx, (num, action, title, desc) in enumerate(steps):
@@ -508,14 +508,14 @@ add_notes(s8, "Manual support destroys unit economics on small orders. Automatin
 # ==============================================================================
 s9 = prs.slides.add_slide(blank_layout)
 set_slide_background(s9, C_OFF_WHITE)
-add_header(s9, "08 / Business Model", "Standard 2.0% commission. Zero fee on refunds.")
+add_header(s9, "08 / Business Model", "4% all-in: 2.5% vendor + 1.5% buyer. Zero fee on refunds.")
 
 tx_lead = s9.shapes.add_textbox(Inches(1.2), Inches(2.8), Inches(4.5), Inches(4.3))
 tf_l = tx_lead.text_frame
 tf_l.word_wrap = True
 
 p = tf_l.paragraphs[0]
-p.text = "LEAD VERTICAL: ELECTRONICS & SNEAKERS"
+p.text = "LEAD VERTICAL: PHONES, ELECTRONICS & SNEAKERS"
 p.font.bold = True
 p.font.size = Pt(12)
 p.font.color.rgb = C_GREEN
@@ -528,11 +528,12 @@ p2.font.size = Pt(22)
 p2.font.color.rgb = C_TEXT_HEAD
 
 lead_stats = [
-    ("Gross Commission (2.0%)", "GHS 24.00"),
-    ("MoMo B2C Payout Fee", "- GHS 1.00"),
-    ("Allocated SMS / Infra", "- GHS 0.50"),
-    ("Croe Net Margin / Txn", "≈ GHS 22.50 – 23.00"),
-    ("Break-Even Monthly Txns", "~22 transactions / mo")
+    ("Croe Fee (4%)", "GHS 48.00"),
+    ("MoMo Collection (1.95%)", "- GHS 23.75"),
+    ("Payout, ID Check, SMS, Hosting", "- GHS 2.55"),
+    ("Fraud Reserve & Refunds", "- GHS 4.90"),
+    ("Croe Net Margin / Order", "GHS 16.80"),
+    ("Company Break-Even", "~37,900 orders / mo")
 ]
 for label, val in lead_stats:
     p = tf_l.add_paragraph()
@@ -554,24 +555,25 @@ tf_b = tx_base.text_frame
 tf_b.word_wrap = True
 
 p = tf_b.paragraphs[0]
-p.text = "GENERAL SOCIAL COMMERCE BASELINE"
+p.text = "BASE CASE: BLENDED ORDER"
 p.font.bold = True
 p.font.size = Pt(12)
 p.font.color.rgb = C_BLUE
 
 p2 = tf_b.add_paragraph()
 p2.space_before = Pt(10)
-p2.text = "GHS 450 Average Order Value"
+p2.text = "GHS 800 Average Order Value"
 p2.font.bold = True
 p2.font.size = Pt(22)
 p2.font.color.rgb = C_TEXT_HEAD
 
 base_stats = [
-    ("Gross Commission (2.0%)", "GHS 9.00"),
-    ("MoMo B2C Payout Fee", "- GHS 1.00"),
-    ("Allocated SMS / Infra", "- GHS 0.50"),
-    ("Croe Net Margin / Txn", "≈ GHS 7.50 – 8.00"),
-    ("Break-Even Monthly Txns", "~63 transactions / mo")
+    ("Croe Fee (4%)", "GHS 32.00"),
+    ("MoMo Collection (1.95%)", "- GHS 15.83"),
+    ("Payout, ID Check, SMS, Hosting", "- GHS 2.55"),
+    ("Fraud Reserve & Refunds", "- GHS 3.29"),
+    ("Croe Net Margin / Order", "GHS 10.33"),
+    ("Company Break-Even", "~61,700 orders / mo")
 ]
 for label, val in base_stats:
     p = tf_b.add_paragraph()
@@ -583,7 +585,7 @@ for label, val in base_stats:
         p.font.bold = True
         p.font.color.rgb = C_TEXT_HEAD
 
-add_notes(s9, "Highlight why ticket size matters: leading with GHS 1,200 orders yields ~GHS 23 net margin and drops monthly break-even from 63 to just 22 transactions.")
+add_notes(s9, "Say the uncomfortable part first: MoMo collection costs 1.95% and each payout GHS 1.00, so a 2% fee would lose GHS 4-7 on every order. At 4% all-in (2.5% vendor + 1.5% buyer protection fee) net is 1.29% on a GHS 800 order. Against a fully staffed month-36 cost base of GHS 637k/month, company break-even is ~62,000 orders/month. Levers: a 5% fee (~34,800), direct telco rails via our own PSP licence (~34,500), high-ticket vendors (~37,900 at GHS 1,200). Buyer acceptance of the 1.5% fee is the first thing the pilot tests.")
 
 # ==============================================================================
 # SLIDE 10: Go To Market
@@ -677,16 +679,16 @@ tx_g = s11.shapes.add_textbox(Inches(7.2), Inches(2.8), Inches(5.0), Inches(4.2)
 tf_g = tx_g.text_frame
 tf_g.word_wrap = True
 p = tf_g.paragraphs[0]
-p.text = "60-Day Pilot Success Gates"
+p.text = "Stage 1 Pilot Gates"
 p.font.bold = True
 p.font.size = Pt(20)
 p.font.color.rgb = C_TEXT_HEAD
 
 gates = [
-    ("Monthly Volume", "≥ 63 transactions", "Clears the break-even hurdle"),
+    ("Volume", "≥ 250 orders by month 6", "Real demand on capped live rails"),
     ("Dispute Rate", "< 8% of transactions", "Validates fraud resistance"),
     ("AI Accuracy", "> 95% upheld", "Proves 3-tier dispute engine"),
-    ("Buyer Drop-off", "< 30% drop-off", "Validates mobile web/USSD UX"),
+    ("Buyer Drop-off", "< 30% with 1.5% fee shown", "Validates 4% pricing and web/USSD UX"),
     ("Retention", "> 60% active", "Proves commercial utility"),
     ("Reconciliation", "0 mismatches", "Mandatory requirement")
 ]
@@ -709,29 +711,29 @@ add_notes(s11, "Be straightforwardly honest: we are pre-revenue. In fintech, one
 # ==============================================================================
 s12 = prs.slides.add_slide(blank_layout)
 set_slide_background(s12, C_OFF_WHITE)
-add_header(s12, "11 / Capital Ask", "Dual-track funding for a 60-day supervised pilot.")
+add_header(s12, "11 / Capital Ask", "US$387k pre-seed to a licensed, partner-held launch.")
 
 tx_ta = s12.shapes.add_textbox(Inches(1.2), Inches(2.8), Inches(5.0), Inches(3.8))
 tf_ta = tx_ta.text_frame
 tf_ta.word_wrap = True
 p = tf_ta.paragraphs[0]
-p.text = "TRACK A: LEAN BOOTSTRAP PILOT"
+p.text = "STAGE 1: LEGAL PILOT (MONTHS 1–6)"
 p.font.bold = True
 p.font.size = Pt(12)
 p.font.color.rgb = C_BLUE
 p2 = tf_ta.add_paragraph()
 p2.space_before = Pt(8)
-p2.text = "GHS 30,000  (~USD $2,500)"
+p2.text = "US$26k  (GHS 305k)"
 p2.font.bold = True
 p2.font.size = Pt(26)
 p2.font.color.rgb = C_TEXT_HEAD
 
 ta_items = [
-    "Entity formation (ORC) + GRA TIN + DPC registration",
-    "Initial T+2 working capital float & loss reserve (GHS 5k)",
-    "Lean CPU cloud hosting + SMS messaging (3 months)",
-    "60-day supervised pilot with 10–20 high-ticket vendors",
-    "Milestone: First 100+ live transactions on compliant rails"
+    "Company, TIN, DPC registration, lawyer's custody opinion",
+    "Written aggregator approval; BoG sandbox or partner LOI",
+    "Founder stipends, part-time ops, lean hosting (AI on CPU)",
+    "10–50 vendors; ~500 capped, disclosed live orders",
+    "Gate: buyer fee acceptance, order value, dispute rate"
 ]
 for item in ta_items:
     p = tf_ta.add_paragraph()
@@ -749,23 +751,23 @@ tx_tb = s12.shapes.add_textbox(Inches(7.2), Inches(2.8), Inches(5.0), Inches(3.8
 tf_tb = tx_tb.text_frame
 tf_tb.word_wrap = True
 p = tf_tb.paragraphs[0]
-p.text = "TRACK B: INSTITUTIONAL / ACCELERATED"
+p.text = "STAGE 2: COMPLIANT LAUNCH (MONTHS 7–18)"
 p.font.bold = True
 p.font.size = Pt(12)
 p.font.color.rgb = C_GREEN
 p2 = tf_tb.add_paragraph()
 p2.space_before = Pt(8)
-p2.text = "GHS 150,000  (~USD $12,500)"
+p2.text = "US$360k  (GHS 4.18M)"
 p2.font.bold = True
 p2.font.size = Pt(26)
 p2.font.color.rgb = C_TEXT_HEAD
 
 tb_items = [
-    "Specialist fintech legal counsel (BoG PFTSP opinion)",
-    "Independent external penetration test & security audit",
-    "Multi-AZ PostgreSQL PITR + high-availability cloud infra",
-    "Funded 2% GMV loss reserve & T+2 working capital float",
-    "Milestone: Total de-risking for P2 Bank trust onboarding"
+    "BoG PFTSP licence + partner-bank trust account (P2)",
+    "The five BoG management roles; ~12 staff",
+    "External pentest, ISO 27001, full BoG policy set",
+    "Float (one day of order value) + partner reserve",
+    "Milestone: ~5,000 orders/month on compliant rails"
 ]
 for item in tb_items:
     p = tf_tb.add_paragraph()
@@ -774,7 +776,7 @@ for item in tb_items:
     p.font.size = Pt(14)
     p.font.color.rgb = C_TEXT_BODY
 
-add_notes(s12, "Tie the number to the milestone: Track A proves unit economics and conversion for $2.5k. Track B provides institutional security and legal de-risking for institutional funds.")
+add_notes(s12, "Tie the number to the milestone. Pre-seed US$387k (range US$189k-713k) covers stages 1-2 over 18 months, with 15% contingency and working capital; FX US$1 = GHS 11.60. Most of stage 2 is people: the BoG names five management roles in its licensing pack. A seed round of ~US$916k around month 15 funds scale to ~30,000 orders/month; US$1.30M total over 36 months. Line items and sources: FINANCIAL-MODEL.md.")
 
 # ==============================================================================
 # SLIDE 13: Appendix Divider (Dark Theme)
@@ -886,7 +888,7 @@ risks = [
     ("Working capital gap (T+2 settlement)", "Float sized and reserved in budget; option to align vendor payout timing to settlement cycle."),
     ("Buyer drop-off at install step", "Web-based payment fallback supported; buyer pays via mobile browser + USSD prompt without app install."),
     ("Dispute volume overwhelms team", "Automated Tier 1 (media hash) and Tier 2 (SQL heuristics) filter out clear fraud before human review."),
-    ("Wrong AI dispute decision", "Written adjudication policy, loss reserve funded at 2% GMV, appeal path, and ToS liability caps.")
+    ("Wrong AI dispute decision", "Written adjudication policy, ring-fenced loss reserve plus 0.3% of order value per order, appeal path, and ToS liability caps.")
 ]
 for idx, (risk, mit) in enumerate(risks):
     top = Inches(2.8 + idx * 0.7)

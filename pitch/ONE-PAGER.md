@@ -19,7 +19,7 @@ Vendors routinely lose 20%–30% of qualified orders to payment anxiety. Buyers 
 | **1. Link** | Vendor generates a Croe escrow link | Shared directly in the WhatsApp/Instagram chat where the customer already is |
 | **2. Pay** | Buyer authorizes payment via MoMo | Standard USSD prompt (MTN, Telecel, AirtelTigo). Funds lock in escrow - visible to the vendor, but untouched |
 | **3. Ship** | Vendor dispatches the order | Dispatched against locked, verified money rather than an empty promise |
-| **4. Release** | Buyer confirms delivery | Vendor is paid out automatically, less a flat commission. If an issue arises, a structured dispute opens |
+| **4. Release** | Buyer confirms delivery | Vendor is paid out automatically, less a 2.5% commission. If an issue arises, a structured dispute opens |
 
 ### Why This Is Hard - And Why We Are Ahead
 
@@ -36,29 +36,30 @@ Vendors routinely lose 20%–30% of qualified orders to payment anxiety. Buyers 
 
 ### Business Model & Unit Economics
 
-We earn a standard **2.0% commission** per successfully released transaction, deducted from vendor payout. **0% commission on refunds** - if a buyer is refunded, Croe takes nothing.
+We earn **4.0% all-in** per successfully released transaction: a **2.5% vendor commission** (deducted from payout) plus a **1.5% buyer protection fee** (shown at checkout). **No fees on refunds** - if a buyer is refunded, Croe takes nothing.
 
-- **Lead Launch Category (Electronics, Smartphones, Streetwear):**
-  - Average Order Value (AOV): **GHS 1,200.00**
-  - Gross Commission (2.0%): **GHS 24.00**
-  - Net Margin (after ~GHS 1.00 MoMo disbursement & SMS fees): **≈ GHS 22.50 – 23.00** per transaction
-- **Baseline General Retail Comparison:**
-  - AOV: GHS 450.00 → Gross Commission: GHS 9.00 → Net Margin: **≈ GHS 7.50 – 8.00**
-- **Break-Even Volume:**
-  - Against our target lean pilot fixed overhead of **< GHS 500/month**, break-even is achieved at just **~22 transactions/month** in our lead category (~63 transactions/month in general retail).
+Why 4% and not 2%: MoMo collection through Paystack or Hubtel costs **1.95%**, and each payout costs **GHS 1.00**. At 2% Croe would lose GHS 4–7 on every order.
+
+- **Net per released order** (after collection, payout, fraud reserve, ID checks, refunds, SMS and hosting):
+  - Lead category (phones, electronics, sneakers), **GHS 1,200** order: **GHS 16.80**
+  - Base-case blended order, **GHS 800**: **GHS 10.33** (1.29% of order value)
+  - General retail, **GHS 450** order: **GHS 4.67**
+- **Company break-even:** **~62,000 released orders/month** at a GHS 800 average order, against a fully staffed month-36 cost base of GHS 637,000/month. At a 5% fee, or with direct telco rails, this drops to about 35,000.
 
 ### Market & Regional Scalability
 
 Mobile Money is the financial backbone of Ghana (20M+ active accounts across MTN MoMo, Telecel Cash, and AirtelTigo). By placing payments and currency behind clean interfaces, **Kenya (M-Pesa) and Nigeria (NIP/Cards) are modular `PaymentRail` additions, not system rebuilds.**
 
-### The Ask - Dual-Track Pilot Funding
+### The Ask - Pre-Seed to a Licensed Launch
 
-We are raising funding to transition Croe from sandbox completion to a live, supervised 60-day pilot with **10–20 hand-recruited high-ticket vendors**:
+We are raising a **US$387k pre-seed** (range US$189k–713k; GHS 4.48M base) to take Croe from sandbox to a licensed, partner-held launch in **18 months**. Figures include 15% contingency and working capital. FX: US$1 = GHS 11.60.
 
-| Funding Track | Amount | Target Allocation | Milestone Funded |
-|---|---|---|---|
-| **Track A: Lean Bootstrap** | **GHS 30,000**<br>*(~$2,500 USD)* | Entity incorporation (ORC + TIN), DPC registration, T+2 working capital float, base hosting/SMS, 60-day pilot ops. | First 100+ live transactions on compliant rails, measured conversion, and baseline dispute rate. |
-| **Track B: Institutional / Angel** | **GHS 150,000**<br>*(~$12,500 USD)* | Track A + formal fintech legal counsel (BoG PFTSP opinion & custody trust structuring), external penetration test, managed production infrastructure, and funded loss reserve. | Complete de-risking for institutional P2 partner bank onboarding and seed accelerator applications. |
+| Stage | Months | Net need (base) | What it buys | Gate to next stage |
+|---|---|---|---|---|
+| **1 · Legal pilot** | 1–6 | **US$26k** | Company, DPC registration, lawyer's custody opinion, written aggregator approval, BoG sandbox or partner LOI, 10–50 vendors, ~500 capped live orders | Written aggregator or partner yes; measured buyer drop-off, order value and dispute rate |
+| **2 · Compliant launch** | 7–18 | **US$360k** | BoG PFTSP licence, partner-bank trust account, the BoG management team (~12 staff), external pentest, ISO 27001, Accra + Kumasi, ~5,000 orders/month | Clean daily reconciliation, disputes under 8%, vendor retention |
+
+A **seed round of ~US$916k** around month 15 funds stage 3: ~25 staff and ~30,000 orders/month by month 36. The total over 36 months is **US$1.30M**. Full line items: [`FINANCIAL-MODEL.md`](FINANCIAL-MODEL.md).
 
 ---
 

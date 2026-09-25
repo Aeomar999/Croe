@@ -42,7 +42,7 @@ Ask **all three** aggregators, in writing, before anything else:
 | 8 | Payout API availability for MoMo B2C (MTN / Telecel / AirtelTigo) | [ ] | [ ] | [ ] |
 | 9 | Sandbox → live promotion timeline once documents are submitted | [ ] | [ ] | [ ] |
 
-**Why this is first:** answers to Q4 and Q5 also decide whether the unit economics in [`03-Business-Model-and-Costs.md`](for_agents/03-Business-Model-and-Costs.md) §3 survive. The current ≈8.00 GHS net per transaction rests entirely on `[verify]` assumptions (1.5% collection, ~1.00 GHS payout). A higher payout fee or a flat payout minimum can invert the model on small transactions.
+**Why this is first:** answers to Q4 and Q5 also decide whether the unit economics in [`03-Business-Model-and-Costs.md`](for_agents/03-Business-Model-and-Costs.md) §3 survive. Published pricing (Sep 2026) is **1.95% MoMo collection** and **GHS 1.00 per MoMo payout** (Paystack; Hubtel 1.95%, min GHS 0.30). At those rates a 2% commission loses GHS 4–7 per order, so the model now prices at **4% all-in** (2.5% vendor + 1.5% buyer): GHS 10.33 net on a GHS 800 order ([`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) §2–3). Q4 and Q5 still need written confirmation, including any volume discount. A flat payout minimum can still invert small transactions.
 
 **Outcome to record here:**
 
@@ -134,13 +134,13 @@ Categories where scam fear already kills sales, and order values are high enough
 
 | # | Decision | Current default | Status |
 |---|---|---|---|
-| 1 | Commission rate | 1.5–2.5% **[verify/decide]** — doc 03 §1 | [ ] |
-| 2 | **Who pays the commission** | Vendor-pays | [ ] — **revisit; see below** |
+| 1 | Fee level | **4.0% all-in modelled** (3.5% floor, 5% halves break-even) — [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) §2 | [ ] |
+| 2 | **Who pays** | **Split modelled:** 2.5% vendor + 1.5% buyer protection fee | [ ] — **test in pilot; see below** |
 | 3 | Minimum transaction size | Undefined | [ ] — needed if payout fees are flat |
 | 4 | Floor fee on small transactions | Undefined | [ ] |
 | 5 | Vendor payout timing (T+0 vs. match settlement) | Undefined | [ ] — ties to working capital, §2.2 |
 
-> **Revisit vendor-pays.** [`03-Business-Model-and-Costs.md`](for_agents/03-Business-Model-and-Costs.md) §1 defaults to vendor-pays on the logic that the vendor gains guaranteed settlement. But the **buyer** carries the fear, and the **vendor** is the party being recruited. Making Croe free to the vendor and charging the buyer removes the acquisition friction entirely. Doc 03 already states this is configurable per market — **test both arms during the pilot** and record the outcome here.
+> **Revisit vendor-pays.** [`03-Business-Model-and-Costs.md`](for_agents/03-Business-Model-and-Costs.md) §1 defaults to vendor-pays on the logic that the vendor gains guaranteed settlement. But the **buyer** carries the fear, and the **vendor** is the party being recruited. Making Croe free to the vendor and charging the buyer removes the acquisition friction entirely. Doc 03 already states this is configurable per market. The model now uses a split (2.5% vendor + 1.5% buyer), because 2% vendor-only loses money. **Test buyer acceptance of the 1.5% fee during the pilot** (fallback: 4% vendor-only) and record the outcome here.
 
 #### Vendor acquisition checklist
 
@@ -176,7 +176,7 @@ The architecture has humans in the loop **by design**. Until there is a hire, ev
 
 | Monthly released transactions | Realistic ops load | Staffing |
 |---|---|---|
-| ~63 (break-even, doc 03 §5) | A few hours/week | Founder alone is fine |
+| ~250 (stage 1 pilot, month 6) | A few hours a day | Founder + part-time ops (budgeted in §10.2) |
 | ~300 | ~10–25 disputes + KYC + daily recon + support | Founder is saturated |
 | ~1,000 | ~30–80 disputes/month + everything else | **Full-time role. Hire before this, not after** |
 
@@ -297,19 +297,19 @@ Two items on that list are business-critical, not merely technical:
 
 **Design:** 10–20 hand-picked vendors. One WhatsApp group, founder present daily. Capped transaction sizes. 60 days minimum. **No paid marketing until this passes.**
 
-**Primary bar:** clear the break-even of **≈63 released transactions/month** (doc 03 §5, recomputed once real fees are confirmed).
+**Primary bar:** buyers accept the 1.5% protection fee, and each order makes money after every variable cost. Company break-even (~62,000 orders/month, §10.5) is a stage 3 target, not a pilot target.
 
 | Metric | Why it matters | Target | Actual |
 |---|---|---|---|
-| Released transactions / month | Break-even and demand signal | ≥ 63 **[recompute]** | _—_ |
-| **Net margin per transaction (actual)** | Validates or kills doc 03 §3 | ≥ 8.00 GHS **[verify]** | _—_ |
+| Released transactions / month | Demand signal on capped live rails | ≥ 250 by month 6 | _—_ |
+| **Net margin per transaction (actual)** | Validates or kills [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) §3 | ≥ 10.00 GHS at measured order value | _—_ |
 | Dispute rate (% of transactions) | Drives ops staffing and loss reserve | < 8% **[verify]** | _—_ |
 | **Adjudication accuracy** (decisions not reversed on appeal) | The product's entire reputation | > 95% **[verify]** | _—_ |
 | **Buyer drop-off at payment step** | Tests the install-barrier risk (§2.3) | < 30% **[verify]** | _—_ |
 | Vendor retention (still trading at day 60) | Is the value real or novelty? | > 60% **[verify]** | _—_ |
 | Transactions per active vendor / month | Determines how many vendors are needed to scale | ≥ 5 **[verify]** | _—_ |
 | Reconciliation mismatches | Any non-zero is a P1 incident | 0 | _—_ |
-| Vendor-pays vs. buyer-pays conversion (§2.4) | Settles the pricing decision with data | — | _—_ |
+| **Buyer drop-off with the 1.5% protection fee shown** (§2.4) | Settles the pricing decision with data | < 30% | _—_ |
 
 ---
 
@@ -319,7 +319,7 @@ Two items on that list are business-critical, not merely technical:
 |---|------|--------|------------|-------|
 | 1 | **Aggregator refuses the escrow model** | Existential — P1 does not exist | §1, answered in week 1, before any spend | _[fill in]_ |
 | 2 | **P1 is legally thin** — doc 02 §3 says so explicitly | Regulatory action; forced shutdown | Low supervised volumes, user disclosure, continuous movement toward P2 | _[fill in]_ |
-| 3 | **Margin inverts** — real payout fees exceed the assumed ~1.00 GHS, or carry a flat minimum | Business is unviable at small ticket sizes | Confirm fees in writing (§1 Q4–5); set minimum transaction size / floor fee | _[fill in]_ |
+| 3 | **Margin inverts** — real payout fees exceed the assumed ~1.00 GHS, or carry a flat minimum | Business is unviable at small ticket sizes | Price at 4% all-in (§10.7); confirm fees in writing (§1 Q4–5); set minimum transaction size / floor fee | _[fill in]_ |
 | 4 | **Buyer install barrier** kills conversion | Vendors churn; product looks broken | Measure drop-off in pilot; decide on web fallback (§2.3) | _[fill in]_ |
 | 5 | **Working capital gap** from settlement lag | Cash crunch; failed payouts; trust damage | Size the float (§2.2); or match payout timing to settlement | _[fill in]_ |
 | 6 | **Ops load outruns the founder** | Slow disputes → the one thing that destroys an escrow brand | Hiring trigger set in advance (§3.1); second admin from day one | _[fill in]_ |
@@ -337,8 +337,8 @@ Two items on that list are business-critical, not merely technical:
 | # | Decision | Options | Decided | Rationale |
 |---|---|---|---|---|
 | 1 | Which aggregator | Paystack GH / Hubtel / Flutterwave | [ ] | |
-| 2 | Commission rate | 1.5% – 2.5% | [ ] | |
-| 3 | Who pays commission | Vendor / Buyer / Split | [ ] | |
+| 2 | Fee level | 3.5% – 5% all-in | [ ] | 4% modelled; 2% loses money (§10.7) |
+| 3 | Who pays | Vendor / Buyer / Split | [ ] | Split modelled: 2.5% vendor + 1.5% buyer |
 | 4 | Vendor payout timing | T+0 (float required) / match settlement | [ ] | |
 | 5 | Minimum transaction size | — | [ ] | |
 | 6 | Buyer web payment fallback | Required pre-launch / post-pilot | [ ] | |
@@ -382,111 +382,128 @@ Croe is ready to take real money from real Ghanaian users when **all** of the fo
 
 ## 10. Budget & Cost Model
 
-> **Every figure in this section is an order-of-magnitude estimate, not a quote.** Treat all of them as `[verify]` until replaced with a written quote in the **Actual** column. Recurring lines feed [`Production_manual.md`](Production_manual.md) §8; unit economics feed [`03-Business-Model-and-Costs.md`](for_agents/03-Business-Model-and-Costs.md) §3 and §5.
+> **Rebuilt 25 Sep 2026 from published 2026 prices.** The full model is in [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md), with line items, sources and sensitivity. An interactive version is at [Croe Capital Plan](https://claude.ai/artifact/9qnYtftuyXg6zwgfj1DtwR) (private until shared). This section is the operational view: what to spend, when, and where to record the real quote. Replace estimates with written quotes in the **Actual** columns and recompute. Recurring lines feed [`Production_manual.md`](Production_manual.md) §8.
 >
-> **Working FX assumption: ≈ GHS 12 = USD 1 [verify].** Update when it moves materially — several lines below are USD-denominated and will drift with it.
+> **FX: US$1 = GHS 11.60** (Sep 2026). Update when it moves materially; several lines are US$-priced.
+>
+> **What changed from the earlier budget:** it assumed fixed costs under GHS 500/month, no salaries, and a 2% commission netting GHS 8–23 per order. Published fees (1.95% MoMo collection, GHS 1.00 per payout) make 2% loss-making, and the BoG licensing pack requires a staffed management team. The pilot is still cheap; getting licensed is not.
 
-### 10.1 One-Time Setup Cost
+### 10.1 One-Time Costs
 
-| # | Item | Bootstrap (GHS) | Recommended (GHS) | **Actual quote** | Notes |
-|---|------|-----------------|-------------------|------------------|-------|
-| 1 | Company registration (ORC) | 300–800 (self-filed) | 2,000–4,000 (agent/lawyer) | _—_ | Keep **stated capital low** — stamp duty scales with it **[verify]** |
-| 2 | GRA TIN | 0 | 0 | _—_ | |
-| 3 | Data Protection Commission registration | 300–1,000 | 300–1,000 | _—_ | Fee tiers by entity size **[verify]** |
-| 4 | **Fintech lawyer** | 5,000–15,000 (consult + review) | 25,000–70,000 (custody opinion + ToS + Privacy + partner structuring) | _—_ | Largest controllable line |
-| 5 | **Penetration test** | defer as documented accepted risk | 20,000–90,000 | _—_ | USD 1.5k–7k; regional firms cheaper than global. `Production_manual.md` §1.4.11 |
-| 6 | Apple Developer Program (USD 99/yr) | ~1,200 | ~1,200 | _—_ | |
-| 7 | Google Play Developer (USD 25 once) | ~300 | ~300 | _—_ | |
-| 8 | Trademark "Croe" | defer | 1,500–4,000 | _—_ | BRAND-01 asset protection |
-| 9 | Bank account opening / minimum balance | 500–2,000 | 500–2,000 | _—_ | |
-| 10 | Domain + TLS | ~200 | ~200 | _—_ | |
-| | **Total** | **≈ 8,000–21,000** | **≈ 51,000–173,000** | _—_ | Items 4 + 5 are ~80% of the recommended figure |
+| # | Item | Stage | Low (GHS) | Base (GHS) | High (GHS) | **Actual quote** | Notes |
+|---|------|-------|-----------|------------|------------|------------------|-------|
+| 1 | Company registration, stamp duty, company secretary | 1 | 1,100 | 3,000 | 5,000 | _—_ | ORC GHS 585 + 1% stamp duty on stated capital (fees effective 2 Feb 2026). Keep stated capital low |
+| 2 | GRA TIN | 1 | 0 | 0 | 0 | _—_ | |
+| 3 | Data Protection Commission registration | 1 | 1,000 | 2,000 | 4,000 | _—_ | Fee tiers by entity size **[verify]** |
+| 4 | Trademark "Croe" | 1 | 0 | 3,000 | 6,000 | _—_ | BRAND-01 asset protection |
+| 5 | Apple Developer (US$99/yr) + Google Play (US$25 once) | 1 | 1,440 | 1,440 | 1,440 | _—_ | |
+| 6 | **Fintech lawyer:** custody opinion, ToS, privacy, vendor terms, sandbox/aggregator filings | 1 | 35,000 | 60,000 | 120,000 | _—_ | Highest-value spend in stage 1 |
+| 7 | Pre-pilot security review (automated scan + light external test) | 1 | 0 | 12,000 | 35,000 | _—_ | Full pentest moves to stage 2 (#11) |
+| 8 | Test devices (3 Android tiers + 1 iPhone) | 1 | 8,000 | 15,000 | 25,000 | _—_ | |
+| 9 | BoG PFTSP licence fees | 2 | 30,000 | 30,000 | 30,000 | _—_ | GHS 10k processing + GHS 20k licence (BoG licensing pack; confirm current) |
+| 10 | **Legal:** licence application, partner trust-account agreement, employment contracts, ESOP | 2 | 80,000 | 130,000 | 250,000 | _—_ | |
+| 11 | **Penetration test:** web + API + iOS + Android, with retest | 2 | 70,000 | 140,000 | 300,000 | _—_ | US$6k–26k. BoG pack requires VA/pentest for every licence category. `Production_manual.md` §1.4.11 |
+| 12 | ISO 27001 | 2 | 40,000 | 230,000 | 520,000 | _—_ | Low = gap assessment only. Listed for PFTSP "where applicable" **[verify]** |
+| 13 | BoG-required policy set (ICT, BCP/DR, AML/CFT, risk) | 2 | 20,000 | 45,000 | 90,000 | _—_ | |
+| 14 | Custody partner onboarding & integration | 2 | 10,000 | 40,000 | 100,000 | _—_ | |
+| 15 | Laptops & equipment for stage 2 hires | 2 | 60,000 | 100,000 | 150,000 | _—_ | |
+| 16 | Recruitment (compliance lead, senior engineers) | 2 | 20,000 | 60,000 | 120,000 | _—_ | |
+| | **Stage 1 one-time total** | | **46,540** | **96,440** | **196,440** | _—_ | |
+| | **Stage 2 one-time total** | | **330,000** | **775,000** | **1,560,000** | _—_ | |
 
-### 10.2 Monthly Recurring Cost (Pilot Scale)
+Stage 3 one-time costs (ISO 27001 surveillance, annual pentests, equipment, recruitment: GHS 640k base) are itemised in [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) §6.
 
-| # | Item | Lean (GHS/mo) | Realistic (GHS/mo) | **Actual** | Notes |
-|---|------|---------------|--------------------|-----------|-------|
-| 1 | App hosting | 150 | 400 | _—_ | |
-| 2 | Managed Postgres | 0–200 | 300–600 | _—_ | |
-| 3 | Managed Redis | 0–100 | 150–300 | _—_ | |
-| 4 | Object storage (S3/R2) | 30 | 100 | _—_ | Evidence media; usage-based |
-| 5 | **LLM hosting** | **0** (CPU/Ollama on app host) | **1,200–4,000** (GPU instance) | _—_ | **See §10.6 — largest recurring line** |
-| 6 | SMS (OTP + notification matrix) | 30–150 | 150–600 | _—_ | ~6–10 SMS per completed transaction **[verify per-SMS rate]** |
-| 7 | Monitoring / log aggregation | 0 (free tier) | 200–500 | _—_ | |
-| 8 | Push, domain, misc | 50 | 100 | _—_ | Push is free |
-| | **Monthly total (`F`)** | **≈ 260–680** | **≈ 2,600–6,600** | _—_ | Doc 03 §5 targets `F < 500` |
+### 10.2 Monthly Recurring Cost
 
-> Aggregator fees are **not** listed here — they are a per-transaction cost of goods, not fixed overhead (doc 03 §3). They belong in the unit economics, §10.4.
+| # | Item | Stage 1 (GHS/mo) | Stage 2 (GHS/mo) | Stage 3 (GHS/mo) | **Actual** | Notes |
+|---|------|------------------|------------------|------------------|-----------|-------|
+| 1 | People, fully loaded | 14,500 | 136,000 | 290,000 avg (370,000 by month 36) | _—_ | Stage 1: founder stipends 10,000 + part-time ops 3,000 + bookkeeping 1,500. Stage 2: the five BoG key management roles, ~12 staff. SSNIT 13% employer + benefits ≈ 18% loaded |
+| 2 | Infrastructure & software | 2,500 | 20,000 | 58,000 | _—_ | Stage 1: Render, AI triage on CPU or off. Stage 2: HA database + 1 GPU node (Hetzner GEX44, €184–234/mo). Stage 3: DR region + 2nd GPU node |
+| 3 | Office / coworking | 1,500 | 15,000 | 35,000 | _—_ | |
+| 4 | Vendor acquisition & marketing | 4,000 | 40,000 | 120,000 | _—_ | No paid marketing until the §5 pilot passes |
+| 5 | Legal & compliance retainer | — | 10,000 | 15,000 | _—_ | |
+| 6 | Insurance (professional indemnity, cyber, fidelity) | — | 5,000 | 10,000 | _—_ | Get quotes |
+| 7 | External audit & tax filing | — | 3,500 | 6,000 | _—_ | BoG application requires named external auditors |
+| 8 | Directors' fees | — | 3,000 | 8,000 | _—_ | Minimum 3 directors (Act 987) |
+| 9 | Travel, data, admin, misc. | 2,000 | 6,000 | 15,000 | _—_ | |
+| | **Monthly total (`F`)** | **24,500** | **238,500** | **557,000 avg · 637,000 at month 36** | _—_ | |
+
+> Aggregator fees are **not** listed here. They are a per-order cost of goods and belong in the unit economics (§10.7 and [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) §3).
 
 ### 10.3 Working Capital & Reserves
 
-> **Not modelled in doc 03.** If the aggregator settles at T+2 but Croe releases to the vendor at T+0, Croe fronts the difference. Assumes 450.00 GHS average ticket — recompute for the segment actually launched (§2.4).
+Aggregators settle to Croe the next day (T+1). Most escrow orders are held longer than that while delivery happens. The float covers the exception: **same-day deliveries confirmed before settlement arrives**. The loss reserve covers wrong adjudications and fraud, and a custody partner may require one.
 
-| Monthly released transactions | Monthly GMV (GHS) | Float required (T+2, GHS) | Loss reserve @1–2% GMV (GHS/mo) |
-|---|---|---|---|
-| 63 (break-even) | 28,350 | ≈ 2,000–2,800 | 285–570 |
-| 300 | 135,000 | ≈ 9,000–13,500 | 1,350–2,700 |
-| 1,000 | 450,000 | ≈ 30,000–45,000 | 4,500–9,000 |
+| At the end of | Basis | Low (GHS) | Base (GHS) | High (GHS) |
+|---|---|---|---|---|
+| Stage 1 · pilot | Loss reserve + small float | 10,000 | 30,000 | 60,000 |
+| Stage 2 · ~5,000 orders/month | One day of order value (GHS 133k) + partner reserve | 50,000 | 233,000 | 467,000 |
+| Stage 3 · ~30,000 orders/month | One day of order value (GHS 800k) + reserve | 300,000 | 1,100,000 | 1,900,000 |
+
+The per-order fraud and loss reserve (0.3% of order value) is a running cost inside the unit economics. The amounts above are the ring-fenced balance.
 
 | # | Decision | Status |
 |---|----------|--------|
 | 1 | Float sized for target pilot volume and reserved | [ ] |
-| 2 | **Or** vendor payout timing matched to settlement cycle (removes the float, weakens the pitch) — ties to §7.4 | [ ] |
+| 2 | **Or** vendor payout timing matched to settlement cycle (removes the float, weakens the pitch). Ties to §7 decision 4 | [ ] |
 | 3 | Loss reserve percentage set and funded | [ ] |
 
-### 10.4 Cash Required To Reach a Supervised Pilot
+### 10.4 Capital Required by Stage
 
-| Tier | Setup + 3 months running + float | USD equiv. |
-|---|---|---|
-| **Bootstrap** — self-filed, lean infra, LLM off, pen test deferred | **≈ GHS 15,000–30,000** | ≈ $1,200–2,500 |
-| **Recommended** — proper legal, pen test, real infra | **≈ GHS 60,000–185,000** | ≈ $5,000–15,000 |
+Net need = spend + 15% contingency + working capital − order income. The high case pairs top-of-range costs with half the base-case volume.
+
+| Stage | Months | Low | Base | High |
+|---|---|---|---|---|
+| **1 · Legal pilot** | 1–6 | GHS 126k (US$11k) | **GHS 305k (US$26k)** | GHS 597k (US$51k) |
+| **2 · Compliant launch** | 7–18 | GHS 2.07M (US$178k) | **GHS 4.18M (US$360k)** | GHS 7.68M (US$662k) |
+| **3 · Scale** | 19–36 | GHS 5.13M (US$442k) | **GHS 10.63M (US$916k)** | GHS 20.93M (US$1.80M) |
+| **Total** | 36 | GHS 7.32M (US$631k) | **GHS 15.11M (US$1.30M)** | GHS 29.21M (US$2.52M) |
+
+**Pre-seed = stages 1–2: US$387k base** (US$189k–713k). **Seed ≈ US$916k** around month 15, on stage 2 data.
 
 ### 10.5 Break-Even Sensitivity
 
-Doc 03 §5: `break-even monthly transactions ≈ F / C`, where `C` ≈ 8.00 GHS net per transaction **[verify]**.
+Released orders/month needed to cover the month-36 fixed cost of GHS 637,000/month. All-in fee = 1.5% buyer + the rest from the vendor.
 
-| Fixed monthly cost `F` (GHS) | Break-even transactions/month |
-|---|---|
-| 500 (doc 03 target) | 63 |
-| 1,500 | 188 |
-| 3,000 | 375 |
-| 6,000 | 750 |
+| Average order | 3.0% fee | 3.5% fee | 4.0% fee | 4.5% fee | 5.0% fee |
+|---|---|---|---|---|---|
+| GHS 450 | not viable | not viable | 136,300 | 92,000 | 69,500 |
+| GHS 800 | not viable | 100,600 | **61,700** | 44,500 | 34,800 |
+| GHS 1,200 | 132,800 | 59,000 | 37,900 | 27,900 | 22,100 |
+| GHS 2,000 | 65,500 | 32,300 | 21,400 | 16,000 | 12,800 |
 
-**Break-even is far more sensitive to infrastructure choices than to pricing.** Provisioning a GPU before it is needed multiplies the break-even by 6–12×.
+**Break-even depends on price and ticket size far more than on infrastructure.** A GPU node is under 1% of the month-36 cost base. This reverses the earlier budget's conclusion, which only held while salaries were left out.
 
 ### 10.6 Cost Discipline Decisions
 
 | # | Decision | Rationale | Status |
 |---|----------|-----------|--------|
-| 1 | **Run the pilot with AI triage off or CPU-only** | At 63 txn/mo and a ~5% dispute rate that is **≈3 inferences per month**. A 24/7 GPU box for 3 inferences is indefensible. [`Production_manual.md`](Production_manual.md) §7.2 already specifies graceful degradation — disputes route to `UNDER_HUMAN_REVIEW`. Adjudicate them personally; enable the GPU when volume justifies it | [ ] |
-| 2 | Free/low tiers for hosting, storage, and monitoring throughout P0/P1 | COST-01 in [`25-Engineering-Rules.md`](for_agents/25-Engineering-Rules.md) — never provision paid infra "to be safe" | [ ] |
-| 3 | Defer trademark and pen test only if documented as accepted risk | Pen test is also evidence a P2 partner will ask for — defer, do not cancel | [ ] |
-| 4 | Keep stated capital at registration low | Stamp duty scales with it **[verify]** | [ ] |
+| 1 | **Run the pilot with AI triage off or CPU-only** | At 250 orders/month and a ~5% dispute rate, that's **≈12 disputes a month**. [`Production_manual.md`](Production_manual.md) §7.2 already routes disputes to `UNDER_HUMAN_REVIEW` when the LLM is unavailable. Adjudicate them personally; add the GPU node in stage 2, when disputes reach the hundreds | [ ] |
+| 2 | Free/low tiers for hosting, storage and monitoring throughout P0/P1 | COST-01 in [`25-Engineering-Rules.md`](for_agents/25-Engineering-Rules.md). Apply for cloud credits (§11.2) | [ ] |
+| 3 | Stage 1 gets a light security review; the full pentest happens in stage 2, before partner go-live | A P2 partner will ask for the pentest report. Defer it, don't cancel it | [ ] |
+| 4 | Keep stated capital at registration low | Stamp duty is 1% of stated capital | [ ] |
+| 5 | **No stage 2 hires before the stage 1 gate passes** | PROC-01 applies to spending too. Stage 2 payroll is ~45% of stage 2 spend (GHS 1.63M of 3.64M) | [ ] |
 
-### 10.7 Payback — and the Ticket-Size Lever
+### 10.7 The Ticket-Size and Pricing Levers
 
-At `C` ≈ 8.00 GHS net per transaction:
+Net per released order at 4% all-in (2.5% vendor + 1.5% buyer), after collection (1.95% of the amount collected), payout, fraud reserve, ID checks, refunds, SMS and hosting:
 
-| Setup spend (GHS) | Transactions to repay | At 300 txn/mo |
-|---|---|---|
-| 20,000 (bootstrap) | 2,500 | ~8 months |
-| 100,000 (recommended) | 12,500 | ~42 months |
+| Segment | Avg ticket (GHS) **[verify]** | Net per order (GHS) | Orders/mo to break-even | At a 5% fee |
+|---|---|---|---|---|
+| General social commerce | 450 | 4.67 | ~136,300 | ~69,500 |
+| Base case (blended) | 800 | 10.33 | ~61,700 | ~34,800 |
+| **Electronics / sneakers** | 1,200 | 16.80 | **~37,900** | ~22,100 |
 
-**42 months is not a business.** Setup cost dwarfs per-transaction margin, which makes **average ticket size the most powerful lever available — more than the commission rate.**
+Same product, same cost base: the lead segment needs **~40% less volume** than the blended base, and **~72% less** than general commerce. This is the quantitative case for the segment ranking in §2.4. Confirm real average ticket per segment during the pilot and update this table.
 
-| Segment | Avg ticket (GHS) **[verify]** | `C` net/txn (GHS) | Txn to repay 100,000 |
-|---|---|---|---|
-| General social commerce | 450 | ≈ 8 | 12,500 |
-| Beauty / thrift | ~700 | ≈ 13 | ~7,700 |
-| **Electronics / sneakers** | ~1,200 | ≈ 23 | **~4,350** |
-
-Same product, same cost base, **~3× faster to profitability** — which is the quantitative case for the segment ranking in §2.4. Confirm real average ticket per segment during the pilot and update this table.
+At the old 2% vendor-only price, **every row is negative** (GHS −4.19 to −6.83 per order).
 
 ### 10.8 What the Budget Actually Says
 
-1. **The money is not the hard part.** ≈ GHS 15,000–30,000 gets Croe legally trading. The binding constraints are the aggregator's answer (§1) and whether pilot vendors close sales they were previously losing (§5).
-2. **Spend the minimum until both are answered.** Every line in §10.1 marked "defer" stays deferred until §1 returns a yes.
-3. **Then the expensive items become mandatory, not optional** — lawyer and pen test are the price of handling other people's money at any scale worth having.
+1. **The pilot is cheap; the licence is not.** Stage 1 costs about US$26k (GHS 305k), including founder stipends. Stages 1–2 together need about US$387k, mostly for people the Bank of Ghana requires.
+2. **Price is the first decision, not the last.** At 2% every order loses money. 4% all-in is the working minimum. Whether buyers accept the 1.5% protection fee is the first thing the pilot tests.
+3. **Spend in gates.** Nothing in stage 2 is committed until §1 returns a written yes and the stage 1 gate (§5) passes.
+4. **Break-even needs scale:** about 62,000 orders/month at a GHS 800 average. The levers are price, ticket size and direct telco rails, not infrastructure.
 
 ---
 
@@ -520,7 +537,7 @@ After the §10.4 validation sprint the position is: registered company, written 
 | 3 | Google Cloud for Startups | [ ] | _—_ | |
 | 4 | DigitalOcean Hatch | [ ] | _—_ | |
 
-**Why it matters more than the dollar figure:** credits would zero out the entire §10.2 infrastructure line **including GPU hosting for the LLM** — the largest recurring cost in the model, and the one that swings break-even from 63 to 750 transactions/month (§10.5). Record any award in §10.2 `Actual` and recompute `F`.
+**Why it matters:** credits could cover most of the §10.2 infrastructure line (GHS 2,500/month in stage 1, GHS 20,000/month in stage 2), **including the GPU node for the LLM**. That's real cash, but it doesn't move break-even much; people and price do (§10.5). Record any award in §10.2 `Actual` and recompute `F`.
 
 ### 11.3 Non-Dilutive Pipeline — Grants & Competitions
 
@@ -582,12 +599,12 @@ Production TypeScript, PostgreSQL, payments, and infrastructure skills are direc
 
 | # | Asset | Status | Notes |
 |---|-------|--------|-------|
-| 1 | One-page summary | [x] | [`pitch/ONE-PAGER.md`](pitch/ONE-PAGER.md) — 2.0% standard statement, GHS 1,200 lead ticket, dual-track ask |
-| 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes with locked metrics & dual asks |
+| 1 | One-page summary | [x] | [`pitch/ONE-PAGER.md`](pitch/ONE-PAGER.md) — 4% all-in pricing (2.5% vendor + 1.5% buyer), GHS 800 base / GHS 1,200 lead ticket, US$387k pre-seed ask |
+| 2 | Deck (12 slides + appendix) | [x] | [`pitch/PITCH-DECK.md`](pitch/PITCH-DECK.md) — slide copy + speaker notes; slides 9 and 12 carry the rebuilt unit economics and staged ask |
 | 3 | **Live demo on sandbox** | [ ] | The strongest asset — a working app, not a mockup |
 | 4 | Due-diligence pack | [x] | **Already exists** — the `for_agents/` package, `Production_manual.md`, and this document |
-| 5 | Vendor commitment letters | [x] template · [ ] collected | Template + WhatsApp version + portfolio tracker: [`pitch/VENDOR-COMMITMENT-LETTER.md`](pitch/VENDOR-COMMITMENT-LETTER.md). Locked 2.0% commission acceptance. |
-| 6 | Unit economics reference | [x] | [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) — 3-tier unit economics, break-even sensitivity, dual-track budget |
+| 5 | Vendor commitment letters | [x] template · [ ] collected | Template + WhatsApp version + portfolio tracker: [`pitch/VENDOR-COMMITMENT-LETTER.md`](pitch/VENDOR-COMMITMENT-LETTER.md). Records 2.5% commission acceptance and whether buyers would accept the 1.5% fee. |
+| 6 | Unit economics reference | [x] | [`pitch/FINANCIAL-MODEL.md`](pitch/FINANCIAL-MODEL.md) — per-order economics, staged capital plan (low/base/high), break-even sensitivity, sources |
 | 7 | Regulatory & custody brief | [x] | [`pitch/BANK-AND-PARTNER-BRIEF.md`](pitch/BANK-AND-PARTNER-BRIEF.md) — P0→P3 custody chain, trust account, compliance controls |
 | 8 | Vendor onboarding flyer | [x] | [`pitch/VENDOR-ONE-PAGER.md`](pitch/VENDOR-ONE-PAGER.md) — High-conversion sales flyer for pilot merchants |
 
