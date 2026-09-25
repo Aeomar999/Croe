@@ -15,7 +15,7 @@ export interface PaymentRail {
     transactionId: string;
     outcome: "PAID" | "FAILED" | "CANCELLED";
     amount: Money;
-  };
+  } | null;
 
   initiateDisbursement(p: {
     msisdn: string;

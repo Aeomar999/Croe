@@ -1,9 +1,37 @@
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
+import crypto from "crypto";
 import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport } from "../types/domain.js";
 import type { CustodyProvider } from "./custody-provider.js";
 import type { PaymentRail } from "./payment-rail.js";
 import { toMinor, fromMinor } from "../services/money.js";
+
+interface PaystackBalanceResponse {
+  data: Array<{ currency: string; balance: number }>;
+}
+
+interface PaystackChargeResponse {
+  data: { reference: string };
+}
+
+interface PaystackRecipientResponse {
+  data: { recipient_code: string };
+}
+
+interface PaystackTransferResponse {
+  data: { reference: string };
+}
+
+interface PaystackWebhookPayload {
+  event: string;
+  data: {
+    reference?: string;
+    transfer_code?: string;
+    amount?: number;
+    currency?: string;
+    [key: string]: unknown;
+  };
+}
 
 function getHeaders() {
   return {
@@ -29,9 +57,18 @@ export class PaystackCustodyProvider implements CustodyProvider {
       reference: `rel-${p.transactionId}`,
     });
 
+    if (result.status === "FAILED") {
+      return {
+        payoutId: result.providerRef,
+        status: "FAILED",
+        providerRef: result.providerRef,
+        failureReason: "Paystack transfer initiation failed",
+      };
+    }
+
     return {
       payoutId: result.providerRef,
-      status: "SUCCESS",
+      status: "INITIATED",
       providerRef: result.providerRef,
     };
   }
@@ -44,9 +81,18 @@ export class PaystackCustodyProvider implements CustodyProvider {
       reference: `ref-${p.transactionId}`,
     });
 
+    if (result.status === "FAILED") {
+      return {
+        payoutId: result.providerRef,
+        status: "FAILED",
+        providerRef: result.providerRef,
+        failureReason: "Paystack transfer initiation failed",
+      };
+    }
+
     return {
       payoutId: result.providerRef,
-      status: "SUCCESS",
+      status: "INITIATED",
       providerRef: result.providerRef,
     };
   }
@@ -58,8 +104,8 @@ async getBalance(currency: Currency): Promise<Money> {
     if (!res.ok) {
       throw new Error(`Paystack getBalance failed: ${res.statusText}`);
     }
-    const data = await (res.json() as Promise<any>);
-    const balanceObj = data.data.find((b: any) => b.currency === currency);
+    const data = await res.json() as PaystackBalanceResponse;
+    const balanceObj = data.data.find((b) => b.currency === currency);
     const amountInPesewas = balanceObj ? balanceObj.balance : 0;
 
     return {
@@ -112,36 +158,78 @@ export class PaystackPaymentRail implements PaymentRail {
       throw new Error("Paystack deposit failed");
     }
 
-    const data = await (res.json() as Promise<any>);
+    const data = await res.json() as PaystackChargeResponse;
     return { providerRef: data.data.reference };
   }
 
-  verifyWebhook(_rawBody: Buffer, _headers: Record<string, string>): boolean {
+  verifyWebhook(rawBody: Buffer, headers: Record<string, string>): boolean {
+    const signature = headers["x-paystack-signature"] as string | undefined;
+    if (!signature) {
+      return false;
+    }
+
+    const expected = crypto
+      .createHmac("sha512", env.MOMO_WEBHOOK_SECRET)
+      .update(rawBody)
+      .digest("hex");
+
+    const sigBuf = Buffer.from(signature, "hex");
+    const expectedBuf = Buffer.from(expected, "hex");
+
+    if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+      logger.warn("Invalid Paystack webhook signature");
+      return false;
+    }
+
     return true;
   }
 
-parseWebhook(payload: unknown): { providerRef: string; transactionId: string; outcome: "PAID" | "FAILED" | "CANCELLED"; amount: Money } {
-    const p = payload as Record<string, any>;
-    let outcome: "PAID" | "FAILED" | "CANCELLED" = "FAILED";
+  parseWebhook(payload: unknown): { providerRef: string; transactionId: string; outcome: "PAID" | "FAILED" | "CANCELLED"; amount: Money } | null {
+    const p = payload as PaystackWebhookPayload;
+    const data = p.data ?? {};
+    const event = p.event;
 
-    // We only process charge.success for deposits (AWAITING_DEPOSIT -> FUNDS_SECURED)
-    if (p.event === "charge.success") {
-      outcome = "PAID";
+    // Handle deposit webhooks (charge.success)
+    if (event === "charge.success") {
+      const amountInPesewas = BigInt(data.amount ?? 0);
+      const amountFormatted = fromMinor(amountInPesewas);
+
+      return {
+        providerRef: data.reference ?? String(Date.now()),
+        transactionId: data.reference ?? "",
+        outcome: "PAID",
+        amount: {
+          amount: amountFormatted,
+          currency: (data.currency as Currency) || "GHS",
+        },
+      };
     }
 
-    const data = p.data || {};
-    const amountInPesewas = BigInt(data.amount ?? 0);
-    const amountFormatted = fromMinor(amountInPesewas);
+    // Handle transfer webhooks (transfer.success, transfer.failed, transfer.reversed)
+    if (event === "transfer.success" || event === "transfer.failed" || event === "transfer.reversed") {
+      const amountInPesewas = BigInt(data.amount ?? 0);
+      const amountFormatted = fromMinor(amountInPesewas);
 
-    return {
-      providerRef: data.reference || String(Date.now()),
-      transactionId: data.reference || "",
-      outcome,
-      amount: {
-        amount: amountFormatted,
-        currency: data.currency || "GHS",
-      },
-    };
+      let outcome: "PAID" | "FAILED" | "CANCELLED" = "FAILED";
+      if (event === "transfer.success") {
+        outcome = "PAID";
+      } else if (event === "transfer.reversed") {
+        outcome = "CANCELLED";
+      }
+
+      return {
+        providerRef: data.reference ?? data.transfer_code ?? String(Date.now()),
+        transactionId: data.reference ?? "",
+        outcome,
+        amount: {
+          amount: amountFormatted,
+          currency: (data.currency as Currency) || "GHS",
+        },
+      };
+    }
+
+    // Non-money webhook events we don't process for escrow state
+    return null;
   }
 
   async initiateDisbursement(p: { msisdn: string; amount: Money; reference: string }): Promise<{ providerRef: string; status: "INITIATED" | "FAILED" }> {
@@ -167,7 +255,7 @@ parseWebhook(payload: unknown): { providerRef: string; transactionId: string; ou
       return { providerRef: p.reference, status: "FAILED" };
     }
 
-    const recipientData = await (recipientRes.json() as Promise<any>);
+    const recipientData = await recipientRes.json() as PaystackRecipientResponse;
     const recipientCode = recipientData.data.recipient_code;
 
     const transferPayload = {
@@ -190,7 +278,7 @@ parseWebhook(payload: unknown): { providerRef: string; transactionId: string; ou
       return { providerRef: p.reference, status: "FAILED" };
     }
 
-    const transferData = await (transferRes.json() as Promise<any>);
+    const transferData = await transferRes.json() as PaystackTransferResponse;
     return {
       providerRef: transferData.data.reference,
       status: "INITIATED",

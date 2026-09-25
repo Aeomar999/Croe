@@ -14,6 +14,8 @@ Triggered by `DELIVERED_CONFIRMED`, auto-release timer, or a dispute resolution 
 - Insert `payouts` row (`direction=RELEASE`, `INITIATED`).
 - Call `releaseTo({transactionId, vendorMsisdn, amount, commission})`.
 - **On provider `SUCCESS` only**, within one DB transaction: mark `payouts.SUCCESS`, append ledger `FUNDS_RELEASED` (`amount_delta = −amount`), set `FUNDS_RELEASED`.
+- **On provider `INITIATED`**: record `provider_ref`, keep `payouts.INITIATED`, **do not** write ledger or change escrow state. Final completion happens via `transfer.success` webhook.
+- **On provider `FAILED`**: mark `payouts.FAILED`, append ledger `PAYOUT_FAILED`, escrow state unchanged.
 - Commission remains in the pool as Croe revenue (swept separately, [`12`](06-Money-Custody-and-Settlement.md) §2).
 
 ## 3. Refund (buyer)
@@ -23,13 +25,31 @@ Triggered by a dispute resolution `REFUND_BUYER` (auto or L3).
 - Insert `payouts` row (`direction=REFUND`, `INITIATED`).
 - Call `refundTo({transactionId, buyerMsisdn, amount})` (no commission).
 - **On `SUCCESS` only:** mark `payouts.SUCCESS`, append ledger `REFUND_ISSUED` (`amount_delta = −amount`), set `FUNDS_REFUNDED`.
+- **On provider `INITIATED`**: record `provider_ref`, keep `payouts.INITIATED`, **do not** write ledger or change escrow state. Final completion happens via `transfer.success` webhook.
+- **On provider `FAILED`**: mark `payouts.FAILED`, append ledger `PAYOUT_FAILED`, escrow state unchanged.
 
-## 4. Payout State Machine
+## 4. Transfer Webhook Completion (Paystack)
+
+Paystack transfers are asynchronous. After `INITIATED`, the final outcome arrives via webhook:
+
+| Webhook Event | Action |
+|---------------|--------|
+| `transfer.success` | Mark `payouts.SUCCESS`, write `FUNDS_RELEASED`/`REFUND_ISSUED` ledger, transition escrow to `FUNDS_RELEASED`/`FUNDS_REFUNDED` |
+| `transfer.failed` | Mark `payouts.FAILED` with `failure_reason="Transfer failed"`, write `PAYOUT_FAILED` ledger |
+| `transfer.reversed` | Mark `payouts.FAILED` with `failure_reason="Transfer reversed by Paystack"`, write `PAYOUT_FAILED` ledger |
+
+All webhook processing:
+1. Verifies HMAC-SHA512 signature over raw body (WH-01)
+2. Redis SETNX + `webhook_inbox` durable dedup (12-Webhooks-and-Idempotency.md §4)
+3. Finds `payouts` row by `provider_ref` with `FOR UPDATE`
+4. Completes in single DB transaction
+
+## 5. Payout State Machine
 
 ```mermaid
 stateDiagram-v2
     [*] --> INITIATED
-    INITIATED --> SUCCESS : provider confirms
+    INITIATED --> SUCCESS : provider confirms (sync or webhook)
     INITIATED --> FAILED : provider rejects
     FAILED --> RETRYING : retry policy
     RETRYING --> SUCCESS
@@ -38,7 +58,7 @@ stateDiagram-v2
     FAILED --> [*]
 ```
 
-## 5. Error & Edge Cases
+## 6. Error & Edge Cases
 
 | Case | Handling |
 | :--- | :--- |
@@ -48,16 +68,18 @@ stateDiagram-v2
 | Double release attempt | `idx_single_success_payout` blocks a 2nd `SUCCESS` per `(transaction_id, direction)`. |
 | Duplicate resolution triggers | `Idempotency-Key` + existing terminal state → no-op. |
 | Reversal needed after success | Not automatic; manual L3 action with full audit (funds already left the pool). |
+| Transfer webhook for unknown provider_ref | Log warning, no state change (idempotent no-op). |
 
-## 6. Idempotency & Ordering (must-follow)
+## 7. Idempotency & Ordering (must-follow)
 
 - The `−amount` ledger event and `payouts.SUCCESS` are written **only after** the provider confirms success, in the **same** DB transaction (payout-ordering rule, [`12`](06-Money-Custody-and-Settlement.md) §6).
 - Every disbursement path requires an `Idempotency-Key`; replays return the original result.
 - Failed payouts never mutate the sub-ledger, so the transaction remains cleanly retriable.
 
-## 7. Acceptance Criteria
+## 8. Acceptance Criteria
 
 - No float leaves the pool without a corresponding `−amount` ledger event and a `SUCCESS` `payouts` row.
 - A failed payout leaves the transaction's held balance unchanged and retriable.
 - Never more than one successful payout per direction per transaction.
 - Commission math uses `NUMERIC(15,2)`; vendor net + commission == amount, exactly.
+- `INITIATED` payouts are completed via webhook; no money moves without ledger entry.

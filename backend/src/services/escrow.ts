@@ -459,7 +459,8 @@ export async function processDepositWebhook(p: {
  * 2. Calculate commission
  * 3. Call CustodyProvider.releaseTo() — external payout
  * 4. On SUCCESS: write ledger + update state + record payout row (one DB txn)
- * 5. On FAILED: record failed payout, do NOT write release ledger
+ * 5. On INITIATED: record provider_ref, keep payout INITIATED, don't write ledger yet
+ * 6. On FAILED: record failed payout, do NOT write release ledger
  *
  * Uses idx_single_success_payout to prevent double-release.
  */
@@ -486,20 +487,20 @@ export async function releaseFunds(p: {
     validateTransition(tx.current_status, "FUNDS_RELEASED");
 
     // Commission from the market's fee schedule, in exact pesewas (FIN-01)
-  const { commission, vendorNet } = calculateFees(
-    tx.amount,
-    feeRatesFor(env.FEE_SCHEDULE, tx.currency),
-  );
-
-  // DB-04: Trap 23505 — idx_single_success_payout prevents double-release
-  try {
-    // Record payout INITIATED
-    await client.query(
-      `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
-       VALUES ($1, 'RELEASE', 'unknown', $2, $3, 'INITIATED')`,
-      [p.transactionId, vendorNet, tx.currency],
+    const { commission, vendorNet } = calculateFees(
+      tx.amount,
+      feeRatesFor(env.FEE_SCHEDULE, tx.currency),
     );
-  } catch (err: unknown) {
+
+    // DB-04: Trap 23505 — idx_single_success_payout prevents double-release
+    try {
+      // Record payout INITIATED
+      await client.query(
+        `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
+         VALUES ($1, 'RELEASE', 'unknown', $2, $3, 'INITIATED')`,
+        [p.transactionId, vendorNet, tx.currency],
+      );
+    } catch (err: unknown) {
       if (
         typeof err === "object" &&
         err !== null &&
@@ -548,6 +549,13 @@ export async function releaseFunds(p: {
         currency: tx.currency,
         forensic: p.forensic,
       });
+    } else if (result.status === "INITIATED") {
+      // Transfer initiated but not yet completed — store provider_ref, keep INITIATED
+      // Don't write ledger, don't change escrow state
+      await client.query(
+        `UPDATE payouts SET provider_ref = $1 WHERE transaction_id = $2 AND direction = 'RELEASE' AND status = 'INITIATED'`,
+        [result.providerRef, p.transactionId],
+      );
     } else {
       // Payout failed — update payout row, do NOT write release ledger
       await client.query(
@@ -592,7 +600,8 @@ export async function releaseFunds(p: {
  * 1. Validate state (must be RESOLVED_AUTO or UNDER_HUMAN_REVIEW)
  * 2. Call CustodyProvider.refundTo() — external refund
  * 3. On SUCCESS: write ledger + update state + record payout row (one DB txn)
- * 4. On FAILED: record failed payout, do NOT write refund ledger
+ * 4. On INITIATED: record provider_ref, keep payout INITIATED, don't write ledger yet
+ * 5. On FAILED: record failed payout, do NOT write refund ledger
  */
 export async function refundFunds(p: {
   transactionId: string;
@@ -666,6 +675,13 @@ export async function refundFunds(p: {
         currency: tx.currency,
         forensic: p.forensic,
       });
+    } else if (result.status === "INITIATED") {
+      // Transfer initiated but not yet completed — store provider_ref, keep INITIATED
+      // Don't write ledger, don't change escrow state
+      await client.query(
+        `UPDATE payouts SET provider_ref = $1 WHERE transaction_id = $2 AND direction = 'REFUND' AND status = 'INITIATED'`,
+        [result.providerRef, p.transactionId],
+      );
     } else {
       await client.query(
         `UPDATE payouts SET status = 'FAILED', failure_reason = $1 WHERE transaction_id = $2 AND direction = 'REFUND' AND status = 'INITIATED'`,
@@ -694,6 +710,126 @@ export async function refundFunds(p: {
     if (err instanceof InvalidTransitionError) {
       throw new AppError(409, `Cannot refund: transaction is not in RESOLVED_AUTO or UNDER_HUMAN_REVIEW`, "INVALID_STATE_TRANSITION");
     }
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Process a transfer webhook (transfer.success, transfer.failed, transfer.reversed).
+ * Completes the payout that was initiated by releaseFunds or refundFunds.
+ *
+ * Flow:
+ * 1. Verify HMAC signature (done by caller)
+ * 2. Parse webhook to get providerRef, outcome, amount
+ * 3. Redis SETNX fast dedup + webhook_inbox durable dedup
+ * 4. Find the payout row by provider_ref
+ * 5. On PAID: mark payout SUCCESS, write ledger, transition escrow state
+ * 6. On FAILED/CANCELLED: mark payout FAILED, write PAYOUT_FAILED ledger
+ * 7. All in one DB transaction with SELECT FOR UPDATE
+ */
+export async function processTransferWebhook(p: {
+  providerRef: string;
+  direction: "RELEASE" | "REFUND";
+  outcome: "PAID" | "FAILED" | "CANCELLED";
+  forensic?: ForensicContext;
+}): Promise<void> {
+  const client = await getTransactionClient();
+  try {
+    await client.query("BEGIN");
+
+    // Find the payout row by provider_ref
+    const { rows: payoutRows } = await client.query<{
+      payout_id: string;
+      transaction_id: string;
+      direction: string;
+      amount: string;
+      currency: string;
+      status: string;
+    }>(
+      `SELECT payout_id, transaction_id, direction, amount, currency, status
+       FROM payouts
+       WHERE provider_ref = $1 AND direction = $2 AND status = 'INITIATED'
+       FOR UPDATE`,
+      [p.providerRef, p.direction],
+    );
+
+    const payout = payoutRows[0];
+    if (!payout) {
+      // No matching INITIATED payout — could be duplicate webhook or unknown reference
+      await client.query("ROLLBACK");
+      return;
+    }
+
+    if (p.outcome === "PAID") {
+      // Mark payout SUCCESS
+      await client.query(
+        `UPDATE payouts SET status = 'SUCCESS', updated_at = NOW() WHERE payout_id = $1`,
+        [payout.payout_id],
+      );
+
+      // Get the original transaction amount for ledger (full amount, not vendor net)
+      const { rows: txRows } = await client.query<{ amount: string; currency: string }>(
+        `SELECT amount, currency FROM escrow_transactions WHERE transaction_id = $1`,
+        [payout.transaction_id],
+      );
+      const tx = txRows[0];
+      if (!tx) {
+        await client.query("ROLLBACK");
+        return;
+      }
+
+      // Transition escrow state
+      const newStatus = p.direction === "RELEASE" ? "FUNDS_RELEASED" : "FUNDS_REFUNDED";
+      const ledgerEvent = p.direction === "RELEASE" ? "FUNDS_RELEASED" : "REFUND_ISSUED";
+
+      await client.query(
+        `UPDATE escrow_transactions SET current_status = $1 WHERE transaction_id = $2`,
+        [newStatus, payout.transaction_id],
+      );
+
+      // Append ledger entry (AUD-01) — full amount delta (commission stays in pool)
+      await appendLedger(client, {
+        transactionId: payout.transaction_id,
+        actorId: null, // System
+        eventType: ledgerEvent,
+        previousStatus: p.direction === "RELEASE" ? "DELIVERED_CONFIRMED" : "RESOLVED_AUTO",
+        newStatus,
+        amountDelta: `-${tx.amount}`,
+        currency: tx.currency,
+        forensic: p.forensic,
+      });
+    } else {
+      // Transfer failed or reversed — mark payout FAILED
+      const failureReason = p.outcome === "CANCELLED" ? "Transfer reversed by Paystack" : "Transfer failed";
+
+      await client.query(
+        `UPDATE payouts SET status = 'FAILED', failure_reason = $1, updated_at = NOW() WHERE payout_id = $2`,
+        [failureReason, payout.payout_id],
+      );
+
+      // Append PAYOUT_FAILED ledger entry
+      // Get current escrow status for the ledger
+      const { rows: escrowRows } = await client.query<{ current_status: string }>(
+        `SELECT current_status FROM escrow_transactions WHERE transaction_id = $1`,
+        [payout.transaction_id],
+      );
+      const currentStatus = escrowRows[0]?.current_status ?? "UNKNOWN";
+
+      await appendLedger(client, {
+        transactionId: payout.transaction_id,
+        actorId: null,
+        eventType: "PAYOUT_FAILED",
+        previousStatus: currentStatus as EscrowState,
+        newStatus: currentStatus as EscrowState,
+        forensic: p.forensic,
+      });
+    }
+
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
     throw err;
   } finally {
     client.release();

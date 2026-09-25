@@ -144,8 +144,9 @@ export class SandboxPaymentRail implements PaymentRail {
     transactionId: string;
     outcome: "PAID" | "FAILED" | "CANCELLED";
     amount: Money;
-  } {
+  } | null {
     const p = payload as Record<string, unknown>;
+    // Sandbox only simulates PAID outcomes
     return {
       providerRef: String(p.providerRef ?? `SANDBOX-WEBHOOK-${Date.now()}`),
       transactionId: String(p.transactionId ?? ""),

@@ -1,7 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import type { Request, Response } from "express";
 import { verifyMoMoWebhook } from "../middleware/webhook-hmac.js";
-import { processDepositWebhook } from "../services/escrow.js";
+import { processDepositWebhook, processTransferWebhook } from "../services/escrow.js";
 import { enqueueWebhook, markWebhookProcessed } from "../services/webhook-inbox.js";
 import { paymentRail } from "../providers/index.js";
 import { dedupGate } from "../config/redis.js";
@@ -28,6 +28,12 @@ router.post(
       // 2. Parse webhook payload
       const parsed = paymentRail.parseWebhook(req.body);
 
+      // If parseWebhook returns null, it's a non-money event we don't process
+      if (!parsed) {
+        logger.info({ event: (req.body as Record<string, any>)?.event }, "Non-processable webhook event, ACKed only");
+        return;
+      }
+
       // 3. Redis SETNX fast dedup gate (§4 gate 1)
       const { isNew } = await dedupGate(`idemp:${parsed.providerRef}`);
       if (!isNew) {
@@ -48,8 +54,11 @@ router.post(
         return;
       }
 
-      // 5. Process the deposit if outcome is PAID
-      if (parsed.outcome === "PAID") {
+      // 5. Process based on event type
+      const event = (req.body as Record<string, any>)?.event;
+
+      if (event === "charge.success" && parsed.outcome === "PAID") {
+        // Deposit webhook
         await processDepositWebhook({
           transactionId: parsed.transactionId,
           forensic: req.forensic,
@@ -64,10 +73,30 @@ router.post(
           { transactionId: parsed.transactionId, providerRef: parsed.providerRef },
           "Deposit webhook processed successfully",
         );
+      } else if (event === "transfer.success" || event === "transfer.failed" || event === "transfer.reversed") {
+        // Transfer webhook (payout completion)
+        const direction = parsed.providerRef.startsWith("rel-") ? "RELEASE" : "REFUND";
+
+        await processTransferWebhook({
+          providerRef: parsed.providerRef,
+          direction,
+          outcome: parsed.outcome,
+          forensic: req.forensic,
+        });
+
+        await markWebhookProcessed({
+          provider: "momo",
+          providerRef: parsed.providerRef,
+        });
+
+        logger.info(
+          { providerRef: parsed.providerRef, direction, outcome: parsed.outcome },
+          "Transfer webhook processed successfully",
+        );
       } else {
         logger.warn(
-          { outcome: parsed.outcome, transactionId: parsed.transactionId },
-          "Non-PAID webhook outcome, marking processed without state change",
+          { outcome: parsed.outcome, transactionId: parsed.transactionId, event },
+          "Non-processable webhook outcome, marking processed without state change",
         );
         await markWebhookProcessed({
           provider: "momo",

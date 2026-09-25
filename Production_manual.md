@@ -50,6 +50,7 @@
 | 9 | Automated daily Postgres backups configured with PITR | [ ] | |
 | 10 | Object storage versioning enabled for evidence | [ ] | |
 | 11 | Log aggregation configured (structured JSON → external store) | [ ] | |
+| 12 | Paystack webhook URL configured (`https://<croe-host>/v1/webhooks/momo-callback`) for `charge.success`, `transfer.success`, `transfer.failed`, `transfer.reversed` events | [ ] | Configure in Paystack dashboard |
 
 ### 1.3 Secrets & Configuration
 
@@ -67,8 +68,9 @@
 | 8 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | Platform secret store | [ ] | |
 | 9 | `LLM_URL` / `LLM_MODEL` | Platform secret store | [ ] | |
 | 10 | `CUSTODY_PHASE` | Platform secret store (set to `P1` for pilot) | [ ] | |
-| 11 | `NODE_ENV` | Platform config (set to `production`) | [ ] | |
-| 12 | `CORS_ORIGIN` | Platform config (locked to production domain) | [ ] | |
+| 11 | `MOMO_WEBHOOK_SECRET` | Platform secret store (shared secret for Paystack HMAC-SHA512) | [ ] | Used for both deposit and transfer webhooks |
+| 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | |
+| 13 | `CORS_ORIGIN` | Platform config (locked to production domain) | [ ] | |
 
 ### 1.4 Security Audit
 
