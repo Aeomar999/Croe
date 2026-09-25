@@ -1,1 +1,1 @@
-module.exports = { modelName: "MockDevice" };
+export default { modelName: "MockDevice" };

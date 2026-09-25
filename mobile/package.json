@@ -49,6 +49,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@expo/ngrok": "^4.1.3",
     "@testing-library/react-native": "^14.0.1",
     "@types/detox": "^17.14.3",

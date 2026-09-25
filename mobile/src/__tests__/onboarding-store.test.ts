@@ -9,6 +9,7 @@
  *  - complete(null) — the Skip path — records seen without a role
  *  - a SecureStore read failure still resolves hydration
  */
+/// <reference path="./global.d.ts" />
 // SecureStore mock provided by jest.config.js moduleNameMapper
 import SecureStore from 'expo-secure-store';
 import { useOnboardingStore } from '../stores/onboarding';
@@ -23,8 +24,8 @@ beforeEach(() => {
 
 describe('Onboarding store — hydrate', () => {
   it('reports "not seen" when nothing is stored', async () => {
-    const originalDev = global.__DEV__;
-    global.__DEV__ = false as any;
+    const originalDev = (global as any).__DEV__;
+    (global as any).__DEV__ = false;
 
     await useOnboardingStore.getState().hydrate();
 
@@ -33,12 +34,12 @@ describe('Onboarding store — hydrate', () => {
     expect(state.role).toBeNull();
     expect(state.hydrated).toBe(true);
 
-    global.__DEV__ = originalDev;
+    (global as any).__DEV__ = originalDev;
   });
 
   it('restores a stored flag and role', async () => {
-    const originalDev = global.__DEV__;
-    global.__DEV__ = false as any;
+    const originalDev = (global as any).__DEV__;
+    (global as any).__DEV__ = false;
 
     await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'true');
     await SecureStore.setItemAsync('croe.onboarding.role.v2', 'buyer');
@@ -49,12 +50,12 @@ describe('Onboarding store — hydrate', () => {
     expect(state.seen).toBe(true);
     expect(state.role).toBe('buyer');
     
-    global.__DEV__ = originalDev;
+    (global as any).__DEV__ = originalDev;
   });
 
   it('discards a role value that is not one of the two roles', async () => {
-    const originalDev = global.__DEV__;
-    global.__DEV__ = false as any;
+    const originalDev = (global as any).__DEV__;
+    (global as any).__DEV__ = false;
 
     await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'true');
     await SecureStore.setItemAsync('croe.onboarding.role.v2', 'administrator');
@@ -63,12 +64,12 @@ describe('Onboarding store — hydrate', () => {
 
     expect(useOnboardingStore.getState().role).toBeNull();
 
-    global.__DEV__ = originalDev;
+    (global as any).__DEV__ = originalDev;
   });
 
   it('treats any value other than "true" as not seen', async () => {
-    const originalDev = global.__DEV__;
-    global.__DEV__ = false as any;
+    const originalDev = (global as any).__DEV__;
+    (global as any).__DEV__ = false;
 
     await SecureStore.setItemAsync('croe.onboarding.seen.v2', 'yes');
 
@@ -76,7 +77,7 @@ describe('Onboarding store — hydrate', () => {
 
     expect(useOnboardingStore.getState().seen).toBe(false);
 
-    global.__DEV__ = originalDev;
+    (global as any).__DEV__ = originalDev;
   });
 
   it('still finishes hydrating when SecureStore throws', async () => {
@@ -121,10 +122,8 @@ describe('Onboarding store — complete', () => {
   });
 
   it('survives a round trip through hydrate', async () => {
-    // @ts-ignore - Mock __DEV__ to false so it doesn't wipe state
-    const originalDev = global.__DEV__;
-    // @ts-ignore
-    global.__DEV__ = false;
+    const originalDev = (global as any).__DEV__;
+    (global as any).__DEV__ = false;
 
     try {
       await useOnboardingStore.getState().complete('buyer');
@@ -135,8 +134,7 @@ describe('Onboarding store — complete', () => {
       expect(useOnboardingStore.getState().seen).toBe(true);
       expect(useOnboardingStore.getState().role).toBe('buyer');
     } finally {
-      // @ts-ignore
-      global.__DEV__ = originalDev;
+      (global as any).__DEV__ = originalDev;
     }
   });
 });

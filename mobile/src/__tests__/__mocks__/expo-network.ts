@@ -1,1 +1,1 @@
-module.exports = { getNetworkStateAsync: jest.fn().mockResolvedValue({ type: "UNKNOWN" }) };
+export default { getNetworkStateAsync: jest.fn().mockResolvedValue({ type: "UNKNOWN" }) };
