@@ -123,6 +123,7 @@ Valid values for `dispute_cases.ai_recommended_action` and the LLM output field 
 | **Disbursement / Payout** | Moving funds out to a vendor (release) or buyer (refund) MoMo wallet. |
 | **Reconciliation** | Verifying that pooled balance == sum of sub-ledger balances == partner/aggregator statement. |
 | **Commission** | Croe's percentage fee deducted on release, in `NUMERIC(15,2)`. |
+| **Buyer protection fee** | Croe's percentage fee paid by the buyer, added to the amount collected at deposit and returned with the refund on `FUNDS_REFUNDED`. Together with the commission it makes up the all-in fee ([`03-Business-Model-and-Costs.md`](03-Business-Model-and-Costs.md) §1). |
 
 ---
 
