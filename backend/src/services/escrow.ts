@@ -5,6 +5,9 @@ import type { EscrowState, LedgerEvent, Carrier, Money } from "../types/domain.j
 import type { ForensicContext } from "../middleware/forensic.js";
 import { AppError } from "../middleware/error-handler.js";
 import { paymentRail, custodyProvider } from "../providers/index.js";
+import { env } from "../config/env.js";
+import { feeRatesFor } from "../config/fees.js";
+import { calculateFees } from "./money.js";
 
 const DEPOSIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 const DISPUTE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h post-ship
@@ -448,23 +451,6 @@ export async function processDepositWebhook(p: {
   }
 }
 
-// ─── Commission Constants ──────────────────────────────────
-const COMMISSION_RATE = 0.02; // 2% commission (P0 sandbox)
-
-/**
- * Calculate commission and vendor net from amount.
- * All values are NUMERIC(15,2) strings — no float arithmetic in DB.
- */
-function calculateCommission(amountStr: string): {
-  commission: string;
-  vendorNet: string;
-} {
-  const amount = parseFloat(amountStr);
-  const commission = (amount * COMMISSION_RATE).toFixed(2);
-  const vendorNet = (amount - parseFloat(commission)).toFixed(2);
-  return { commission, vendorNet };
-}
-
 /**
  * Release funds to vendor (MONEY-01: pay then ledger).
  *
@@ -499,18 +485,21 @@ export async function releaseFunds(p: {
     // Validate transition
     validateTransition(tx.current_status, "FUNDS_RELEASED");
 
-    // Calculate commission (FIN-01: NUMERIC(15,2) strings)
-    const { commission, vendorNet } = calculateCommission(tx.amount);
+    // Commission from the market's fee schedule, in exact pesewas (FIN-01)
+  const { commission, vendorNet } = calculateFees(
+    tx.amount,
+    feeRatesFor(env.FEE_SCHEDULE, tx.currency),
+  );
 
-    // DB-04: Trap 23505 — idx_single_success_payout prevents double-release
-    try {
-      // Record payout INITIATED
-      await client.query(
-        `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
-         VALUES ($1, 'RELEASE', 'unknown', $2, $3, 'INITIATED')`,
-        [p.transactionId, vendorNet, tx.currency],
-      );
-    } catch (err: unknown) {
+  // DB-04: Trap 23505 — idx_single_success_payout prevents double-release
+  try {
+    // Record payout INITIATED
+    await client.query(
+      `INSERT INTO payouts (transaction_id, direction, recipient_msisdn, amount, currency, status)
+       VALUES ($1, 'RELEASE', 'unknown', $2, $3, 'INITIATED')`,
+      [p.transactionId, vendorNet, tx.currency],
+    );
+  } catch (err: unknown) {
       if (
         typeof err === "object" &&
         err !== null &&

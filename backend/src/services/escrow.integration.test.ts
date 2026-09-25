@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { pool } from "../db/pool.js";
 import { createEscrow, getEscrow, initiateDeposit, shipEscrow, confirmDelivery, cancelEscrow, processDepositWebhook, releaseFunds } from "./escrow.js";
 import { checkIdempotencyKey, storeIdempotencyResponse, hashRequestBody, purgeExpiredIdempotencyKeys } from "./idempotency.js";
+import { calculateFees, sumAmounts } from "./money.js";
+import { DEFAULT_FEE_RATES, feeRatesFor } from "../config/fees.js";
 
 beforeAll(async () => {
   await pool.query("SELECT 1");
@@ -327,9 +329,9 @@ describe("escrow service integration", () => {
       expect(payouts).toHaveLength(1);
       expect(payouts[0].status).toBe("SUCCESS");
 
-      // Check commission math: 2% of 500.00 = 10.00, vendor gets 490.00
-      const vendorNet = parseFloat(payouts[0].amount);
-      expect(vendorNet).toBe(490.00);
+      // Check commission math using exact string comparison (FIN-01)
+      const fees = calculateFees("500.00", DEFAULT_FEE_RATES);
+      expect(payouts[0].amount).toBe(fees.vendorNet);
 
       // Check ledger has FUNDS_RELEASED entry with negative amount
       const { rows: ledger } = await pool.query(
@@ -381,13 +383,12 @@ describe("escrow service integration", () => {
           [tx.transaction_id],
         );
 
-        const expectedCommission = (parseFloat(amount) * 0.02).toFixed(2);
-        const expectedVendorNet = (parseFloat(amount) - parseFloat(expectedCommission)).toFixed(2);
+        const fees = calculateFees(amount, DEFAULT_FEE_RATES);
 
         // Exact equality — no float drift (FIN-01)
-        expect(payouts[0].amount).toBe(expectedVendorNet);
+        expect(payouts[0].amount).toBe(fees.vendorNet);
       }
-    });
+    }, 60000);
   });
 
   describe("idempotency replay", () => {

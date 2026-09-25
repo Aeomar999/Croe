@@ -3,6 +3,7 @@ import { logger } from "../config/logger.js";
 import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport } from "../types/domain.js";
 import type { CustodyProvider } from "./custody-provider.js";
 import type { PaymentRail } from "./payment-rail.js";
+import { toMinor, fromMinor } from "../services/money.js";
 
 function getHeaders() {
   return {
@@ -50,7 +51,7 @@ export class PaystackCustodyProvider implements CustodyProvider {
     };
   }
 
-  async getBalance(currency: Currency): Promise<Money> {
+async getBalance(currency: Currency): Promise<Money> {
     const res = await fetch(`${env.AGGREGATOR_BASE_URL}/balance`, {
       headers: getHeaders(),
     });
@@ -60,9 +61,9 @@ export class PaystackCustodyProvider implements CustodyProvider {
     const data = await (res.json() as Promise<any>);
     const balanceObj = data.data.find((b: any) => b.currency === currency);
     const amountInPesewas = balanceObj ? balanceObj.balance : 0;
-    
+
     return {
-      amount: (amountInPesewas / 100).toFixed(2),
+      amount: fromMinor(BigInt(amountInPesewas)),
       currency,
     };
   }
@@ -81,7 +82,7 @@ export class PaystackCustodyProvider implements CustodyProvider {
 
 export class PaystackPaymentRail implements PaymentRail {
   async initiateDeposit(p: { transactionId: string; msisdn: string; amount: Money; carrier: Carrier }): Promise<{ providerRef: string }> {
-    const amountInPesewas = Math.round(parseFloat(p.amount.amount) * 100);
+    const amountInPesewas = toMinor(p.amount.amount);
     
     // Map our carrier to Paystack's provider string
     let provider = "mtn";
@@ -90,7 +91,7 @@ export class PaystackPaymentRail implements PaymentRail {
 
     const payload = {
       email: `customer-${p.msisdn}@croe.io`,
-      amount: amountInPesewas,
+      amount: amountInPesewas.toString(),
       currency: p.amount.currency,
       mobile_money: {
         phone: p.msisdn,
@@ -119,17 +120,18 @@ export class PaystackPaymentRail implements PaymentRail {
     return true;
   }
 
-  parseWebhook(payload: unknown): { providerRef: string; transactionId: string; outcome: "PAID" | "FAILED" | "CANCELLED"; amount: Money } {
+parseWebhook(payload: unknown): { providerRef: string; transactionId: string; outcome: "PAID" | "FAILED" | "CANCELLED"; amount: Money } {
     const p = payload as Record<string, any>;
     let outcome: "PAID" | "FAILED" | "CANCELLED" = "FAILED";
-    
+
     // We only process charge.success for deposits (AWAITING_DEPOSIT -> FUNDS_SECURED)
     if (p.event === "charge.success") {
       outcome = "PAID";
     }
 
     const data = p.data || {};
-    const amountFormatted = data.amount ? (data.amount / 100).toFixed(2) : "0.00";
+    const amountInPesewas = BigInt(data.amount ?? 0);
+    const amountFormatted = fromMinor(amountInPesewas);
 
     return {
       providerRef: data.reference || String(Date.now()),
@@ -143,7 +145,7 @@ export class PaystackPaymentRail implements PaymentRail {
   }
 
   async initiateDisbursement(p: { msisdn: string; amount: Money; reference: string }): Promise<{ providerRef: string; status: "INITIATED" | "FAILED" }> {
-    const amountInPesewas = Math.round(parseFloat(p.amount.amount) * 100);
+    const amountInPesewas = toMinor(p.amount.amount);
 
     const recipientPayload = {
       type: "mobile_money",
@@ -170,7 +172,7 @@ export class PaystackPaymentRail implements PaymentRail {
 
     const transferPayload = {
       source: "balance",
-      amount: amountInPesewas,
+      amount: amountInPesewas.toString(),
       reference: p.reference,
       recipient: recipientCode,
       reason: "Croe Escrow Disbursement",

@@ -67,6 +67,13 @@ export interface CreateEscrowResponse {
   amount: string;
   currency: EscrowCurrency;
   created_at: string;
+  fee_breakdown: {
+    amount: string;
+    commission: string;
+    vendorNet: string;
+    buyerProtectionFee: string;
+    amountCollected: string;
+  };
 }
 
 export interface DepositRequest {

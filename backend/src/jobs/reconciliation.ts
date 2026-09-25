@@ -1,37 +1,93 @@
 /**
- * Scheduled reconciliation job — 3-way compare:
+ * Scheduled reconciliation job — 3-way compare per currency:
  *   ledger sub-sums vs custody provider balances vs transaction state.
  *
  * 23-Observability-and-Reconciliation.md §1.
+ * 06-Money-Custody-and-Settlement.md §2/§4 (unswept revenue).
  * Rule: never UPDATE/DELETE transaction_ledger — only read (AUD-01).
+ * FIN-01: Money is NUMERIC(15,2) strings; no JS float arithmetic.
+ * FIN-02: Every amount carries explicit currency; no cross-currency arithmetic.
  */
-import { pool } from "../db/pool.js";
+import { pool, type PoolClient } from "../db/pool.js";
 import { logger } from "../config/logger.js";
 import { custodyProvider } from "../providers/index.js";
 import { recordReconciliationLatency, incrementReconciliationAnomaly } from "../services/metrics.js";
 import { alertReconciliationAnomaly } from "../services/alerting.js";
 import type { Currency, EscrowState } from "../types/domain.js";
+import { toMinor, fromMinor, compareAmounts } from "../services/money.js";
 
-export interface ReconciliationResult {
-  timestamp: string;
-  ledgerSummary: {
+export interface CurrencyReconciliation {
+  currency: Currency;
+  ledger: {
     totalDeposited: string;
     totalReleased: string;
     totalRefunded: string;
     netHeld: string;
+    unsweptRevenue: string;
   };
+  custodyBalance: string;
+  gap: string;
+  matched: boolean;
+}
+
+export interface ReconciliationResult {
+  timestamp: string;
+  perCurrency: CurrencyReconciliation[];
   stateSummary: Record<string, number>;
   anomalies: string[];
+}
+
+/**
+ * Compute unswept revenue (commission + buyer protection fee) for a currency.
+ * This is Croe revenue retained in the pool, not yet swept to operating accounts.
+ * 06-Money-Custody-and-Settlement.md §4.
+ */
+async function computeUnsweptRevenue(
+  client: PoolClient,
+  currency: Currency,
+): Promise<string> {
+  // Sum of commission from released escrows + buyer protection fee from deposited escrows
+  // Commission is recorded as part of FUNDS_RELEASED amount_delta (negative full amount)
+  // but vendorNet = amount - commission. We need to extract commission.
+  // For P0, we approximate: commission = 2.5% of released, buyerProtectionFee = 1.5% of deposited
+  // This will be refined when buyer protection fee branch lands.
+  const result = await client.query<{
+    total_released: string;
+    total_deposited: string;
+  }>(
+    `SELECT
+       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_RELEASED' THEN ABS(amount_delta) END), '0')::text AS total_released,
+       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_DEPOSITED' THEN ABS(amount_delta) END), '0')::text AS total_deposited
+     FROM transaction_ledger
+     WHERE currency = $1`,
+    [currency],
+  );
+  const { rows } = result;
+
+  const totalReleased = toMinor(rows[0]?.total_released ?? "0.00");
+  const totalDeposited = toMinor(rows[0]?.total_deposited ?? "0.00");
+
+  // Commission: 250 bps of released amount
+  const COMMISSION_BPS = 250n;
+  const BPS_PER_UNIT = 10_000n;
+  const commissionMinor = (totalReleased * COMMISSION_BPS) / BPS_PER_UNIT;
+  const commissionRemainder = (totalReleased * COMMISSION_BPS) % BPS_PER_UNIT;
+  const commissionFinal = commissionRemainder * 2n >= BPS_PER_UNIT ? commissionMinor + 1n : commissionMinor;
+
+  // Buyer protection fee: 150 bps of deposited amount
+  const BPF_BPS = 150n;
+  const bpfMinor = (totalDeposited * BPF_BPS) / BPS_PER_UNIT;
+  const bpfRemainder = (totalDeposited * BPF_BPS) % BPS_PER_UNIT;
+  const bpfFinal = bpfRemainder * 2n >= BPS_PER_UNIT ? bpfMinor + 1n : bpfMinor;
+
+  return fromMinor(commissionFinal + bpfFinal);
 }
 
 export async function runReconciliation(): Promise<ReconciliationResult> {
   const start = Date.now();
   const anomalies: string[] = [];
-  let deposited = 0;
-  let released = 0;
-  let refunded = 0;
-  let netHeld = 0;
   const stateSummary: Record<string, number> = {};
+  const perCurrency: CurrencyReconciliation[] = [];
 
   logger.info("Starting reconciliation job");
 
@@ -39,39 +95,85 @@ export async function runReconciliation(): Promise<ReconciliationResult> {
   try {
     await client.query("BEGIN");
 
-    // ── 1. Ledger sub-sums (read-only, no UPDATE/DELETE per AUD-01) ──
-    const { rows: ledgerRows } = await client.query<{
-      event_type: string;
-      total: string;
-    }>(
-      `SELECT event_type, COALESCE(SUM(ABS(amount_delta)), 0)::text AS total
-       FROM transaction_ledger
-       WHERE event_type IN ('FUNDS_DEPOSITED', 'FUNDS_RELEASED', 'REFUND_ISSUED')
-       GROUP BY event_type`,
-    );
-
-    const totals: Record<string, string> = {};
-    for (const row of ledgerRows) {
-      totals[row.event_type] = row.total;
-    }
-
-    deposited = parseFloat(totals["FUNDS_DEPOSITED"] ?? "0");
-    released = parseFloat(totals["FUNDS_RELEASED"] ?? "0");
-    refunded = parseFloat(totals["REFUND_ISSUED"] ?? "0");
-    netHeld = deposited - released - refunded;
-
-    // ── 2. Custody provider balances (CustodyProvider.getBalance per currency) ──
-    // Custody balances live with the provider, not the DB — see 23 §1 + MONEY-03.
-    const { rows: custodyCurrencies } = await client.query<{ currency: string }>(
+    // ── 1. Get distinct currencies from active custody accounts and ledger ──
+    const { rows: currencyRows } = await client.query<{ currency: string }>(
       `SELECT DISTINCT currency FROM custody_accounts WHERE is_active = true
        UNION
        SELECT DISTINCT currency FROM transaction_ledger`,
     );
 
-    let totalCustodyBalance = 0;
-    for (const row of custodyCurrencies) {
-      const balance = await custodyProvider.getBalance(row.currency as Currency);
-      totalCustodyBalance += parseFloat(balance.amount);
+    // ── 2. Per-currency reconciliation ──
+    for (const row of currencyRows) {
+      const currency = row.currency as Currency;
+
+      // Ledger sub-sums per currency
+      const { rows: ledgerRows } = await client.query<{
+        event_type: string;
+        total: string;
+      }>(
+        `SELECT event_type, COALESCE(SUM(ABS(amount_delta)), 0)::text AS total
+         FROM transaction_ledger
+         WHERE event_type IN ('FUNDS_DEPOSITED', 'FUNDS_RELEASED', 'REFUND_ISSUED')
+           AND currency = $1
+         GROUP BY event_type`,
+        [currency],
+      );
+
+      const totals: Record<string, string> = {};
+      for (const lr of ledgerRows) {
+        totals[lr.event_type] = lr.total;
+      }
+
+      const depositedStr = totals["FUNDS_DEPOSITED"] ?? "0.00";
+      const releasedStr = totals["FUNDS_RELEASED"] ?? "0.00";
+      const refundedStr = totals["REFUND_ISSUED"] ?? "0.00";
+
+      // netHeld = deposited - released - refunded (exact minor-unit arithmetic)
+      const netHeldStr = fromMinor(
+        toMinor(depositedStr) - toMinor(releasedStr) - toMinor(refundedStr),
+      );
+
+      // Compute unswept revenue (commission + buyer protection fee)
+      const unsweptRevenueStr = await computeUnsweptRevenue(client, currency);
+
+      // Expected custody balance = netHeld + unsweptRevenue
+      const expectedCustodyStr = fromMinor(toMinor(netHeldStr) + toMinor(unsweptRevenueStr));
+
+      // Custody provider balance
+      const balance = await custodyProvider.getBalance(currency);
+      const custodyBalanceStr = balance.amount;
+
+      // Compare
+      const cmp = compareAmounts(expectedCustodyStr, custodyBalanceStr);
+      const matched = cmp === 0;
+
+      const gapStr = cmp !== 0
+        ? fromMinor(toMinor(expectedCustodyStr) > toMinor(custodyBalanceStr)
+            ? toMinor(expectedCustodyStr) - toMinor(custodyBalanceStr)
+            : toMinor(custodyBalanceStr) - toMinor(expectedCustodyStr))
+        : "0.00";
+
+      if (!matched) {
+        anomalies.push(
+          `Currency ${currency}: Expected custody ${expectedCustodyStr} (netHeld ${netHeldStr} + unswept ${unsweptRevenueStr}) differs from actual ${custodyBalanceStr} by ${gapStr}`,
+        );
+        incrementReconciliationAnomaly();
+        alertReconciliationAnomaly(gapStr, currency);
+      }
+
+      perCurrency.push({
+        currency,
+        ledger: {
+          totalDeposited: depositedStr,
+          totalReleased: releasedStr,
+          totalRefunded: refundedStr,
+          netHeld: netHeldStr,
+          unsweptRevenue: unsweptRevenueStr,
+        },
+        custodyBalance: custodyBalanceStr,
+        gap: gapStr,
+        matched,
+      });
     }
 
     // ── 3. Escrow state counts ──
@@ -88,17 +190,7 @@ export async function runReconciliation(): Promise<ReconciliationResult> {
       stateSummary[row.current_status] = parseInt(row.cnt, 10);
     }
 
-    // ── 4. Cross-check: ledger vs custody ──
-    if (Math.abs(netHeld - totalCustodyBalance) > 0.01) {
-      const gap = netHeld - totalCustodyBalance;
-      anomalies.push(
-        `Ledger net held (${netHeld.toFixed(2)}) differs from custody balance (${totalCustodyBalance.toFixed(2)}) by ${gap.toFixed(2)}`,
-      );
-      incrementReconciliationAnomaly();
-      alertReconciliationAnomaly(gap, "GHS");
-    }
-
-    // ── 5. Check for orphaned dispute cases ──
+    // ── 4. Check for orphaned dispute cases ──
     const { rows: orphans } = await client.query<{ cnt: string }>(
       `SELECT COUNT(*)::text AS cnt
        FROM dispute_cases dc
@@ -111,7 +203,7 @@ export async function runReconciliation(): Promise<ReconciliationResult> {
       incrementReconciliationAnomaly();
     }
 
-    // ── 6. Check for ledger entries without matching state transitions ──
+    // ── 5. Check for ledger entries without matching state transitions ──
     const { rows: staleEntries } = await client.query<{ cnt: string }>(
       `SELECT COUNT(*)::text AS cnt
        FROM transaction_ledger tl
@@ -142,13 +234,8 @@ export async function runReconciliation(): Promise<ReconciliationResult> {
 
   const result: ReconciliationResult = {
     timestamp: new Date().toISOString(),
-    ledgerSummary: {
-      totalDeposited: (deposited ?? 0).toFixed(2),
-      totalReleased: (released ?? 0).toFixed(2),
-      totalRefunded: (refunded ?? 0).toFixed(2),
-      netHeld: (netHeld ?? 0).toFixed(2),
-    },
-    stateSummary: stateSummary ?? {},
+    perCurrency,
+    stateSummary,
     anomalies,
   };
 

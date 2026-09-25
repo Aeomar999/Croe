@@ -81,6 +81,14 @@ export const CARRIERS = ["MTN", "TELECEL", "AIRTELTIGO"] as const;
 
 export type Carrier = (typeof CARRIERS)[number];
 
+/** Fee rates for one market, in basis points (250 = 2.5%). See 03-Business-Model-and-Costs.md §1. */
+export type FeeRates = {
+  /** Commission: vendor-paid, deducted at FUNDS_RELEASED. */
+  commissionBps: number;
+  /** Buyer protection fee: buyer-paid, added to the amount collected at deposit. */
+  buyerProtectionFeeBps: number;
+};
+
 export type DisbursementResult = {
   payoutId: string;
   status: "INITIATED" | "SUCCESS" | "FAILED";

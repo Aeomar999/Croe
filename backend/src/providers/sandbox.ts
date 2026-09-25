@@ -2,6 +2,7 @@ import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport
 import type { CustodyProvider } from "./custody-provider.js";
 import type { PaymentRail } from "./payment-rail.js";
 import { pool } from "../db/pool.js";
+import { compareAmounts, subtractAmounts } from "../services/money.js";
 
 /**
  * P0 Sandbox CustodyProvider.
@@ -95,14 +96,17 @@ export class SandboxCustodyProvider implements CustodyProvider {
     );
 
     // In sandbox, statement = sub-ledger (no external aggregator statement yet)
-    const netAmount = subLedgerRows[0]?.net_amount ?? "0";
-    const pooledAmount = pooledRows[0]?.pooled ?? "0";
+    const netAmount = subLedgerRows[0]?.net_amount ?? "0.00";
+    const pooledAmount = pooledRows[0]?.pooled ?? "0.00";
     const currency = (subLedgerRows[0]?.currency ?? pooledRows[0]?.currency ?? "GHS") as Currency;
     const discrepancies: Array<{ transactionId?: string; note: string; delta: Money }> = [];
 
-    if (netAmount !== pooledAmount) {
+    if (compareAmounts(netAmount, pooledAmount) !== 0) {
+      const delta = compareAmounts(netAmount, pooledAmount) > 0
+        ? subtractAmounts(netAmount, pooledAmount)
+        : subtractAmounts(pooledAmount, netAmount);
       discrepancies.push(
-        { note: `Sub-ledger net (${netAmount}) differs from pooled balance (${pooledAmount})`, delta: { amount: String(Math.abs(parseFloat(netAmount) - parseFloat(pooledAmount))), currency } },
+        { note: `Sub-ledger net (${netAmount}) differs from pooled balance (${pooledAmount})`, delta: { amount: delta, currency } },
       );
     }
 

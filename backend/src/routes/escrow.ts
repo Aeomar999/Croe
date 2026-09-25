@@ -16,6 +16,9 @@ import {
 } from "../services/escrow.js";
 import type { Currency, Carrier } from "../types/domain.js";
 import { CURRENCIES } from "../types/domain.js";
+import { feeRatesFor } from "../config/fees.js";
+import { calculateFees } from "../services/money.js";
+import { env } from "../config/env.js";
 
 const router: RouterType = Router();
 
@@ -62,12 +65,19 @@ router.post("/escrow", authenticate, paymentRateLimiter, requireIdempotencyKey, 
     forensic: req.forensic,
   });
 
+  // Calculate fee breakdown for vendor preview
+  const feeBreakdown = calculateFees(
+    amount,
+    feeRatesFor(env.FEE_SCHEDULE, currency as Currency),
+  );
+
   res.status(201).json({
     transaction_id: tx.transaction_id,
     current_status: tx.current_status,
     amount: tx.amount,
     currency: tx.currency,
     created_at: tx.created_at,
+    fee_breakdown: feeBreakdown,
   });
 });
 

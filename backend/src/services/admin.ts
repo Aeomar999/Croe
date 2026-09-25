@@ -4,6 +4,7 @@ import { logger } from "../config/logger.js";
 import { custodyProvider } from "../providers/index.js";
 import type { Currency, EscrowState, LedgerEvent } from "../types/domain.js";
 import { releaseFunds, refundFunds } from "./escrow.js";
+import { fromMinor, toMinor } from "./money.js";
 
 type DisputeQueueRow = {
   dispute_id: string;
@@ -330,9 +331,13 @@ export async function getReconciliationReport(
       totals[row.event_type] = row.total;
     }
 
-    const deposited = parseFloat(totals["FUNDS_DEPOSITED"] ?? "0");
-    const released = parseFloat(totals["FUNDS_RELEASED"] ?? "0");
-    const refunded = parseFloat(totals["REFUND_ISSUED"] ?? "0");
+    const depositedStr = totals["FUNDS_DEPOSITED"] ?? "0.00";
+    const releasedStr = totals["FUNDS_RELEASED"] ?? "0.00";
+    const refundedStr = totals["REFUND_ISSUED"] ?? "0.00";
+
+    const netHeldStr = fromMinor(
+      toMinor(depositedStr) - toMinor(releasedStr) - toMinor(refundedStr),
+    );
 
     const { rows: accountRows } = await client.query<{ provider: string; currency: string }>(
       `SELECT DISTINCT provider, currency FROM custody_accounts WHERE is_active = true`,
@@ -348,10 +353,10 @@ export async function getReconciliationReport(
 
     return {
       summary: {
-        totalDeposited: deposited.toFixed(2),
-        totalReleased: released.toFixed(2),
-        totalRefunded: refunded.toFixed(2),
-        netHeld: (deposited - released - refunded).toFixed(2),
+        totalDeposited: depositedStr,
+        totalReleased: releasedStr,
+        totalRefunded: refundedStr,
+        netHeld: netHeldStr,
       },
       custodyAccounts,
     };

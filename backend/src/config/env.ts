@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { resolve } from "path";
+import { parseFeeSchedule } from "./fees.js";
 
 config({ path: resolve(import.meta.dirname, "../../.env") });
 
@@ -46,4 +47,7 @@ export const env = {
 
   // Alerting
   ALERT_WEBHOOK_URL: process.env.ALERT_WEBHOOK_URL ?? "",
+
+  // Fees per market: COMMISSION_BPS, BUYER_PROTECTION_FEE_BPS, optional _<CUR> overrides
+  FEE_SCHEDULE: parseFeeSchedule(process.env),
 } as const;

@@ -72,11 +72,11 @@ export function getActiveAlerts(): AlertPayload[] {
 /**
  * Convenience alerters for common Phase 8 scenarios.
  */
-export function alertReconciliationAnomaly(gap: number, currency: string): void {
+export function alertReconciliationAnomaly(gap: string, currency: string): void {
   fireAlert(
     "critical",
     "reconciliation_gap",
-    `Reconciliation gap detected: ${gap.toFixed(2)} ${currency} discrepancy between ledger and custody`,
+    `Reconciliation gap detected: ${gap} ${currency} discrepancy between ledger and custody`,
     { gap, currency },
   );
 }

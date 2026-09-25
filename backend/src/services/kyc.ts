@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { getTransactionClient, pool } from "../db/pool.js";
 import { AppError } from "../middleware/error-handler.js";
 import { logger } from "../config/logger.js";
+import { compareAmounts, sumAmounts } from "./money.js";
 
 export type KycTier = 0 | 1 | 2;
 
@@ -42,11 +43,11 @@ export async function checkTierLimit(
     }
 
     const tier = user.kyc_tier as KycTier;
-    const perTxLimit = parseFloat(KYC_LIMITS[tier].perTransaction);
-    const dailyLimit = parseFloat(KYC_LIMITS[tier].daily);
-    const requestedAmount = parseFloat(amount);
+    const perTxLimit = KYC_LIMITS[tier].perTransaction;
+    const dailyLimit = KYC_LIMITS[tier].daily;
 
-    if (requestedAmount > perTxLimit) {
+    // Compare amounts as NUMERIC(15,2) strings (FIN-01)
+    if (compareAmounts(amount, perTxLimit) > 0) {
       throw new AppError(403, "Per-transaction limit exceeded for current tier", "KYC_LIMIT_EXCEEDED");
     }
 
@@ -62,8 +63,9 @@ export async function checkTierLimit(
       [userId, todayStart],
     );
 
-    const dailySum = parseFloat(dailyRows[0]?.daily_sum ?? "0");
-    if (dailySum + requestedAmount > dailyLimit) {
+    const dailySum = dailyRows[0]?.daily_sum ?? "0.00";
+    const dailyPlusRequested = sumAmounts([dailySum, amount]);
+    if (compareAmounts(dailyPlusRequested, dailyLimit) > 0) {
       throw new AppError(403, "Daily limit exceeded for current tier", "KYC_DAILY_LIMIT_EXCEEDED");
     }
 

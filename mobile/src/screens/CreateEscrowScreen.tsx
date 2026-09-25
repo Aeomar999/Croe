@@ -23,6 +23,7 @@ import { Button } from '../theme/components/Button';
 import { WashBanner } from '../theme/components/WashBanner';
 import { ArrowLeft, Info } from '../theme/components/icons';
 import type { MainStackParamList } from '../navigation/MainStack';
+import { calculateFees, type FeeBreakdown } from '../utils/money';
 
 type DeliveryMode = 'MEETUP' | 'COURIER';
 
@@ -31,15 +32,19 @@ export function CreateEscrowScreen() {
   const insets = useSafeAreaInsets();
   const createMutation = useCreateEscrow();
 
-const [description, setDescription] = React.useState('');
+  const [description, setDescription] = React.useState('');
   const [amount, setAmount] = React.useState('');
+
   const [delivery, setDelivery] = React.useState<DeliveryMode>('COURIER');
 
   // Format amount to always have 2 decimal places for backend
   const formattedAmount = amount ? parseFloat(amount).toFixed(2) : '';
 
-  const fee = formattedAmount ? (parseFloat(formattedAmount) * 0.025).toFixed(2) : '0.00';
-  const received = formattedAmount ? (parseFloat(formattedAmount) - parseFloat(fee)).toFixed(2) : '0.00';
+  // Calculate fee breakdown using exact integer arithmetic (FIN-01)
+  const fee: FeeBreakdown | null = formattedAmount ? calculateFees(formattedAmount) : null;
+
+  const received = fee?.vendorNet ?? '0.00';
+  const buyerPays = fee?.amountCollected ?? '0.00';
 
   return (
     <KeyboardAvoidingView
@@ -88,7 +93,7 @@ const [description, setDescription] = React.useState('');
             />
           </View>
           <Text style={styles.helper}>
-            Croe fee 2.5% · you receive GH₵ {received}
+            Croe fee {fee ? fee.commission : '0.00'} · you receive GH₵ {received}
           </Text>
         </View>
 

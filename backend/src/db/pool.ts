@@ -2,6 +2,8 @@ import { Pool, type PoolClient } from "pg";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 
+export type { PoolClient };
+
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
   max: 10,
