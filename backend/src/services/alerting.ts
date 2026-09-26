@@ -46,8 +46,9 @@ export function fireAlert(
   activeAlerts.set(source, alert);
   incrementAlertCounter(severity);
 
-  const logFn = severity === "critical" ? logger.error : severity === "warning" ? logger.warn : logger.info;
-  logFn({ alert }, `ALERT: ${source} — ${message}`);
+  // Call through the logger: pino methods need `this` and throw when detached.
+  const level = severity === "critical" ? "error" : severity === "warning" ? "warn" : "info";
+  logger[level]({ alert }, `ALERT: ${source} — ${message}`);
 
   // Auto-clear after 5 minutes
   setTimeout(() => {
