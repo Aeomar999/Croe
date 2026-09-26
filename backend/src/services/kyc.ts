@@ -55,12 +55,14 @@ export async function checkTierLimit(
     todayStart.setUTCHours(0, 0, 0, 0);
 
     const { rows: dailyRows } = await client.query<{ daily_sum: string }>(
-      `SELECT COALESCE(SUM(amount)::text, '0') AS daily_sum
+      // COALESCE to a NUMERIC(15,2)-shaped '0.00', never '0' (FIN-01, task.md T8.1)
+      `SELECT COALESCE(SUM(amount), 0.00)::text AS daily_sum
        FROM escrow_transactions
        WHERE vendor_id = $1
+         AND currency = $3
          AND created_at >= $2
          AND current_status NOT IN ('CANCELLED', 'EXPIRED', 'FUNDS_REFUNDED')`,
-      [userId, todayStart],
+      [userId, todayStart, currency],
     );
 
     const dailySum = dailyRows[0]?.daily_sum ?? "0.00";
