@@ -3,6 +3,7 @@ import type {
   APIError, 
   LoginRequest, 
   LoginResponse, 
+  RefreshResponse,
   AdminUser,
   DisputeQueueItem,
   DisputeCaseDetail,
@@ -149,13 +150,17 @@ api.interceptors.response.use(
       }
 
       try {
-        const response: AxiosResponse<LoginResponse> = await axios.post(
+        const response: AxiosResponse<RefreshResponse> = await axios.post(
           `${API_URL}/v1/auth/refresh`,
           { refresh_token: refreshTokenValue },
           { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const { accessToken, refreshToken, user } = response.data;
+        const { access_token: accessToken, refresh_token: refreshToken } = response.data;
+        const user = getStoredUser();
+        if (!accessToken || !refreshToken || !user) {
+          throw new Error('Session refresh returned an incomplete response');
+        }
         setAuthTokens(accessToken, refreshToken, user);
         processQueue(null, accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
