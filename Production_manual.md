@@ -71,7 +71,7 @@
 | 11 | `PAYSTACK_WEBHOOK_SECRET` | Platform secret store (Paystack HMAC-SHA512 key) | [ ] | Must equal the Paystack secret key (`AGGREGATOR_API_KEY`); rotate them together. Used for deposit and transfer webhooks. Paystack webhooks are rejected while it is unset (task.md T1.5) |
 | 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | Enforces S3 config and 32+ char secrets at boot |
 | 13 | `CORS_ORIGIN` | Platform config (exact admin origin(s)) | [ ] | Must include the admin console origin, e.g. `https://admin.croe.co` |
-| 14 | `ARKESEL_SMS_API_KEY` | Platform secret store | [ ] | Required when `CUSTODY_PHASE != P0` |
+| 14 | `ARKESEL_SMS_API_KEY` | Platform secret store | [ ] | Required when `CUSTODY_PHASE != P0`. When set, OTPs go through Arkesel in every non-test environment. Without it (P0 only) OTPs are neither sent nor logged outside development/test, so staging testers need it (task.md T7.9) |
 | 15 | `S3_BUCKET` / `S3_ENDPOINT` / `S3_REGION` | Platform config | [ ] | Required when `NODE_ENV=production`; R2: `S3_REGION=auto` |
 | 16 | `ALERT_WEBHOOK_URL` | Platform secret store | [ ] | On-call channel (task.md T13.2) |
 | 17 | `COMMISSION_BPS` / `BUYER_PROTECTION_FEE_BPS` | Platform config (explicit) | [ ] | Defaults 250/150 apply if unset; decide per task.md T4.5 |
