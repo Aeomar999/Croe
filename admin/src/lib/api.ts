@@ -117,9 +117,13 @@ function processQueue(error: Error | null, token: string | null = null): void {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<APIError>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // A 401 from the login or refresh endpoints is a real answer, not an
+    // expired session: surface it to the caller instead of redirecting.
+    const isAuthEndpoint = /^\/auth\/(login|refresh)\b/.test(originalRequest?.url ?? '');
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -136,6 +140,7 @@ api.interceptors.response.use(
 
       const refreshTokenValue = getRefreshToken();
       if (!refreshTokenValue) {
+        isRefreshing = false;
         clearAuthTokens();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
