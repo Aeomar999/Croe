@@ -164,8 +164,8 @@ export async function resolveDispute(
     }
 
     await client.query(
-      `UPDATE dispute_cases SET status = 'RESOLVED_AUTO', resolved_at = NOW(), resolution_reason = $1 WHERE dispute_id = $2`,
-      [reason, disputeId],
+      `UPDATE dispute_cases SET status = 'RESOLVED_AUTO', resolved_at = NOW(), final_resolution = $1 WHERE dispute_id = $2`,
+      [action, disputeId],
     );
 
     await client.query("COMMIT");
@@ -175,7 +175,7 @@ export async function resolveDispute(
       "Dispute marked resolved by reviewer; initiating payout",
     );
 
-    const forensic: ForensicContext = { deviceId: reviewerId, ip: "admin", networkType: "admin" };
+    const forensic: ForensicContext = { deviceId: reviewerId, ip: "127.0.0.1", networkType: "admin" };
 
     let newStatus: EscrowState;
     if (action === "RELEASE_VENDOR") {
@@ -565,7 +565,7 @@ export async function retryPayout(transactionId: string, adminId: string) {
     client.release();
   }
 
-  const forensic: ForensicContext = { deviceId: adminId, ip: "admin", networkType: "admin" };
+  const forensic: ForensicContext = { deviceId: adminId, ip: "127.0.0.1", networkType: "admin" };
 
   if (direction === "RELEASE") {
     await releaseFunds({ transactionId, forensic });
