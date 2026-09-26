@@ -194,9 +194,10 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 
 | Endpoint | Frequency | Expected | Alert if |
 |----------|-----------|----------|----------|
-| `GET /health` | Every 30s | `200 OK` | Down for > 2 min |
-| `GET /health/db` | Every 30s | `200 OK` (pool stats) | Connection pool > 80% utilized |
-| `GET /health/redis` | Every 60s | `200 OK` | Latency > 10ms |
+| `GET /health` | Every 30s (Docker `HEALTHCHECK`, external uptime monitor) | `200 OK` — process up and PostgreSQL reachable | Down for > 2 min |
+| `GET /health/ready` | Render `healthCheckPath` | `200 OK` with `checks.database` (latency + pool stats) and `checks.redis` (latency); `503` if either fails or takes > 2s | `503` for > 2 min; `checks.database.pool.waiting` > 0 sustained; Redis latency > 10ms |
+
+> Both are also served under `/v1`. There are no separate `/health/db` or `/health/redis` endpoints; read those values from `/health/ready` (task.md T3.10).
 
 ### 3.2 Business Metrics (from `01-PRD.md` and `23-Observability-and-Reconciliation.md`)
 
