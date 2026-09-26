@@ -1,4 +1,19 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
+
+// Stub the LLM client so the test never depends on LLM_MODEL/LLM_URL from the
+// environment (CI sets LLM_MODEL=test, which would attempt a real fetch).
+vi.mock("../config/llm.js", () => ({
+  callLLM: vi.fn(async () => ({
+    text: JSON.stringify({
+      reasoning_steps: ["Stubbed LLM for integration tests", "Returning neutral response"],
+      confidence_score: 0.5,
+      recommended_action: "ESCALATE_HUMAN",
+      summary_for_users: "This dispute requires manual review.",
+    }),
+    model: "mock-p0",
+  })),
+}));
+
 import { pool } from "../db/pool.js";
 import { runAITriage, validateLLMOutput } from "./ai-triage.js";
 
@@ -61,7 +76,7 @@ describe("ai-triage integration", () => {
       [DISPUTE_ID, TX_ID, BUYER_ID],
     );
 
-    // Run AI triage (will use mock LLM since LLM_MODEL not set)
+    // Run AI triage against the stubbed LLM
     await runAITriage(DISPUTE_ID);
 
     // Verify dispute was updated
