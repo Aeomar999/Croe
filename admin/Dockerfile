@@ -18,6 +18,11 @@ COPY admin/ ./admin/
 
 WORKDIR /app/admin
 
+# NEXT_PUBLIC_* values are inlined into the client bundle at build time.
+# API origin only, no /v1 (task.md T3.4). Render passes service env vars as build args.
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 # Next.js telemetry disable
 ENV NEXT_TELEMETRY_DISABLED=1
 

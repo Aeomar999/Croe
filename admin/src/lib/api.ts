@@ -17,8 +17,10 @@ import type {
   SchedulerStatus,
   JobStatus,
 } from '@/types';
+import { resolveApiOrigin } from './api-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// NEXT_PUBLIC_* values are inlined at build time: rebuild after changing them.
+const API_URL = resolveApiOrigin(process.env.NEXT_PUBLIC_API_URL);
 
 export const api = axios.create({
   baseURL: `${API_URL}/v1`,
