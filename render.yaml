@@ -22,6 +22,7 @@ services:
         value: 8080
       # These must be set manually in the Render dashboard:
       # - MOMO_WEBHOOK_SECRET
+      # - PAYSTACK_WEBHOOK_SECRET (must equal the Paystack secret key)
       # - JWT_SECRET
       # - OTP_PEPPER
       # - AGGREGATOR_API_KEY

@@ -60,7 +60,7 @@
 |---|--------|----------|---------|-------|
 | 1 | `DATABASE_URL` | Platform secret store | [ ] | |
 | 2 | `REDIS_URL` | Platform secret store | [ ] | |
-| 3 | `MOMO_WEBHOOK_SECRET` | Platform secret store | [ ] | |
+| 3 | `MOMO_WEBHOOK_SECRET` | Platform secret store | [ ] | Sandbox/MoMo HMAC-SHA256 webhooks only; never reuse the Paystack key here |
 | 4 | `JWT_SECRET` | Platform secret store | [ ] | |
 | 5 | `OTP_PEPPER` | Platform secret store | [ ] | |
 | 6 | `AGGREGATOR_API_KEY` | Platform secret store | [ ] | |
@@ -68,7 +68,7 @@
 | 8 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | Platform secret store | [ ] | |
 | 9 | `LLM_URL` / `LLM_MODEL` | Platform secret store | [ ] | |
 | 10 | `CUSTODY_PHASE` | Platform secret store (set to `P1` for pilot) | [ ] | |
-| 11 | `MOMO_WEBHOOK_SECRET` | Platform secret store (shared secret for Paystack HMAC-SHA512) | [ ] | Used for both deposit and transfer webhooks |
+| 11 | `PAYSTACK_WEBHOOK_SECRET` | Platform secret store (Paystack HMAC-SHA512 key) | [ ] | Must equal the Paystack secret key (`AGGREGATOR_API_KEY`); rotate them together. Used for deposit and transfer webhooks. Paystack webhooks are rejected while it is unset (task.md T1.5) |
 | 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | |
 | 13 | `CORS_ORIGIN` | Platform config (locked to production domain) | [ ] | |
 

@@ -18,6 +18,9 @@ export const env = {
   DATABASE_URL: required("DATABASE_URL"),
   REDIS_URL: process.env.REDIS_URL ?? "redis://localhost:6379",
   MOMO_WEBHOOK_SECRET: required("MOMO_WEBHOOK_SECRET"),
+  // Paystack signs webhooks with the account secret key (HMAC-SHA512), so this
+  // must equal the Paystack secret key and be rotated with it (task.md T1.5/T7.8).
+  PAYSTACK_WEBHOOK_SECRET: process.env.PAYSTACK_WEBHOOK_SECRET ?? "",
   JWT_SECRET: required("JWT_SECRET"),
   OTP_PEPPER: required("OTP_PEPPER"),
   CUSTODY_PHASE: (process.env.CUSTODY_PHASE ?? "P0") as "P0" | "P1" | "P2" | "P3",

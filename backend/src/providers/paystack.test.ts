@@ -11,7 +11,8 @@ vi.mock("../config/env.js", () => ({
   env: {
     AGGREGATOR_API_KEY: "test-secret-key",
     AGGREGATOR_BASE_URL: "https://api.paystack.co",
-    MOMO_WEBHOOK_SECRET: "test-webhook-secret",
+    MOMO_WEBHOOK_SECRET: "test-momo-secret",
+    PAYSTACK_WEBHOOK_SECRET: "test-webhook-secret",
     CUSTODY_PHASE: "P1",
     FEE_SCHEDULE: "ghana",
   },
@@ -227,6 +228,14 @@ describe("PaystackPaymentRail", () => {
       const result = rail.verifyWebhook(rawBody, { "x-paystack-signature": expected });
 
       expect(result).toBe(true);
+    });
+
+    it("rejects a signature made with the MoMo/sandbox secret (T1.5)", () => {
+      const rail = new PaystackPaymentRail();
+      const rawBody = Buffer.from('{"event":"charge.success"}');
+      const momoSigned = crypto.createHmac("sha512", "test-momo-secret").update(rawBody).digest("hex");
+
+      expect(rail.verifyWebhook(rawBody, { "x-paystack-signature": momoSigned })).toBe(false);
     });
 
     it("returns false for invalid signature", () => {

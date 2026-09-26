@@ -164,12 +164,12 @@ export class PaystackPaymentRail implements PaymentRail {
 
   verifyWebhook(rawBody: Buffer, headers: Record<string, string>): boolean {
     const signature = headers["x-paystack-signature"] as string | undefined;
-    if (!signature) {
+    if (!signature || !env.PAYSTACK_WEBHOOK_SECRET) {
       return false;
     }
 
     const expected = crypto
-      .createHmac("sha512", env.MOMO_WEBHOOK_SECRET)
+      .createHmac("sha512", env.PAYSTACK_WEBHOOK_SECRET)
       .update(rawBody)
       .digest("hex");
 
