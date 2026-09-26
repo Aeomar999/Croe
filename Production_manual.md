@@ -176,6 +176,19 @@ The `croe-admin` Next.js console is defined alongside the API in `render.yaml` a
 | 4 | CORS | The admin origin must be listed in the API's `CORS_ORIGIN` |
 | 5 | Verify | Admin `/login` loads and a staff login succeeds against the API |
 
+### 2.3a Staff Accounts (reviewer / ops / admin)
+
+Staff accounts are never created by the seed script (it refuses to run when `NODE_ENV=production`). `users.password_hash` comes from migration `007_users_password_hash` (task.md T7.3).
+
+| Step | Action | Command / Details |
+|------|--------|-------------------|
+| 1 | Open a shell on the API service | Render dashboard → `croe-api` → Shell (env vars already set) |
+| 2 | Create the account | `STAFF_EMAIL=<email> STAFF_PHONE=<+233…> STAFF_NAME="<name>" STAFF_ROLE=reviewer node dist/db/create-staff.js` — prompts for the password without echo. Locally: `pnpm --filter croe-backend staff:create` |
+| 3 | Password policy | ≥ 12 characters, at least three of lowercase/uppercase/digits/symbols, must not contain the email name. Never pass it on the command line |
+| 4 | Verify | Log in at the admin console `/login` |
+
+> Still open for M2 (task.md T7.4): TOTP 2FA for staff roles and lockout after repeated failed logins.
+
 ### 2.4 Deployment (Mobile App / Expo EAS)
 
 Mobile builds are not continuous; they are cut intentionally via Expo Application Services (EAS).

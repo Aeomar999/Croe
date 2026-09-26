@@ -39,11 +39,7 @@ async function seed(): Promise<void> {
   try {
     await client.query("BEGIN");
 
-    // Add password_hash column if not exists (safe to run multiple times)
-    await client.query(`
-      ALTER TABLE users 
-      ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)
-    `);
+    // users.password_hash comes from migration 007 (task.md T7.3).
 
     // Seed test users for P0 (placeholders until auth)
     const testUsers = [
