@@ -25,6 +25,12 @@ export interface LoginResponse {
   user: AdminUser;
 }
 
+/** POST /v1/auth/refresh response (18-API-Reference.md §1). */
+export interface RefreshResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
 // Dispute Types
 export type DisputeReasonCode =
   | 'ITEM_NOT_RECEIVED'

@@ -32,26 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (credentials: LoginRequest) => {
-    try {
-      const response = await api.post<LoginResponse>('/auth/login', credentials);
-      const { accessToken, refreshToken, user: userData } = response.data;
-      setAuthTokens(accessToken, refreshToken, userData);
-      setUser(userData);
-    } catch (error) {
-      // Fallback for UI testing when backend is offline
-      if (credentials.email === 'amoahjerry@croe.app') {
-        const mockUser: AdminUser = {
-          userId: '00000000-0000-0000-0000-000000000099',
-          email: 'amoahjerry@croe.app',
-          name: 'Jerry Amoah',
-          role: 'admin',
-        };
-        setAuthTokens('mock-access-token', 'mock-refresh-token', mockUser);
-        setUser(mockUser);
-      } else {
-        throw error;
-      }
-    }
+    const response = await api.post<LoginResponse>('/auth/login', credentials);
+    const { accessToken, refreshToken, user: userData } = response.data;
+    setAuthTokens(accessToken, refreshToken, userData);
+    setUser(userData);
     router.push('/dashboard');
   };
 

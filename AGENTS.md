@@ -17,7 +17,7 @@ Croe is a **mobile-first trust and escrow service** for social commerce (WhatsAp
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | Language | TypeScript 5.4 (strict) | noImplicitAny, strictNullChecks everywhere |
-| Runtime | Node.js 20 LTS | Backend API |
+| Runtime | Node.js 22 LTS | Backend API, admin, and all Docker images (pnpm 11 needs `node:sqlite`) |
 | Framework | Express or Fastify | Raw-body capture required for webhook HMAC |
 | Database | PostgreSQL 16+ | uuid-ossp extension, append-only ledger |
 | Cache/Queue | Redis 7.2+ | Rate limiting, idempotency fast gate, session cache |
@@ -406,11 +406,10 @@ These files MUST be updated as development progresses:
 | Item | Status |
 |------|--------|
 | Specification phase | Complete (28 docs) |
-| Implementation phase | **Complete (Phases 1–8)** |
-| Test suite | 275 passing (backend) + 79 frontend |
-| Custody phase | P0 (sandbox) — code ready for P1 Pilot gate |
-| Active branch | `main` |
-| Git commits | 5 (`ffc1fad` → `6d30444`) |
-| Remote | None configured |
+| Implementation phase | Phases 1–8 built; **production-readiness work in progress** (see [`task.md`](task.md)) |
+| Test suite | 410 backend + 81 mobile + 24 admin passing; CI green since 2026-09-26 |
+| Custody phase | P0 (sandbox). Real money is gated by milestones M1 → M2 → M3 in `task.md` §19 |
+| Default branch | `main` |
+| Remote | `github.com/Aeomar999/Croe` |
 
-The next step is to begin Phase 1 (Data and Ledger) on branch `phase/1-data-ledger`.
+**The next step is the remaining work in [`task.md`](task.md):** finish the M1 (sandbox staging) gate, then the M2 real-money code-readiness tasks. Business and legal gates live in `PRODUCTION_TASKS.md` and `GO-TO-MARKET.md`.

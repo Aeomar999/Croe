@@ -4,6 +4,7 @@ import { requestOTP, verifyOTP, refreshSession, logout, adminLogin } from "../se
 import { authenticate } from "../middleware/auth.js";
 import { authRateLimiter, otpRateLimiter } from "../middleware/rate-limiter.js";
 import { AppError } from "../middleware/error-handler.js";
+import { logger } from "../config/logger.js";
 
 const router: RouterType = Router();
 
@@ -13,24 +14,29 @@ const OTP_CODE_RE = /^\d{6}$/;
 /**
  * POST /auth/otp/request — Request OTP
  * 18-API-Reference.md §1 Authentication
- * Always returns 202 to prevent user enumeration.
+ *
+ * Returns 202 only after the challenge is stored and the SMS is handed to
+ * the provider. requestOTP never looks up whether the number belongs to an
+ * account, so the response is the same for known and unknown numbers
+ * (no user enumeration). Validation and rate-limit errors keep their status;
+ * infrastructure failures (DB, Redis, SMS provider) return 503.
  */
 router.post("/auth/otp/request", otpRateLimiter, async (req: Request, res: Response) => {
+  const { phone_number } = req.body as { phone_number?: string };
+
+  if (!phone_number || !E164_RE.test(phone_number)) {
+    throw new AppError(400, "phone_number must be E.164 format (e.g. +233240000000)", "VALIDATION_ERROR");
+  }
+
   try {
-    const { phone_number } = req.body as { phone_number?: string };
-
-    if (!phone_number || !E164_RE.test(phone_number)) {
-      throw new AppError(400, "phone_number must be E.164 format (e.g. +233240000000)", "VALIDATION_ERROR");
-    }
-
     await requestOTP(phone_number, {
       ip: req.ip!,
       deviceId: req.headers["x-device-fingerprint"] as string,
     });
-  } catch (error) {
-    // Log the error to debug why OTP is failing silently
-    console.error("Swallowed error in requestOTP:", error);
-    // Intentionally swallowed — always return 202 regardless of outcome.
+  } catch (err) {
+    if (err instanceof AppError) throw err;
+    logger.error({ err }, "OTP request failed");
+    throw new AppError(503, "We couldn't send a code right now. Please try again shortly.", "OTP_UNAVAILABLE");
   }
 
   res.status(202).json({ message: "OTP sent" });

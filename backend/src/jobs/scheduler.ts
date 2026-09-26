@@ -6,11 +6,13 @@
  *   - reconciliation: every 15 minutes
  *   - ledger-integrity: every hour
  *   - retention: daily at 03:00 UTC
+ *   - webhook-sweeper: every minute (retries failed webhooks, task.md T6.2)
  */
 import { logger } from "../config/logger.js";
 import { runReconciliation } from "./reconciliation.js";
 import { runLedgerIntegrityCheck } from "./ledger-integrity.js";
 import { runRetentionPurge } from "./retention.js";
+import { runWebhookSweeper } from "./webhook-sweeper.js";
 
 interface ScheduledJob {
   name: string;
@@ -35,6 +37,11 @@ const jobs: ScheduledJob[] = [
     name: "retention",
     fn: runRetentionPurge,
     intervalMs: 24 * 60 * 60 * 1000, // 24 hours
+  },
+  {
+    name: "webhook-sweeper",
+    fn: runWebhookSweeper,
+    intervalMs: 60 * 1000, // 1 minute
   },
 ];
 

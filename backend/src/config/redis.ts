@@ -39,6 +39,14 @@ export async function dedupGate(
 }
 
 /**
+ * Release a dedup gate key so a later delivery of the same event is not
+ * short-circuited (used when processing fails, task.md T6.1).
+ */
+export async function releaseDedupGate(key: string): Promise<void> {
+  await redis.del(key);
+}
+
+/**
  * Close Redis connection (for graceful shutdown).
  */
 export async function closeRedis(): Promise<void> {

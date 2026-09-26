@@ -1,16 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { useAuth } from '@/context/AuthContext';
 import { Logo, Squiggles } from '@/components/brand';
+import { loginErrorMessage } from '@/lib/auth-errors';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,10 +23,8 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      router.push('/dashboard');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Invalid credentials';
-      setError(message);
+      setError(loginErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +54,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              placeholder="amoahjerry@croe.app"
+              placeholder="you@company.com"
               required
               autoComplete="email"
               leftElement={<Mail className="w-5 h-5" />}

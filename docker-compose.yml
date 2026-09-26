@@ -45,7 +45,9 @@ services:
       DATABASE_URL: postgresql://croe:dev@postgres:5432/croe
       REDIS_URL: redis://redis:6379
       LLM_URL: http://ollama:11434
-      NODE_ENV: production
+      # Local stack. NODE_ENV=production enforces evidence storage (S3/R2) and
+      # 32+ character secrets at boot (backend/src/config/env.ts).
+      NODE_ENV: development
       PORT: 8080
     depends_on:
       postgres:

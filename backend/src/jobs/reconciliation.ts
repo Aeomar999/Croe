@@ -55,9 +55,10 @@ async function computeUnsweptRevenue(
     total_released: string;
     total_deposited: string;
   }>(
+    // COALESCE to 0.00 (not '0') so an empty sum is still a NUMERIC(15,2) string (FIN-01)
     `SELECT
-       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_RELEASED' THEN ABS(amount_delta) END), '0')::text AS total_released,
-       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_DEPOSITED' THEN ABS(amount_delta) END), '0')::text AS total_deposited
+       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_RELEASED' THEN ABS(amount_delta) END), 0.00)::text AS total_released,
+       COALESCE(SUM(CASE WHEN event_type = 'FUNDS_DEPOSITED' THEN ABS(amount_delta) END), 0.00)::text AS total_deposited
      FROM transaction_ledger
      WHERE currency = $1`,
     [currency],

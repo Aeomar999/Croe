@@ -52,7 +52,7 @@
 | C3 | Provision object storage (Cloudflare R2/S3) with versioning + cross-region replication | Provisioned | [ ] | Evidence media |
 | C4 | Provision LLM hosting (CPU-only Ollama on app host for pilot) | Provisioned | [ ] | **Run pilot CPU-only per cost discipline** |
 | C5 | Configure DNS + TLS (Cloudflare) with auto-renewing certs | Configured | [ ] | api.croe.com |
-| C6 | Set up CI/CD pipeline (GitHub Actions → Render/Railway/Fly) | Running | [x] | Typecheck → Lint → Test → Build → Migrate → Deploy |
+| C6 | Set up CI/CD pipeline (GitHub Actions → Render/Railway/Fly) | Running | [ ] | CI green since 2026-09-26 (Typecheck → Lint → Test → Build → Docker). Staging + deploy hooks + production approval still to do (task.md T3.8, T3.9) |
 | C7 | Configure log aggregation (Pino → Loki/Better Stack/Datadog) | Configured | [ ] | Structured JSON |
 | C8 | Configure daily Postgres backups + PITR with monthly restore tests | Verified | [ ] | Automated + tested |
 
@@ -188,15 +188,15 @@
 
 ---
 
-## Code Quality Gates (Already Passing — Maintain)
+## Code Quality Gates (status 2026-09-26 — maintain once passing)
 
 | # | Gate | Current Status | Must Maintain |
 |---|------|----------------|---------------|
-| CQ1 | All tests passing | ✅ 354 (275 backend + 79 frontend) | Zero regressions |
+| CQ1 | All tests passing | ✅ 515 (410 backend + 81 mobile + 24 admin), green in CI from PR #19. CI was red on `main` 2026-09-24 → 2026-09-26 | Zero regressions |
 | CQ2 | TypeScript strict mode | ✅ Zero errors | Zero errors |
-| CQ3 | No console.log/console.error in production code | ✅ Verified | Zero occurrences |
-| CQ4 | No hardcoded secrets in source code | ✅ Verified | Zero occurrences |
-| CQ5 | ESLint | ✅ Zero errors (34 warnings OK) | Zero errors |
+| CQ3 | No console.log/console.error in production code | ⚠️ Backend clean; mobile and admin still call `console.*` (task.md T10.5) | Zero occurrences |
+| CQ4 | No hardcoded secrets in source code | ✅ Seed admin credentials removed 2026-09-26 (task.md T1.1); rotate them, they remain in git history | Zero occurrences |
+| CQ5 | ESLint | ✅ Zero errors (backend 41 warnings; zero-warning gate is task.md T2.6) | Zero errors |
 | CQ6 | 50-concurrent-webhook race test | ✅ Passing | Deterministic pass |
 
 ---
@@ -227,15 +227,15 @@ Ongoing (OC1-4, OG1-9) — Start immediately, run throughout
 |----------|-------|---------|-------------|-----------|
 | Phase A (Blocking) | 6 | 6 | 0 | 0 |
 | Phase B (Entity) | 9 | 9 | 0 | 0 |
-| Phase C (Infra) | 8 | 8 | 0 | 0 |
+| Phase C (Infra) | 8 | 7 | 1 | 0 |
 | Phase D (Secrets/Sec) | 4 | 4 | 0 | 0 |
 | Phase E (Distribution) | 6 | 6 | 0 | 0 |
 | Phase F (Ops) | 16 | 16 | 0 | 0 |
 | Phase G (Pilot) | 13 | 13 | 0 | 0 |
 | Ongoing: Cloud Credits | 4 | 4 | 0 | 0 |
 | Ongoing: Grants | 9 | 9 | 0 | 0 |
-| Code Quality (Maintain) | 6 | 0 | 0 | 6 |
-| **TOTAL** | **114** | **108** | **0** | **6** |
+| Code Quality (Maintain) | 6 | 0 | 1 | 5 |
+| **TOTAL** | **114** | **107** | **2** | **5** |
 
 ---
 

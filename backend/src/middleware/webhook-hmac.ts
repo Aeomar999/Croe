@@ -34,9 +34,15 @@ export function verifyMoMoWebhook(
   }
 
   if (paystackSig) {
-    // Paystack HMAC-SHA512: signature = HMAC(secret, rawBody)
+    // Paystack HMAC-SHA512: signature = HMAC(secret, rawBody), with its own
+    // secret so a leaked sandbox/MoMo secret cannot forge Paystack events.
+    if (!env.PAYSTACK_WEBHOOK_SECRET) {
+      logger.error("Paystack webhook received but PAYSTACK_WEBHOOK_SECRET is not configured");
+      res.status(401).json({ error: "INVALID_SIGNATURE" });
+      return;
+    }
     const expected = crypto
-      .createHmac("sha512", env.MOMO_WEBHOOK_SECRET)
+      .createHmac("sha512", env.PAYSTACK_WEBHOOK_SECRET)
       .update(raw)
       .digest("hex");
 

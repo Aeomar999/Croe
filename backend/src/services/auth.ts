@@ -6,18 +6,13 @@ import { redis } from "../config/redis.js";
 import { logger } from "../config/logger.js";
 import { AppError } from "../middleware/error-handler.js";
 
-import { SmsProvider } from "../providers/sms/sms-provider.js";
-import { MockSmsProvider } from "../providers/sms/mock-provider.js";
-import { ArkeselSmsProvider } from "../providers/sms/arkesel-provider.js";
+import { selectSmsProvider } from "../providers/sms/index.js";
 
 const OTP_MAX_ATTEMPTS = 5;
 const ACCESS_TOKEN_TTL = "15m";
 
-// Instantiate provider based on environment
-const smsProvider: SmsProvider =
-  env.CUSTODY_PHASE === "P0" || env.NODE_ENV === "test"
-    ? new MockSmsProvider()
-    : new ArkeselSmsProvider();
+// Arkesel when configured; otherwise a mock that withholds codes outside dev/test (T7.9)
+const smsProvider = selectSmsProvider();
 
 interface AuthSession {
   session_id: string;

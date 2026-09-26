@@ -21,18 +21,18 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [x] | 285 tests passing, `f346315` |
-| 2 | All acceptance criteria met for every subsystem doc (`for_agents/`) | [x] | All checklist items in Progress.md checked |
+| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [ ] | Not yet: payouts use a placeholder `"unknown"` MSISDN, the buyer's MoMo number is hard-coded in the app, and pay links cannot be resolved. Open items in [`task.md`](task.md) §4, §5, §10 |
+| 2 | All acceptance criteria met for every subsystem doc (`for_agents/`) | [ ] | Not yet: e.g. KYC tier limits not enforced (T8.1), notifications never sent (T9.1), no auto-release or deposit-expiry timers (T5.5, T5.6). See [`task.md`](task.md) |
 | 3 | TypeScript strict mode — zero `any` types in production code | [x] | Only `catch (e: any)` in trust-score.ts and Express rawBody cast (standard patterns) |
 | 4 | `pnpm typecheck` passes with zero errors | [x] | Verified |
 | 5 | `pnpm lint` passes with zero warnings | [ ] | ESLint 10 + typescript-eslint 8 configured (flat config); 0 errors, 34 warnings backlog (unused vars / explicit `any`) |
-| 6 | All tests passing: unit, integration, contract, E2E | [x] | 285 backend + 79 frontend |
+| 6 | All tests passing: unit, integration, contract, E2E | [ ] | Unit + integration green in CI since 2026-09-26 (backend 410, mobile 81, admin 24; PR #19). Mobile Detox E2E never runs (task.md T2.8) |
 | 7 | 50-webhook concurrent race test passes deterministically | [x] | `escrow.integration.test.ts` |
 | 8 | Money-precision tests assert exact equality (zero float drift) | [x] | `payment-precision.test.ts` |
-| 9 | Idempotency survives worker restart | [x] | `idempotency.test.ts` |
-| 10 | Append-only enforcement verified (app role cannot UPDATE/DELETE `transaction_ledger`) | [x] | Integration tests + migration 002 REVOKE |
-| 11 | No `console.log`/`console.error` in production code — structured logger only | [x] | Grep verified — zero matches in non-test files |
-| 12 | No secrets, API keys, or tokens in source code or logs (SEC-01) | [x] | Grep verified — zero hardcoded secrets |
+| 9 | Idempotency survives worker restart | [x] | `webhooks.recovery.integration.test.ts`: a failed webhook stays in `webhook_inbox` and the sweeper applies it exactly once (task.md T6.1/T6.2) |
+| 10 | Append-only enforcement verified (app role cannot UPDATE/DELETE `transaction_ledger`) | [ ] | Not enforced: migration 002's REVOKE is a no-op unless `app_user` exists, and the app connects as the table owner. Needs a trigger + least-privilege role (task.md T7.2) |
+| 11 | No `console.log`/`console.error` in production code — structured logger only | [ ] | Backend clean since T1.4. Mobile and admin still call `console.*` (task.md T10.5) |
+| 12 | No secrets, API keys, or tokens in source code or logs (SEC-01) | [x] | Seed admin credentials removed (task.md T1.1) and OTPs no longer logged outside dev (T7.9). The old credentials remain in git history: rotate anywhere reused |
 | 13 | `docker-compose up` brings full stack up locally | [x] | `docker-compose.yml` verified |
 
 ### 1.2 Infrastructure Readiness
@@ -60,26 +60,35 @@
 |---|--------|----------|---------|-------|
 | 1 | `DATABASE_URL` | Platform secret store | [ ] | |
 | 2 | `REDIS_URL` | Platform secret store | [ ] | |
-| 3 | `MOMO_WEBHOOK_SECRET` | Platform secret store | [ ] | |
+| 3 | `MOMO_WEBHOOK_SECRET` | Platform secret store | [ ] | Sandbox/MoMo HMAC-SHA256 webhooks only; never reuse the Paystack key here |
 | 4 | `JWT_SECRET` | Platform secret store | [ ] | |
 | 5 | `OTP_PEPPER` | Platform secret store | [ ] | |
 | 6 | `AGGREGATOR_API_KEY` | Platform secret store | [ ] | |
 | 7 | `AGGREGATOR_BASE_URL` | Platform secret store | [ ] | |
 | 8 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | Platform secret store | [ ] | |
 | 9 | `LLM_URL` / `LLM_MODEL` | Platform secret store | [ ] | |
-| 10 | `CUSTODY_PHASE` | Platform secret store (set to `P1` for pilot) | [ ] | |
-| 11 | `MOMO_WEBHOOK_SECRET` | Platform secret store (shared secret for Paystack HMAC-SHA512) | [ ] | Used for both deposit and transfer webhooks |
-| 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | |
-| 13 | `CORS_ORIGIN` | Platform config (locked to production domain) | [ ] | |
+| 10 | `CUSTODY_PHASE` | Platform config (`P0` until M2; `P1` for the pilot) | [ ] | Validated at boot: exactly `P0`–`P3` |
+| 11 | `PAYSTACK_WEBHOOK_SECRET` | Platform secret store (Paystack HMAC-SHA512 key) | [ ] | Must equal the Paystack secret key (`AGGREGATOR_API_KEY`); rotate them together. Used for deposit and transfer webhooks. Paystack webhooks are rejected while it is unset (task.md T1.5) |
+| 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | Enforces S3 config and 32+ char secrets at boot |
+| 13 | `CORS_ORIGIN` | Platform config (exact admin origin(s)) | [ ] | Must include the admin console origin, e.g. `https://admin.croe.co`. Validated at boot: exact `https` origins only, no wildcards, paths or trailing slash (task.md T7.21) |
+| 14 | `ARKESEL_SMS_API_KEY` | Platform secret store | [ ] | Required when `CUSTODY_PHASE != P0`. When set, OTPs go through Arkesel in every non-test environment. Without it (P0 only) OTPs are neither sent nor logged outside development/test, so staging testers need it (task.md T7.9) |
+| 15 | `S3_BUCKET` / `S3_ENDPOINT` / `S3_REGION` | Platform config | [ ] | Required when `NODE_ENV=production`; R2: `S3_REGION=auto` |
+| 16 | `ALERT_WEBHOOK_URL` | Platform secret store | [ ] | On-call channel (task.md T13.2) |
+| 17 | `COMMISSION_BPS` / `BUYER_PROTECTION_FEE_BPS` | Platform config (explicit) | [ ] | Defaults 250/150 apply if unset; decide per task.md T4.5 |
+| 18 | `RETENTION_NOTIFICATION_DAYS` / `RETENTION_SESSION_DAYS` | Platform config (explicit) | [ ] | Values from legal (task.md T8.6) |
+| 19 | `NEXT_PUBLIC_API_URL` (admin) | Platform config (build-time) | [ ] | API origin only, no `/v1` |
+| 20 | `TRUST_PROXY_HOPS` | Platform config | [ ] | Exact proxy hop count: `1` behind Render, `2` once Cloudflare is in front (task.md T7.1, T14.5). Wrong value = every user shares one IP (OTP limits and Sybil heuristics break) or clients can spoof `X-Forwarded-For` |
+
+> `render.yaml` declares every row above (task.md T3.6, Appendix B). `JWT_SECRET`, `OTP_PEPPER` and `MOMO_WEBHOOK_SECRET` use `generateValue: true`; the rest are `sync: false` or explicit values. Keep `CUSTODY_PHASE=P0` until the M2 gate.
 
 ### 1.4 Security Audit
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | Webhook HMAC verification tested against live aggregator sandbox | [x] | `webhook-hmac.test.ts` — code verified; needs live sandbox test |
+| 1 | Webhook HMAC verification tested against live aggregator sandbox | [ ] | Unit/middleware tests pass (`webhook-hmac*.test.ts`); the live Paystack test-mode run is task.md T16.1 |
 | 2 | Replay defense tested (expired timestamp rejected) | [x] | `verify-webhook.ts:60` — 300s window enforced |
 | 3 | Auth brute-force lockout verified (5 failed OTPs → lock) | [x] | `auth.ts:97` — MAX_FAILED_ATTEMPTS=5, tested |
-| 4 | IDOR test: `/escrow/:id` returns 401 for unauthorized party | [x] | `authenticate` middleware on all escrow routes, tested |
+| 4 | IDOR test: `/escrow/:id` returns 401 for unauthorized party | [ ] | Authentication exists, but actor checks do not: any logged-in user can refund, release, or take over a funded escrow via deposit (task.md T5.1–T5.4) |
 | 5 | SQL injection test: all endpoints tested, parameterized queries only | [x] | All queries use pg parameterized `$1` syntax |
 | 6 | Prompt injection test: user text cannot influence LLM instructions | [x] | LLM prompt is static; user data passed as structured context only |
 | 7 | Admin RBAC: non-admin cannot access `/admin/*` endpoints | [x] | `requireRole` on all admin routes, tested |
@@ -126,10 +135,10 @@
 | 4 | Wait for healthy | `docker compose ps` — both should show `healthy` | [ ] |
 | 5 | Run migrations | `cd backend && pnpm db:migrate` | [ ] |
 | 6 | Verify migration state | `docker exec croe-postgres psql -U croe -d croe -c "SELECT * FROM pgmigrations ORDER BY id;"` | [ ] |
-| 7 | Verify ledger revocation | `docker exec croe-postgres psql -U croe -d croe -c "SELECT grant_type FROM information_schema.role_table_grants WHERE table_name='transaction_ledger' AND grantee='croe';"` — should show only SELECT | [ ] |
+| 7 | Verify ledger append-only enforcement | **Not enforced yet** (task.md T7.2): the app connects as the table owner, which ignores grants, and migration 002's REVOKE only applies to an `app_user` role that does not exist. After T7.2 lands, verify that `UPDATE transaction_ledger SET ...` fails when run as the runtime role | [ ] |
 | 8 | Start app | `docker compose up -d app` | [ ] |
 | 9 | Health check | `curl http://localhost:8080/health` — should return `200 OK` | [ ] |
-| 10 | Run full test suite | `cd backend && pnpm test` — 275 tests should pass | [ ] |
+| 10 | Run full test suite | `cd backend && pnpm test` — every test must pass (410 at 2026-09-26) | [ ] |
 | 11 | Configure LLM (optional for P0) | `docker compose up -d ollama` then `docker exec croe-ollama ollama pull <model>` | [ ] |
 | 12 | Smoke test: create escrow | `curl -X POST http://localhost:8080/v1/escrow -H 'Content-Type: application/json' -d '{"vendor_id":"...","buyer_id":"...","amount":"100.00","currency":"GHS"}'` | [ ] |
 | 13 | Verify reconciliation job | Check logs for daily reconciliation run; no mismatch on fresh data | [ ] |
@@ -141,24 +150,44 @@ docker compose down -v   # removes containers + volumes
 
 ### 2.2 Routine Deployment (Post-Launch)
 
+Both services deploy with Render's **Docker runtime** from `render.yaml` (task.md T3.1), so what runs is exactly what CI's "Verify Docker Builds" job built. `autoDeploy` is off: the CI `deploy-staging` / `deploy-prod` jobs call the Render deploy hooks only after every check is green.
+
 | Step | Action | Command / Details |
 |------|--------|-------------------|
-| 1 | Merge phase branch to `main` | Squash-merge after gate (PROC-01, GIT-01) |
-| 2 | CI builds container image | Automated on merge to `main` |
-| 3 | Migrations run | Automated pre-deploy hook |
-| 4 | Rolling deploy | Zero-downtime; old pods drain before new pods start |
-| 5 | Post-deploy smoke | Automated health check + key flow verification |
-| 6 | Monitor | Watch error rates, latency, reconciliation for 30 min |
+| 1 | Merge to `main` | Squash-merge after the gate (PROC-01, GIT-01); CI must be green |
+| 2 | CI triggers the deploy hook | `RENDER_DEPLOY_HOOK_URL_STAGING`, then `RENDER_DEPLOY_HOOK_URL_PROD` after the `production` environment approval |
+| 3 | Render builds the image | `backend/Dockerfile` (context `./backend`), `admin/Dockerfile` (context `.`) |
+| 4 | Migrations run (pre-deploy) | `node node_modules/node-pg-migrate/bin/node-pg-migrate.js up --migrations-dir ./migrations --migrations-table pgmigrations` runs in the new image. A non-zero exit aborts the deploy and the previous version keeps serving (T3.3). Needs a paid instance type. Locally: `pnpm --filter croe-backend db:migrate:prod` (plain env vars, no dotenv) |
+| 5 | Zero-downtime swap | Render routes traffic only after `healthCheckPath: /health/ready` returns 200 (PostgreSQL + Redis) |
+| 6 | Post-deploy smoke | `curl https://<api-host>/health/ready`; admin `/login` loads; key flow check |
+| 7 | Monitor | Watch error rates, latency, reconciliation for 30 min |
+
+> The API validates its configuration at boot (`backend/src/config/env.ts`) and exits with the full list of missing or invalid variables. A deploy that fails its health check with a config error in the logs needs the variable fixed in the Render dashboard, not a code change.
 
 ### 2.3 Deployment (Admin Dashboard)
 
-The `croe-admin` Next.js frontend is configured alongside the API in `render.yaml` for continuous deployment. Alternatively, it can be deployed to Vercel.
+The `croe-admin` Next.js console is defined alongside the API in `render.yaml` and deploys through the same CI deploy hooks, using the Docker runtime.
 
 | Step | Action | Command / Details |
 |------|--------|-------------------|
-| 1 | Render Blueprint Sync | Push to `main` auto-triggers `croe-admin` and `croe-api` builds on Render. |
-| 2 | Next.js Standalone Build | Vercel or Render runs `pnpm build` pulling the workspace deps. |
-| 3 | Container Deploy (Optional) | Build via `admin/Dockerfile` and deploy image to container registry. |
+| 1 | Set the API origin | `NEXT_PUBLIC_API_URL` = API origin only, e.g. `https://api.croe.co` — **no `/v1`**; the client appends it (T3.4) |
+| 2 | Build | `admin/Dockerfile` (context = repo root). Next.js `standalone` output is traced from the monorepo root so the pnpm store is bundled. `NEXT_PUBLIC_*` values are inlined at build time via a Docker build arg: **rebuild after changing them** |
+| 3 | Start | `node admin/server.js` (the image `CMD`; T3.5). Do not use `next start` with `standalone` output |
+| 4 | CORS | The admin origin must be listed in the API's `CORS_ORIGIN` |
+| 5 | Verify | Admin `/login` loads and a staff login succeeds against the API |
+
+### 2.3a Staff Accounts (reviewer / ops / admin)
+
+Staff accounts are never created by the seed script (it refuses to run when `NODE_ENV=production`). `users.password_hash` comes from migration `007_users_password_hash` (task.md T7.3).
+
+| Step | Action | Command / Details |
+|------|--------|-------------------|
+| 1 | Open a shell on the API service | Render dashboard → `croe-api` → Shell (env vars already set) |
+| 2 | Create the account | `STAFF_EMAIL=<email> STAFF_PHONE=<+233…> STAFF_NAME="<name>" STAFF_ROLE=reviewer node dist/db/create-staff.js` — prompts for the password without echo. Locally: `pnpm --filter croe-backend staff:create` |
+| 3 | Password policy | ≥ 12 characters, at least three of lowercase/uppercase/digits/symbols, must not contain the email name. Never pass it on the command line |
+| 4 | Verify | Log in at the admin console `/login` |
+
+> Still open for M2 (task.md T7.4): TOTP 2FA for staff roles and lockout after repeated failed logins.
 
 ### 2.4 Deployment (Mobile App / Expo EAS)
 
@@ -194,9 +223,10 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 
 | Endpoint | Frequency | Expected | Alert if |
 |----------|-----------|----------|----------|
-| `GET /health` | Every 30s | `200 OK` | Down for > 2 min |
-| `GET /health/db` | Every 30s | `200 OK` (pool stats) | Connection pool > 80% utilized |
-| `GET /health/redis` | Every 60s | `200 OK` | Latency > 10ms |
+| `GET /health` | Every 30s (Docker `HEALTHCHECK`, external uptime monitor) | `200 OK` — process up and PostgreSQL reachable | Down for > 2 min |
+| `GET /health/ready` | Render `healthCheckPath` | `200 OK` with `checks.database` (latency + pool stats) and `checks.redis` (latency); `503` if either fails or takes > 2s | `503` for > 2 min; `checks.database.pool.waiting` > 0 sustained; Redis latency > 10ms |
+
+> Both are also served under `/v1`. There are no separate `/health/db` or `/health/redis` endpoints; read those values from `/health/ready` (task.md T3.10).
 
 ### 3.2 Business Metrics (from `01-PRD.md` and `23-Observability-and-Reconciliation.md`)
 
@@ -250,7 +280,7 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 
 | Step | Action |
 |------|--------|
-| 1 | **Freeze new disbursements** (automated by reconciliation job) |
+| 1 | **Freeze new disbursements** — **manual today**: the reconciliation job only alerts; there is no automated freeze yet (task.md T4.14). Stop admin payout retries and releases by hand until it is built |
 | 2 | **Investigate** — compare pooled balance, sub-ledger sum, and aggregator statement line by line |
 | 3 | **Identify discrepancy** — missing ledger entry, double-write, or aggregator error |
 | 4 | **Correct** — append corrective ledger entries (never UPDATE the ledger) |
@@ -358,6 +388,15 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 3. If legitimate flood: check aggregator for retry loops
 4. If attack: temporary IP block at CDN/reverse proxy level
 5. Verify `webhook_inbox` dedup is catching duplicates
+
+### 7.3a Stuck or Dead-Lettered Webhooks
+
+Webhooks are ACKed first, stored in `webhook_inbox`, then applied. If applying fails, the row keeps `processed_at = NULL`, `attempts` and `last_error` are recorded, and the `webhook-sweeper` job (every minute, one instance at a time via advisory lock) retries it with backoff of 1, 2, 4 … 60 minutes. After 8 attempts the row is dead-lettered (`dead_lettered_at` set) and a **critical** `webhook_dead_letter:<provider>:<ref>` alert fires. Rows unprocessed for more than 15 minutes raise a `webhook_inbox_stale` warning (task.md T6.1, T6.2, T6.7).
+
+1. List the backlog: `SELECT webhook_id, provider_ref, attempts, last_error, created_at, dead_lettered_at FROM webhook_inbox WHERE processed_at IS NULL ORDER BY created_at;`
+2. Read `last_error`. A charge for an escrow that is not `AWAITING_DEPOSIT` (expired, cancelled, never initiated) means the buyer paid but the escrow cannot secure funds: treat as a money incident (§4.1) and refund manually until task.md T5.7 lands.
+3. Fix the cause (data, config, or code), then re-queue the row: `UPDATE webhook_inbox SET dead_lettered_at = NULL, attempts = 0, next_attempt_at = NOW() WHERE webhook_id = '<id>';` (never touch `transaction_ledger`, AUD-01). The next sweep applies it idempotently.
+4. Confirm `processed_at` is set and the escrow reached the expected state; record the incident in §10.
 
 ### 7.4 Database Full
 

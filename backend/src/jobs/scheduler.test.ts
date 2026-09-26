@@ -10,11 +10,15 @@ vi.mock("./ledger-integrity.js", () => ({
 vi.mock("./retention.js", () => ({
   runRetentionPurge: vi.fn().mockResolvedValue({ deleted: { notifications: 0, sessions: 0 }, skipped: 0 }),
 }));
+vi.mock("./webhook-sweeper.js", () => ({
+  runWebhookSweeper: vi.fn().mockResolvedValue({ skipped: false, processed: 0, failed: 0, stale: 0 }),
+}));
 
 import { startScheduler, stopScheduler, getSchedulerStatus } from "./scheduler.js";
 import { runReconciliation } from "./reconciliation.js";
 import { runLedgerIntegrityCheck } from "./ledger-integrity.js";
 import { runRetentionPurge } from "./retention.js";
+import { runWebhookSweeper } from "./webhook-sweeper.js";
 
 describe("scheduler", () => {
   beforeEach(() => {
@@ -35,6 +39,15 @@ describe("scheduler", () => {
       expect(runReconciliation).toHaveBeenCalledOnce();
       expect(runLedgerIntegrityCheck).toHaveBeenCalledOnce();
       expect(runRetentionPurge).toHaveBeenCalledOnce();
+      expect(runWebhookSweeper).toHaveBeenCalledOnce();
+    });
+
+    it("runs the webhook sweeper every minute (task.md T6.2)", async () => {
+      startScheduler();
+      await vi.advanceTimersByTimeAsync(0);
+      vi.clearAllMocks();
+      await vi.advanceTimersByTimeAsync(3 * 60 * 1000);
+      expect(runWebhookSweeper).toHaveBeenCalledTimes(3);
     });
 
     it("runs jobs on interval", async () => {
@@ -74,13 +87,14 @@ describe("scheduler", () => {
   });
 
   describe("getSchedulerStatus", () => {
-    it("returns status for all 3 jobs", () => {
+    it("returns status for all 4 jobs", () => {
       const status = getSchedulerStatus();
-      expect(status).toHaveLength(3);
+      expect(status).toHaveLength(4);
       expect(status.map((j) => j.name)).toEqual([
         "reconciliation",
         "ledger-integrity",
         "retention",
+        "webhook-sweeper",
       ]);
     });
 
@@ -89,6 +103,7 @@ describe("scheduler", () => {
       expect(status[0].intervalMs).toBe(15 * 60 * 1000);
       expect(status[1].intervalMs).toBe(60 * 60 * 1000);
       expect(status[2].intervalMs).toBe(24 * 60 * 60 * 1000);
+      expect(status[3].intervalMs).toBe(60 * 1000);
     });
 
     it("updates lastRun after job execution", async () => {

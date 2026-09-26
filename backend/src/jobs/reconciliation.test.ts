@@ -80,10 +80,11 @@ describe("runReconciliation", () => {
     vi.mocked(custodyProvider.getBalance).mockResolvedValue({ amount: "500.00", currency: "GHS" });
 
     const result = await runReconciliation();
-    expect(result.ledgerSummary.totalDeposited).toBe("1000.00");
-    expect(result.ledgerSummary.totalReleased).toBe("400.00");
-    expect(result.ledgerSummary.totalRefunded).toBe("100.00");
-    expect(result.ledgerSummary.netHeld).toBe("500.00");
+    const ghs = result.perCurrency.find((c) => c.currency === "GHS");
+    expect(ghs?.ledger.totalDeposited).toBe("1000.00");
+    expect(ghs?.ledger.totalReleased).toBe("400.00");
+    expect(ghs?.ledger.totalRefunded).toBe("100.00");
+    expect(ghs?.ledger.netHeld).toBe("500.00");
   });
 
   it("detects ledger vs custody discrepancy", async () => {
@@ -106,7 +107,9 @@ describe("runReconciliation", () => {
 
     const result = await runReconciliation();
     expect(result.anomalies.length).toBeGreaterThan(0);
-    expect(result.anomalies[0]).toContain("differs from custody balance");
+    expect(result.anomalies[0]).toContain("Currency GHS");
+    expect(result.anomalies[0]).toContain("differs from actual 800.00");
+    expect(result.perCurrency[0]?.matched).toBe(false);
     expect(alertReconciliationAnomaly).toHaveBeenCalledOnce();
   });
 

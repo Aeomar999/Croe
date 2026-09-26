@@ -7,6 +7,7 @@
  */
 import { pool } from "../db/pool.js";
 import { logger } from "../config/logger.js";
+import { env } from "../config/env.js";
 import { alertDiskRetentionFailure } from "../services/alerting.js";
 
 export interface RetentionResult {
@@ -29,21 +30,23 @@ export async function runRetentionPurge(): Promise<RetentionResult> {
   try {
     await client.query("BEGIN");
 
-    // ── 1. Delete notifications older than 30 days (skip if linked to active dispute) ──
+    // ── 1. Delete notifications older than RETENTION_NOTIFICATION_DAYS (skip if linked to active dispute) ──
     const { rowCount: notifRows } = await client.query(
       `DELETE FROM notifications
-       WHERE created_at < NOW() - INTERVAL '30 days'
+       WHERE created_at < NOW() - make_interval(days => $1)
          AND NOT EXISTS (
            SELECT 1 FROM dispute_cases dc
            WHERE dc.transaction_id = notifications.transaction_id
              AND dc.status IN ('DISPUTE_OPENED', 'AI_PROCESSING', 'UNDER_HUMAN_REVIEW')
          )`,
+      [env.RETENTION_NOTIFICATION_DAYS],
     );
     deleted.notifications = notifRows ?? 0;
 
-    // ── 2. Delete expired auth sessions ──
+    // ── 2. Delete auth sessions expired more than RETENTION_SESSION_DAYS ago ──
     const { rowCount: sessionRows } = await client.query(
-      `DELETE FROM auth_sessions WHERE expires_at < NOW()`,
+      `DELETE FROM auth_sessions WHERE expires_at < NOW() - make_interval(days => $1)`,
+      [env.RETENTION_SESSION_DAYS],
     );
     deleted.sessions = sessionRows ?? 0;
 
@@ -51,12 +54,13 @@ export async function runRetentionPurge(): Promise<RetentionResult> {
     const { rows: skippedRows } = await client.query<{ cnt: string }>(
       `SELECT COUNT(*)::text AS cnt
        FROM notifications n
-       WHERE n.created_at < NOW() - INTERVAL '30 days'
+       WHERE n.created_at < NOW() - make_interval(days => $1)
          AND EXISTS (
            SELECT 1 FROM dispute_cases dc
            WHERE dc.transaction_id = n.transaction_id
              AND dc.status IN ('DISPUTE_OPENED', 'AI_PROCESSING', 'UNDER_HUMAN_REVIEW')
          )`,
+      [env.RETENTION_NOTIFICATION_DAYS],
     );
     totalSkipped = parseInt(skippedRows[0]?.cnt ?? "0", 10);
 

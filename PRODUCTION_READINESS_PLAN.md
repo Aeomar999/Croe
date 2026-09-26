@@ -8,7 +8,7 @@
 
 | Area | Status | Gap |
 |------|--------|-----|
-| **Code** | ✅ Complete | All 8 phases implemented, 354 tests passing, TypeScript strict, zero mocks |
+| **Code** | ⚠️ Partial | CI green since 2026-09-26 (backend 410, mobile 81, admin 24 tests; TypeScript strict). Not "zero mocks": payout MSISDN placeholders, hard-coded buyer MoMo number, unresolvable pay links, missing authz and timers. Engineering work to M2 is tracked in [`task.md`](task.md) |
 | **Infrastructure** | ❌ 0/11 | No production Postgres, Redis, Object Storage, LLM hosting, DNS, TLS, CDN, CI/CD, Backups, Log aggregation |
 | **Secrets** | ❌ 0/12 | All secrets in local `.env`, not in platform secret store |
 | **Security** | ⚠️ Partial | Penetration test not executed (P1 item) |
@@ -80,7 +80,7 @@
 | C3 | Object Storage (Cloudflare R2 / S3) | Provisioned | Versioning + cross-region replication |
 | C4 | LLM Hosting (vLLM on GPU box or CPU/Ollama) | Provisioned | **Run pilot CPU-only per cost discipline** |
 | C5 | DNS + TLS (Cloudflare) | Configured | Auto-renewing certs |
-| C6 | CI/CD Pipeline (GitHub Actions → Render/Railway/Fly) | Running | Typecheck → Lint → Test → Build → Migrate → Deploy |
+| C6 | CI/CD Pipeline (GitHub Actions → Render/Railway/Fly) | ⚠️ CI green; deploy not wired | Typecheck → Lint → Test → Build → Docker verified. Staging services and deploy hooks not set up yet (task.md T3.8, T3.9) |
 | C7 | Log Aggregation (Pino → Loki/Better Stack/Datadog) | Configured | Structured JSON |
 | C8 | Daily Postgres Backups + PITR | Verified | Monthly restore test scheduled |
 

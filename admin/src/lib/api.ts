@@ -3,6 +3,7 @@ import type {
   APIError, 
   LoginRequest, 
   LoginResponse, 
+  RefreshResponse,
   AdminUser,
   DisputeQueueItem,
   DisputeCaseDetail,
@@ -16,8 +17,10 @@ import type {
   SchedulerStatus,
   JobStatus,
 } from '@/types';
+import { resolveApiOrigin } from './api-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// NEXT_PUBLIC_* values are inlined at build time: rebuild after changing them.
+const API_URL = resolveApiOrigin(process.env.NEXT_PUBLIC_API_URL);
 
 export const api = axios.create({
   baseURL: `${API_URL}/v1`,
@@ -117,9 +120,13 @@ function processQueue(error: Error | null, token: string | null = null): void {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<APIError>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // A 401 from the login or refresh endpoints is a real answer, not an
+    // expired session: surface it to the caller instead of redirecting.
+    const isAuthEndpoint = /^\/auth\/(login|refresh)\b/.test(originalRequest?.url ?? '');
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -136,6 +143,7 @@ api.interceptors.response.use(
 
       const refreshTokenValue = getRefreshToken();
       if (!refreshTokenValue) {
+        isRefreshing = false;
         clearAuthTokens();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
@@ -144,13 +152,17 @@ api.interceptors.response.use(
       }
 
       try {
-        const response: AxiosResponse<LoginResponse> = await axios.post(
+        const response: AxiosResponse<RefreshResponse> = await axios.post(
           `${API_URL}/v1/auth/refresh`,
           { refresh_token: refreshTokenValue },
           { headers: { 'Content-Type': 'application/json' } }
         );
 
-        const { accessToken, refreshToken, user } = response.data;
+        const { access_token: accessToken, refresh_token: refreshToken } = response.data;
+        const user = getStoredUser();
+        if (!accessToken || !refreshToken || !user) {
+          throw new Error('Session refresh returned an incomplete response');
+        }
         setAuthTokens(accessToken, refreshToken, user);
         processQueue(null, accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;

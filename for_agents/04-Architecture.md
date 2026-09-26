@@ -25,7 +25,7 @@ graph TD
         RateLimit[Redis Rate Limiter + SETNX Idempotency Gate]
     end
 
-    subgraph API["Core Backend (Node.js 20 / TypeScript)"]
+    subgraph API["Core Backend (Node.js 22 / TypeScript)"]
         IdentitySvc[Identity & Auth]
         EscrowSvc[Escrow Contract Service]
         CustodySvc[Custody & Settlement Service]

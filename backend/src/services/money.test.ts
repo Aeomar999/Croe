@@ -113,12 +113,18 @@ describe("calculateFees", () => {
     expect(fees.amountCollected).toBe("0.01");
   });
 
-  it("large amount: 9999999999999.99", () => {
-    const fees = calculateFees("9999999999999.99", RATES);
-    expect(fees.amount).toBe("9999999999999.99");
-    // commission = 250 bps * 9999999999999.99 = 24999999999999.9975 -> half-up = 25000000000000.00
-    // But commission can't exceed amount - should throw
-    expect(fees.commission).toBeDefined();
+  it("rejects 9999999999999.99: amount + buyer fee overflows NUMERIC(15,2)", () => {
+    expect(() => calculateFees("9999999999999.99", RATES)).toThrow(RangeError);
+  });
+
+  it("largest valid amount at 150 bps collects exactly 9999999999999.99", () => {
+    const fees = calculateFees("9852216748768.46", RATES);
+    expect(fees.buyerProtectionFee).toBe("147783251231.53");
+    expect(fees.amountCollected).toBe("9999999999999.99");
+    expect(fees.commission).toBe("246305418719.21");
+    expect(fees.vendorNet).toBe("9605911330049.25");
+    // One pesewa more and the collected amount no longer fits.
+    expect(() => calculateFees("9852216748768.47", RATES)).toThrow(RangeError);
   });
 
   it("throws on zero amount", () => {
@@ -145,8 +151,12 @@ describe("sumAmounts", () => {
     expect(sumAmounts([])).toBe("0.00");
   });
 
-  it("handles large numbers", () => {
-    expect(sumAmounts(["9999999999999.99", "0.01"])).toBe("10000000000000.00");
+  it("sums up to the NUMERIC(15,2) maximum", () => {
+    expect(sumAmounts(["9999999999999.98", "0.01"])).toBe("9999999999999.99");
+  });
+
+  it("throws RangeError when the sum overflows NUMERIC(15,2)", () => {
+    expect(() => sumAmounts(["9999999999999.99", "0.01"])).toThrow(RangeError);
   });
 });
 

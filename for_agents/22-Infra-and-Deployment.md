@@ -37,7 +37,7 @@ Everything above runs free on a laptop → the P0 "build for ~0 GHS" path.
 
 ## 3. Backend Runtime
 
-- **Node.js 20 LTS + TypeScript 5.4** (strict: `noImplicitAny`, `strictNullChecks`).
+- **Node.js 22 LTS + TypeScript 5.4** (strict: `noImplicitAny`, `strictNullChecks`).
 - Express/Fastify with raw-body capture for webhook HMAC ([`24`](12-Webhooks-and-Idempotency.md)).
 - `pg.Pool` (`max: 20`, `idleTimeoutMillis: 30000`) or pgBouncer transaction pooling.
 - **Migrations:** pin **`node-pg-migrate`** (or Prisma Migrate); one migration per change; never edit shipped migrations ([`11`](05-Data-Model.md) §8).

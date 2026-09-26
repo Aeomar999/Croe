@@ -45,6 +45,16 @@ describe("runRetentionPurge", () => {
     expect(result.deleted.sessions).toBe(2);
   });
 
+  it("uses RETENTION_NOTIFICATION_DAYS and RETENTION_SESSION_DAYS as query parameters (task.md T3.12)", async () => {
+    await runRetentionPurge();
+    const calls = mockQuery.mock.calls as Array<[string, unknown[]?]>;
+    const notifDelete = calls.find(([sql]) => sql.includes("DELETE FROM notifications"));
+    const sessionDelete = calls.find(([sql]) => sql.includes("DELETE FROM auth_sessions"));
+    expect(notifDelete?.[0]).toContain("make_interval(days => $1)");
+    expect(notifDelete?.[1]).toEqual([30]);
+    expect(sessionDelete?.[1]).toEqual([7]);
+  });
+
   it("returns correct skipped count", async () => {
     mockQuery.mockImplementation(async (sql: string) => {
       if (sql === "BEGIN" || sql === "COMMIT" || sql === "ROLLBACK") return {};

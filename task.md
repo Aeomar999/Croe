@@ -3,6 +3,7 @@
 > **Living document.** Engineering tasks and launch gates that stand between the current codebase and a supervised P1 pilot with real money.
 >
 > - **Audit basis:** code on `fix/admin-resolve-dispute` @ `953bd69`, and CI run `36207266482` on `main` @ `d17ec01`. Audited 2026-09-26.
+> - **Last updated:** 2026-09-26 — M1 engineering tasks landed in [PR #19](https://github.com/Aeomar999/Croe/pull/19) (see §19 for what remains).
 > - **Scope:** this file owns **engineering work and launch gates**. Business, legal, and operations tasks stay in [`PRODUCTION_TASKS.md`](PRODUCTION_TASKS.md) (IDs `A1`–`G13`, `OC*`, `OG*`) and [`GO-TO-MARKET.md`](GO-TO-MARKET.md). They are referenced here by ID and not duplicated.
 > - **Rule PROC-03:** when a task here changes production readiness, update [`Production_manual.md`](Production_manual.md) in the same commit.
 
@@ -42,14 +43,16 @@ Items marked **(verify)** are likely but were not confirmed during the audit. Co
 
 ## Readiness snapshot (2026-09-26)
 
+> Updated after [PR #19](https://github.com/Aeomar999/Croe/pull/19): the CI, deploy-config and webhook rows are resolved in code; the rest are unchanged from the audit.
+
 | Area | State today | Key blockers |
 |------|-------------|--------------|
-| CI | Red on every push to `main` since at least 2026-09-24. Backend tests: 327/336 passing. Backend Docker image does not build. Deploy jobs never run. | T2.1, T2.2 |
-| Deploy config | `render.yaml` as written would not produce a working API or admin console. | T3.2, T3.4, T7.3 |
+| CI | ✅ Green on PR #19: all backend (410), mobile (81) and admin (24) tests, and both Docker images build. Branch protection still missing. | T2.3 |
+| Deploy config | ✅ Docker-runtime `render.yaml` with pre-deploy migrations, validated config and a readiness check. Not yet deployed: no staging services or hooks exist. | T3.8, T3.9 |
 | Money movement (Paystack) | Payouts are sent to the phone number `"unknown"`, for the full amount (commission not kept), and always to MTN. | T4.1–T4.3, T4.5, T4.9 |
 | Authorization & lifecycle | Any logged-in user can trigger a refund or take over a funded escrow. No deposit-expiry or auto-release timers exist. | T5.1, T5.3, T5.6 |
-| Webhooks | A webhook that fails during processing is lost permanently. Sandbox deposits never secure. | T6.1–T6.3 |
-| Security | Public repo with hard-coded admin credentials. Every client appears to share one IP. The ledger is not append-only in production. | T1.1, T7.1, T7.2 |
+| Webhooks | ✅ Failed webhooks are retried by a sweeper and dead-lettered with an alert; sandbox deposits secure. Rate limit and amount checks still open. | T6.4, T4.6 |
+| Security | Seed credentials removed (rotate them) and `req.ip` fixed. Repo is still public; the ledger is still not append-only in production. | T1.3, T7.2 |
 | Compliance in code | KYC tier limits are never enforced. Uploaded ID images are discarded. | T8.1, T8.2 |
 | Mobile | Buyer's MoMo number is hard-coded. Pay links cannot be resolved. Evidence upload and KYC submission are not wired. | T10.1–T10.4 |
 | Infrastructure | 0 of 12 items provisioned. | §14 |
@@ -92,7 +95,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 
 ## 1. Immediate security hygiene (do first)
 
-- [ ] **T1.1 · Remove hard-coded admin credentials and rotate them** — `Blocker` `M1` `S`
+- [x] **T1.1 · Remove hard-coded admin credentials and rotate them** — `Blocker` `M1` `S`
   - **Where:** [`backend/src/db/seed.ts#L41`](backend/src/db/seed.ts#L41) (lines 41–42)
   - **Problem:** The GitHub repo `Aeomar999/Croe` is **public**. The seed script contains a literal admin email and password, and the pair is also in git history. If the seed ever runs against a shared or production database, an admin account with a publicly known password exists.
   - **Fix:**
@@ -101,35 +104,36 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Create production staff accounts with a dedicated script instead (T7.4).
     - Change that password anywhere it has been reused.
   - **Done when:** grep finds no literal credentials in the repo, and `NODE_ENV=production pnpm db:seed` refuses to run.
-
-- [ ] **T1.2 · Delete the admin mock-login fallback** — `Blocker` `M1` `S`
+  - **Status:** Done 2026-09-26 ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). Seed reads `SEED_ADMIN_*`, exits 1 under `NODE_ENV=production`; grep finds no credentials. **Still to do by a human:** rotate that password wherever it was reused (it remains in git history).
+- [x] **T1.2 · Delete the admin mock-login fallback** — `Blocker` `M1` `S`
   - **Where:** [`admin/src/context/AuthContext.tsx#L40`](admin/src/context/AuthContext.tsx#L40) (lines 40–50)
   - **Problem:** When the login API call fails and the email matches a hard-coded address, the UI stores `mock-access-token` and routes to `/dashboard`. The backend still rejects the fake token, but this hides real login failures and ships a hard-coded identity.
   - **Fix:** Remove the fallback and show a calm error message instead.
   - **Done when:** A failed login always stays on `/login` with an error, and no hard-coded email remains in `admin/src`.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). Also fixed: a 401 from `/auth/login` triggered the refresh interceptor's page reload, which wiped the error.
 - [ ] **T1.3 · Decide repository visibility** — `High` `M1` `S` — *Owner: Founder*
   - **Problem:** The public repo exposes `pitch/` (financial model, vendor pilot agreement, banking brief), the security threat model, fee strategy, and every future finding in this file.
   - **Fix:** Recommended: make the repo private before M2. If it stays public, move `pitch/` and security docs out of it.
   - **Done when:** The decision is recorded here and `gh repo view --json visibility` matches it.
 
-- [ ] **T1.4 · OTP request endpoint swallows all errors** — `Blocker` `M1` `S`
+- [x] **T1.4 · OTP request endpoint swallows all errors** — `Blocker` `M1` `S`
   - **Where:** [`backend/src/routes/auth.ts#L30`](backend/src/routes/auth.ts#L30) (lines 30–34)
   - **Problem:** The `requestOTP` catch block uses `console.error` (violates SEC-01) and swallows **all** errors including DB failures, SMS provider failures, and rate limit errors. Returns 202 "OTP sent" even when nothing was sent, enabling user enumeration via timing.
   - **Fix:** Return 202 only after successful `requestOTP` call. On failure, log structured error and return 500/503. The "prevent user enumeration" goal is achieved by always returning 202 *after* successful enqueue, not by swallowing errors.
   - **Done when:** A failed OTP request (DB down, SMS down) returns 500/503, not 202. No `console.error` in production code.
-
-- [ ] **T1.5 · Paystack webhook uses wrong HMAC secret** — `High` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). 400 for bad input, 429 kept, 503 for DB/Redis/SMS failures; `routes/auth.test.ts`.
+- [x] **T1.5 · Paystack webhook uses wrong HMAC secret** — `High` `M1` `S`
   - **Where:** [`backend/src/middleware/webhook-hmac.ts#L38`](backend/src/middleware/webhook-hmac.ts#L38)
   - **Problem:** Paystack webhooks use `MOMO_WEBHOOK_SECRET` instead of a dedicated `PAYSTACK_WEBHOOK_SECRET`. If keys are shared across providers, compromise of one compromises the other.
   - **Fix:** Add `PAYSTACK_WEBHOOK_SECRET` to env and use it here. Document in `.env.example`.
   - **Done when:** Paystack webhook verification uses its own secret; unit test confirms different secrets produce different signatures.
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). `PAYSTACK_WEBHOOK_SECRET` in middleware and rail; rejected while unset; `webhook-hmac.middleware.test.ts`.
 
 ---
 
 ## 2. CI green and build integrity
 
-- [ ] **T2.1 · Fix the Docker builds: Node 22 and pinned pnpm** — `Blocker` `M1` `S`
+- [x] **T2.1 · Fix the Docker builds: Node 22 and pinned pnpm** — `Blocker` `M1` `S`
   - **Where:** [`backend/Dockerfile#L3`](backend/Dockerfile#L3) (lines 3, 5, 19, 21) and [`admin/Dockerfile#L2`](admin/Dockerfile#L2) (lines 2, 6, 25)
   - **Problem:** The images use `node:20-alpine` with `corepack prepare pnpm@latest`. pnpm 11 needs the `node:sqlite` module from Node 22, so CI fails with `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`. CI itself runs on Node 22, so local and CI environments differ.
   - **Fix:**
@@ -137,8 +141,8 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Set `engines.node` to `>=22` in every `package.json`.
     - Update the stack table in AGENTS.md (it says Node 20 LTS).
   - **Done when:** The CI job "Verify Docker Builds" is green, and the backend image starts and serves `/health` against a local Postgres.
-
-- [ ] **T2.2 · Fix the 9 failing backend tests** — `Blocker` `M1` `M`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). CI "Verify Docker Builds" green (run `36212460902`). Locally the backend image served `/health` against Postgres. Building the admin image also exposed that it could never start (standalone trace root); fixed.
+- [x] **T2.2 · Fix the 9 failing backend tests** — `Blocker` `M1` `M`
   - **Problem:** 5 of these failures are **real bugs**, not test drift. See Appendix A for the full breakdown.
   - **Fix:**
     - kyc.integration ×2: real bug, fixed by T8.1.
@@ -147,21 +151,21 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - money.test ×2 (drift): the code now correctly rejects amounts that overflow NUMERIC(15,2) once the buyer fee is added. Assert `RangeError`, and add a test at the largest valid amount.
     - reconciliation.test ×2 (drift): the result moved to `perCurrency[]` and the anomaly text changed. Update the assertions.
   - **Done when:** CI "Tests (backend)" shows 336/336 (or more) passing.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)). CI "Tests (backend)" green; 410 tests locally. Also fixed the same `'0'` bug in reconciliation's unswept revenue, with a real-DB test.
 - [ ] **T2.3 · Require green CI before merging to `main`** — `High` `M1` `S` — *Owner: repo admin*
   - **Problem:** PRs were merged while every CI run was red, and nothing stopped them.
   - **Fix:** Add branch protection on `main`: required checks (Typecheck, Lint, Tests backend/admin/mobile, Build, Verify Docker Builds), an up-to-date branch, and no force pushes.
   - **Done when:** A PR with a red check cannot be merged.
 
-- [ ] **T2.4 · Land unmerged work** — `Medium` `M1` `S`
+- [x] **T2.4 · Land unmerged work** — `Medium` `M1` `S`
   - **Problem:** Commit `953bd69` ("resolveDispute calls releaseFunds/refundFunds") exists only on local `fix/admin-resolve-dispute`. It is not on `origin` or `main`.
   - **Fix:** Push it and open a PR, which merges after T2.2.
   - **Done when:** `git branch -r --contains 953bd69` includes `origin/main`.
-
-- [ ] **T2.5 · Set the GitHub default branch to `main`** — `Low` `M1` `S`
+  - **Status:** Done: `git branch -r --contains 953bd69` includes `origin/main` (merged in PR #18).
+- [x] **T2.5 · Set the GitHub default branch to `main`** — `Low` `M1` `S`
   - **Problem:** `origin/HEAD` points at `phase/1-data-ledger`, so new PRs target the wrong base.
   - **Done when:** `git remote show origin` reports `HEAD branch: main`.
-
+  - **Status:** Done: `git remote show origin` reports `HEAD branch: main`.
 - [ ] **T2.6 · Reduce lint warnings to zero and enforce it** — `Low` `M2` `S`
   - **Problem:** The backend has 42 warnings. Production_manual §1.1 #5 requires zero.
   - **Fix:** Clear the warnings, then add `--max-warnings 0` to the lint scripts.
@@ -179,22 +183,22 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 
 ## 3. Deployment configuration (Render / Docker / env)
 
-- [ ] **T3.1 · Choose the deploy runtime** — `High` `M1` `S`
+- [x] **T3.1 · Choose the deploy runtime** — `High` `M1` `S`
   - **Fix:** Recommended: use Render's **Docker runtime** with the fixed Dockerfiles from T2.1, so staging and production run exactly what CI built. Otherwise, fix the native build (T3.2).
   - **Done when:** The decision is recorded here and `render.yaml` reflects it.
-
+  - **Status:** **Decision: Render Docker runtime** for both services ([PR #19](https://github.com/Aeomar999/Croe/pull/19)); `render.yaml` uses `runtime: docker`.
 - [ ] **T3.2 · Install dev dependencies at build time** — `Blocker` `M1` `S` **(verify on first deploy)**
   - **Where:** [`render.yaml#L5`](render.yaml#L5)
   - **Problem:** `NODE_ENV=production` is set for the service, so `pnpm install` will likely skip devDependencies. That means `typescript` (needed by `pnpm build`) and `dotenv-cli` (needed by `pnpm db:migrate`) will be missing.
   - **Fix:** Use the Docker runtime (T3.1), or run `pnpm install --prod=false` in the build command.
   - **Done when:** A Render build log shows `tsc` completing.
-
+  - **Status:** Code done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): with the Docker runtime, dev dependencies install in the builder stage and `tsc` runs there (verified in CI's Docker build). Tick after the first Render build log shows it.
 - [ ] **T3.3 · Run migrations as a pre-deploy step, not in the build** — `High` `M1` `S`
   - **Where:** [`render.yaml#L5`](render.yaml#L5)
   - **Problem:** `pnpm db:migrate` runs inside `buildCommand`. That makes the build depend on the database. Also, `db:migrate` wraps itself in `dotenv --`, which is a dev dependency.
   - **Fix:** Move migrations to Render's pre-deploy command, or to a one-off job that must succeed before traffic shifts. Add a `db:migrate:prod` script that uses plain environment variables.
   - **Done when:** A failed migration blocks the deploy, and the previous version keeps serving.
-
+  - **Status:** Code done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `preDeployCommand` runs node-pg-migrate in the new image; `db:migrate:prod` script added. Verified locally in the image: migrates a fresh DB, exits 1 on a missing DB or broken migration. Tick after one staging deploy (pre-deploy needs a paid instance).
 - [ ] **T3.4 · Fix the doubled `/v1` in the admin API URL** — `Blocker` `M1` `S`
   - **Where:** [`render.yaml#L43`](render.yaml#L43), [`admin/src/lib/api.ts#L23`](admin/src/lib/api.ts#L23), [`admin/next.config.js`](admin/next.config.js)
   - **Problem:** `NEXT_PUBLIC_API_URL=https://api.croe.co/v1`, and the admin code appends `/v1` again, so every admin request goes to `/v1/v1/...` and gets a 404.
@@ -203,13 +207,13 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Fix [`admin/.env.example`](admin/.env.example), which points at port 3001; the backend runs on 8080.
     - `NEXT_PUBLIC_*` values are baked in at build time, so rebuild after changing them.
   - **Done when:** Admin login on staging succeeds against the real backend.
-
+  - **Status:** Code done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): host-only value in `render.yaml`, client strips a stray `/v1`, admin `.env.example` → :8080, build-arg in the admin Dockerfile. Tick once staff login works on staging.
 - [ ] **T3.5 · Admin start command for standalone output** — `Medium` `M1` `S` **(verify)**
   - **Where:** [`admin/next.config.js`](admin/next.config.js) (`output: 'standalone'`), [`render.yaml#L39`](render.yaml#L39) (`pnpm start`, i.e. `next start`)
   - **Fix:** Start with `node .next/standalone/server.js` (copying `.next/static` and `public` into it), or drop `standalone` for the native runtime.
   - **Done when:** Admin serves correctly on staging with no startup warnings.
-
-- [ ] **T3.6 · Complete the production environment definition** — `High` `M1` `S`
+  - **Status:** Code done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): Docker `CMD node admin/server.js`; verified locally that `/login`, JS chunks and `public/` assets serve. Tick after staging.
+- [x] **T3.6 · Complete the production environment definition** — `High` `M1` `S`
   - **Where:** [`render.yaml`](render.yaml). See Appendix B for the full matrix.
   - **Problem:** Several variables are missing: `ARKESEL_SMS_API_KEY`, `S3_REGION`, `ALERT_WEBHOOK_URL`, and explicit `COMMISSION_BPS` / `BUYER_PROTECTION_FEE_BPS` (defaults of 250/150 apply silently). Also, `CUSTODY_PHASE=P1` is hard-coded, so the first deploy would run on the Paystack path with no keys.
   - **Fix:**
@@ -218,15 +222,15 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Set `AGGREGATOR_BASE_URL=https://api.paystack.co`.
     - `CORS_ORIGIN` must include the admin origin.
   - **Done when:** Every variable in Appendix B is declared.
-
-- [ ] **T3.7 · Fail fast on missing or invalid production config** — `High` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): every Appendix B variable is declared; `CUSTODY_PHASE=P0`; secrets `generateValue`/`sync: false`; `TRUST_PROXY_HOPS=1`; Redis `noeviction`; `autoDeploy: false`.
+- [x] **T3.7 · Fail fast on missing or invalid production config** — `High` `M1` `S`
   - **Where:** [`backend/src/config/env.ts`](backend/src/config/env.ts)
   - **Problem:**
     - `AGGREGATOR_API_KEY`, `AGGREGATOR_BASE_URL`, `S3_*` and `ARKESEL_SMS_API_KEY` default to `""`.
     - `CUSTODY_PHASE` is cast without validation, so a typo such as `p0` silently selects the Paystack provider ([`providers/index.ts`](backend/src/providers/index.ts)).
   - **Fix:** Validate `CUSTODY_PHASE ∈ {P0,P1,P2,P3}`. When `CUSTODY_PHASE ≠ P0` or `NODE_ENV=production`, require the aggregator, S3 and SMS variables.
   - **Done when:** Booting with a missing required variable exits with a clear message. Unit tests cover this.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `loadEnv` collects all problems and throws at boot; also requires 32+ char secrets and explicit `TRUST_PROXY_HOPS` in production; `config/env.test.ts`. The local docker-compose app now runs `NODE_ENV=development`.
 - [ ] **T3.8 · Stand up a staging environment** — `High` `M1` `M`
   - **Problem:** CI expects `RENDER_DEPLOY_HOOK_URL_STAGING`, and the mobile `development`/`preview` profiles point at `api-staging.croe.co`. Neither exists yet.
   - **Fix:** Create `croe-api-staging`, `croe-admin-staging`, and a staging Postgres and Redis. Start with `CUSTODY_PHASE=P0`, then switch to Paystack **test** keys for M2.
@@ -238,13 +242,13 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Require reviewer approval on the `production` environment.
     - Turn off Render auto-deploy for services driven by hooks, to avoid double deploys.
   - **Done when:** Production deploys only after the manual approval step.
-
-- [ ] **T3.10 · Real health and readiness checks** — `Medium` `M1` `S`
+  - **Status:** Partly done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `autoDeploy: false` in `render.yaml`. **Still needs a repo admin:** the two deploy-hook secrets and required reviewers on the `production` environment.
+- [x] **T3.10 · Real health and readiness checks** — `Medium` `M1` `S`
   - **Where:** [`backend/src/routes/health.ts`](backend/src/routes/health.ts)
   - **Problem:** Only the database is checked. Production_manual §3.1 references `/health/db` and `/health/redis`, which do not exist.
   - **Fix:** Add a Redis ping plus a readiness endpoint, and set Render's `healthCheckPath`. Align the manual with what exists.
   - **Done when:** A Redis outage makes the readiness check fail.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `/health/ready` checks PostgreSQL and Redis (2s budget each) and is Render's `healthCheckPath`; verified live that stopping Redis returns 503. Manual §3.1 aligned.
 - [ ] **T3.11 · Pick one domain and use it everywhere** — `Medium` `M1` `S` — *Owner: Founder*
   - **Problem:** The code uses three domains:
     - `croe.co`: API and admin (`render.yaml`, `eas.json`).
@@ -253,10 +257,10 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
   - **Fix:** Register one domain and replace the others.
   - **Done when:** Grep for the unused domains returns nothing.
 
-- [ ] **T3.12 · Make `.env.example` and the rate-limit config honest** — `Low` `M1` `S`
+- [x] **T3.12 · Make `.env.example` and the rate-limit config honest** — `Low` `M1` `S`
   - **Problem:** `.env.example` is missing `S3_ENDPOINT`, `ALERT_WEBHOOK_URL`, the fee variables and the retention variables. Separately, the `RATE_LIMIT_*` variables are read in `env.ts` but never used: [`rate-limiter.ts#L120`](backend/src/middleware/rate-limiter.ts#L120) hard-codes the limits.
   - **Done when:** Every variable in `env.ts` is documented and actually takes effect.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `.env.example` files document every variable; `RATE_LIMIT_*_MAX` and `RETENTION_*` now take effect; `RETENTION_MESSAGE_DAYS` removed (no messages table).
 - [ ] **T3.13 · Run scheduled jobs on a single instance** — `Medium` `M3` `S`
   - **Where:** [`backend/src/jobs/scheduler.ts`](backend/src/jobs/scheduler.ts)
   - **Problem:** Jobs run in-process in every web instance. As soon as the service scales past one instance, reconciliation, retention and the new workers from §5 and §6 run concurrently.
@@ -427,7 +431,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 
 ## 6. Webhook reliability
 
-- [ ] **T6.1 · Don't mark a webhook as seen until it is processed** — `Blocker` `M2` `S`
+- [x] **T6.1 · Don't mark a webhook as seen until it is processed** — `Blocker` `M2` `S`
   - **Where:** [`routes/webhooks.ts#L38`](backend/src/routes/webhooks.ts#L38)
   - **Problem:**
     - The Redis `SETNX` key is set before processing. If processing throws, the key stays for 24 hours.
@@ -435,8 +439,8 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Any processing error is therefore **permanent**: the buyer is charged and the escrow stays in `AWAITING_DEPOSIT`.
   - **Fix:** On failure, delete the Redis key. Treat `webhook_inbox` as the durable record and let the sweeper (T6.2) recover.
   - **Done when:** A test injects a failure, and the webhook is processed on the next sweep.
-
-- [ ] **T6.2 · Implement and schedule the inbox sweeper** — `Blocker` `M2` `M`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): the Redis key is released on failure and the inbox row records the failure; `webhooks.recovery.integration.test.ts`.
+- [x] **T6.2 · Implement and schedule the inbox sweeper** — `Blocker` `M2` `M`
   - **Where:** [`webhook-inbox.ts#L56`](backend/src/services/webhook-inbox.ts#L56) (lines 56–77)
   - **Problem:** `getUnprocessedWebhooks` selects `inbox_id` and `transaction_id`, but the table has `webhook_id` and no `transaction_id` ([`001_initial_schema.ts#L492`](backend/migrations/001_initial_schema.ts#L492)). Nothing calls it anyway.
   - **Fix:**
@@ -446,13 +450,13 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Add an `attempts` column with backoff.
     - Alert when a row is older than 15 minutes.
   - **Done when:** A crash-recovery test passes (Production_manual §1.1 #9 then holds for real).
-
-- [ ] **T6.3 · Dispatch on a normalized event type (fixes sandbox deposits)** — `Blocker` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): shared `applyWebhook()`, `webhook-sweeper` job every minute under `pg_try_advisory_lock`, backoff columns (migration 008), stale-row alert at 15 min; a crash-recovery test applies a failed deposit exactly once. Deposit replays after the escrow moved on are now no-ops.
+- [x] **T6.3 · Dispatch on a normalized event type (fixes sandbox deposits)** — `Blocker` `M1` `S`
   - **Where:** [`routes/webhooks.ts#L60`](backend/src/routes/webhooks.ts#L60), [`sandbox.ts#L142`](backend/src/providers/sandbox.ts#L142)
   - **Problem:** The route branches on the raw `event === "charge.success"`. Sandbox payloads have no `event` field, so P0 deposits never reach `FUNDS_SECURED`. This is the failing `api.e2e` test, and it blocks the "7 clean days on sandbox" gate.
   - **Fix:** `parseWebhook` returns `kind: "DEPOSIT" | "PAYOUT"` plus the outcome, and the route switches on `kind`. PaymentRail stays rail-agnostic (MONEY-03).
   - **Done when:** The api.e2e lifecycle test passes under P0.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `ParsedWebhook.kind` (`DEPOSIT`/`PAYOUT`); api.e2e lifecycle passes under P0.
 - [ ] **T6.4 · Exempt the webhook route from the per-IP payment limit** — `High` `M2` `S`
   - **Where:** [`routes/webhooks.ts#L21`](backend/src/routes/webhooks.ts#L21), [`rate-limiter.ts#L122`](backend/src/middleware/rate-limiter.ts#L122)
   - **Problem:** The route uses the payment limiter (10 per minute per IP). Once T7.1 lands, all Paystack webhooks come from a handful of IPs, so a burst gets `429`.
@@ -466,17 +470,18 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 - [ ] **T6.6 · Allowlist Paystack webhook source IPs** — `Low` `M3` `S`
   - **Fix:** Add this as defense in depth on top of HMAC, keeping the list in config.
 
-- [ ] **T6.7 · Webhook inbox has no dead letter / retry limit** — `Medium` `M2` `S`
+- [x] **T6.7 · Webhook inbox has no dead letter / retry limit** — `Medium` `M2` `S`
   - **Where:** [`backend/src/services/webhook-inbox.ts`](backend/src/services/webhook-inbox.ts)
   - **Problem:** Failed webhooks leave `processed_at = NULL` indefinitely. Sweeper retries forever. No max retry count, no dead-letter queue, no alerting.
   - **Fix:** Add `retry_count` column; after N failures, mark `dead_letter = true` and alert.
   - **Done when:** A webhook that fails N times is marked dead-letter and triggers an alert.
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): dead-lettered after 8 attempts (`dead_lettered_at`) with a critical alert; never auto-retried again. Runbook: Production_manual §7.3a.
 
 ---
 
 ## 7. Security hardening
 
-- [ ] **T7.1 · Trust the proxy so `req.ip` is the real client** — `Blocker` `M1` `S`
+- [x] **T7.1 · Trust the proxy so `req.ip` is the real client** — `Blocker` `M1` `S`
   - **Where:** [`backend/src/app.ts#L20`](backend/src/app.ts#L20). There is no `trust proxy` setting.
   - **Problem:** Behind Render (and Cloudflare), every request appears to come from the proxy's IP. As a result:
     - The OTP limit (3 per 5 minutes, keyed by IP for anonymous users at [`rate-limiter.ts#L63`](backend/src/middleware/rate-limiter.ts#L63)) becomes **global**, so login breaks under light load.
@@ -484,7 +489,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - The forensic IP data (AUD-02) is worthless.
   - **Fix:** Set `app.set("trust proxy", <exact hop count>)`: 1 for Render alone, 2 with Cloudflare in front. Never `true`, which lets clients spoof `X-Forwarded-For`.
   - **Done when:** Supertest confirms `req.ip` resolves correctly and a spoofed extra `X-Forwarded-For` hop is ignored.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `trust proxy` = `TRUST_PROXY_HOPS` (validated digit, required in production); `middleware/trust-proxy.test.ts` covers spoofed hops.
 - [ ] **T7.2 · Enforce the append-only ledger in production** — `Blocker` `M2` `M`
   - **Where:** [`002_indexes_and_triggers.ts#L91`](backend/migrations/002_indexes_and_triggers.ts#L91) (lines 91–103)
   - **Problem:** The `REVOKE UPDATE, DELETE` only runs if the role `app_user` exists **when the migration runs**. On a fresh production database it is a no-op. The app also connects as the table owner, which ignores grants anyway. **AUD-01 is not enforced.**
@@ -494,12 +499,12 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Update the Production_manual §2.1 step 7 check (it looks for grants on `croe`).
   - **Done when:** An integration test shows `UPDATE transaction_ledger …` fails when run as the app's database user.
 
-- [ ] **T7.3 · Create the `password_hash` column in a migration** — `Blocker` `M1` `S`
+- [x] **T7.3 · Create the `password_hash` column in a migration** — `Blocker` `M1` `S`
   - **Where:** [`seed.ts#L20`](backend/src/db/seed.ts#L20) (lines 20–24), [`auth.ts#L328`](backend/src/services/auth.ts#L328)
   - **Problem:** Only the seed script creates `password_hash`. Production runs migrations only, so `adminLogin` fails and **no reviewer can log in**.
   - **Fix:** Add migration `007_users_password_hash`, and remove the `ALTER TABLE` from the seed.
   - **Done when:** A clean `db:migrate` followed by the staff account script (T7.4) produces a working admin login.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): migration `007_users_password_hash`; seed no longer alters schema. `staff.integration.test.ts` on a migrations-only DB creates a reviewer and logs in.
 - [ ] **T7.4 · Staff account provisioning, 2FA and lockout** — `High` `M2` `M`
   - **Problem:** Reviewer, ops and admin roles move money (`resolveDispute`, `retryPayout`, KYC approval), but there is no way to create these accounts except the seed.
   - **Fix:**
@@ -507,7 +512,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Require TOTP 2FA for staff roles.
     - Lock staff accounts after repeated failed logins.
   - **Done when:** Staff login requires a second factor, and the lockout is tested.
-
+  - **Status:** Provisioning done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `createStaffAccount` + `node dist/db/create-staff.js` (no-echo prompt, password policy); Production_manual §2.3a. **Still open:** TOTP 2FA and lockout.
 - [ ] **T7.5 · Move admin tokens out of JavaScript-readable storage** — `Medium` `M2` `M`
   - **Where:** [`admin/src/lib/api.ts#L69`](admin/src/lib/api.ts#L69) (lines 69–76)
   - **Problem:** Tokens live in `localStorage` plus cookies set from JavaScript. Any XSS on the admin console steals a money-moving session.
@@ -532,11 +537,11 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - Use different secrets for staging and production.
   - **Done when:** All rows in Production_manual §1.3 are ticked.
 
-- [ ] **T7.9 · Keep OTP codes out of logs outside local development** — `Low` `M1` `S`
+- [x] **T7.9 · Keep OTP codes out of logs outside local development** — `Low` `M1` `S`
   - **Where:** [`auth.ts#L17`](backend/src/services/auth.ts#L17), [`mock-provider.ts#L6`](backend/src/providers/sms/mock-provider.ts#L6)
   - **Problem:** The mock SMS provider logs the OTP code in plain text, and it is selected whenever `CUSTODY_PHASE=P0`, including on staging.
   - **Fix:** Allow the mock only when `NODE_ENV` is `development` or `test`. On staging, use Arkesel or a redacting mock.
-
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): Arkesel whenever the key is set; the mock prints codes only in development/test; `providers/sms/sms.test.ts`.
 - [ ] **T7.10 · External penetration test** — `High` `M3` `L` — *Owner: Founder* (PRODUCTION_TASKS `D3`–`D4`)
   - **Fix:** Scope it per `21-Security-Threat-Model.md` §7, and run it **after** §5 and §7 are fixed.
   - **Done when:** The report is filed, and every critical or high finding is closed (Production_manual §1.4 #11–12).
@@ -601,11 +606,12 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
   - **Fix:** Initialize S3 client at startup via `env` config; fail fast if misconfigured. Use IAM roles in production (no static keys).
   - **Done when:** Boot fails fast without S3 config; test shows silent skip removed.
 
-- [ ] **T7.21 · CORS wildcard logic could allow subdomain takeover** — `Low` `M1` `S`
+- [x] **T7.21 · CORS wildcard logic could allow subdomain takeover** — `Low` `M1` `S`
   - **Where:** [`backend/src/app.ts#L26`](backend/src/app.ts#L26) (lines 26–35)
   - **Problem:** If `CORS_ORIGIN` includes wildcard syntax (e.g., `https://*.croe.app`), string match would fail but developers might mistakenly use it.
   - **Fix:** Validate CORS origins at startup; reject wildcards. Use exact match only.
   - **Done when:** Startup validation rejects wildcard CORS origins; test confirms.
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): exact origins only (no wildcard/path/trailing slash), https in production; unknown origins get no CORS headers instead of a 500.
 
 ---
 
@@ -616,7 +622,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
   - **Problem:** `checkTierLimit` is never called outside tests, so the limits in 09-KYC-and-AML.md are not enforced. It also crashes for any vendor with no transactions today: `COALESCE(...,'0')` returns `"0"`, which is not a valid NUMERIC(15,2) string. This is one of the failing CI tests.
   - **Fix:** Return `'0.00'`. Call the check in `createEscrow` (vendor), and in `initiateDeposit` if the buyer limits in 09 apply. Use empathetic copy when the limit is hit (UI-04).
   - **Done when:** The kyc.integration tests are green, and an over-limit escrow is rejected with friendly copy.
-
+  - **Status:** Partly done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)): `COALESCE` now returns `0.00` and the daily sum is scoped to the currency; kyc.integration green. **Still open:** calling the check from `createEscrow` / `initiateDeposit` with friendly copy.
 - [ ] **T8.2 · Store the KYC ID image** — `Blocker` `M2` `M`
   - **Where:** [`routes/kyc.ts#L38`](backend/src/routes/kyc.ts#L38) (lines 38–54)
   - **Problem:** The uploaded `id_image` is read into memory and **discarded**. The code comment says the reviewer extracts the number from the image, but the image is never saved. Also, every submission hashes the same placeholder, `P0_MANUAL_REVIEW`. **(verify)** Any duplicate-ID check based on `id_number_hash` would then match every user.
@@ -746,6 +752,12 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
   - **Fix:** Enforce max input tokens (truncate claim); set `num_predict` cap; enforce response size limit.
   - **Done when:** Test shows oversized claim is truncated; response capped.
 
+- [ ] **T10.15 · Mobile error copy never matches the backend error code** — `Medium` `M2` `S` *(found 2026-09-26)*
+  - **Where:** [`mobile/src/api/client.ts#L185`](mobile/src/api/client.ts#L185) (`friendlyError`), [`backend/src/middleware/error-handler.ts`](backend/src/middleware/error-handler.ts)
+  - **Problem:** `friendlyError` switches on `response.data.error`, but the backend puts the human message in `error` and the code in `code`. None of the mapped cases (`OTP_EXPIRED`, `KYC_LIMIT_EXCEEDED`, `RATE_LIMITED`, …) ever match, so users only see the generic fallback copy.
+  - **Fix:** Read `response.data.code`, and settle the public error-code contract together with T7.18.
+  - **Done when:** A unit test maps a real backend error body (`{ error, code }`) to its specific friendly message.
+
 ---
 
 ## 11. Admin console
@@ -769,6 +781,10 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
   - **Problem:** Tokens live in `localStorage` plus cookies set from JavaScript. Any XSS on the admin console steals a money-moving session.
   - **Fix:** Have the backend set `HttpOnly`, `Secure`, `SameSite=Strict` cookies. If that has to wait, at minimum add a strict CSP on the admin console.
   - **Done when:** `document.cookie` and `localStorage` contain no tokens.
+
+- [x] **T11.6 · Admin session refresh logged staff out after 15 minutes** — `High` `M1` `S` *(found and fixed 2026-09-26)*
+  - **Problem:** The admin refresh interceptor read `accessToken`/`refreshToken`/`user`, but `POST /v1/auth/refresh` returns `access_token`/`refresh_token`, so every refresh stored `undefined`.
+  - **Status:** Fixed in [PR #19](https://github.com/Aeomar999/Croe/pull/19).
 
 - [ ] *(T3.4 API URL, T1.2 mock login, T7.4 2FA, T7.5 token storage also apply to the admin console.)*
 
@@ -796,7 +812,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 
 - [ ] **T13.2 · Connect and test the alert channel** — `High` `M2` `S`
   - **Fix:** Point `ALERT_WEBHOOK_URL` ([`alerting.ts`](backend/src/services/alerting.ts)) at the on-call channel, then fire a test alert from staging.
-
+  - **Status:** **Found 2026-09-26 (verify):** `ALERT_WEBHOOK_URL` is read by `env.ts` but nothing sends to it; `fireAlert` only logs. Pointing the variable at a channel does nothing until code posts alerts to it.
 - [ ] **T13.3 · External uptime monitor** — `High` `M2` `S`
   - **Fix:** Monitor `/health` every minute from outside Render (free tier), and alert after 2 minutes down.
 
@@ -818,6 +834,10 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 - [ ] **T13.6 · Metrics scraping** — `Low` `M3` `S`
   - **Problem:** `/admin/metrics` requires an admin JWT.
   - **Fix:** Add a scrape token or push metrics instead.
+
+- [x] **T13.7 · Every alert threw instead of logging** — `High` `M2` `S` *(found and fixed 2026-09-26)*
+  - **Problem:** `fireAlert` called a detached `logger.error`/`warn`/`info`; pino throws without its receiver, so every real alert raised a `TypeError` and aborted the caller (reconciliation, ledger integrity). Unit tests mocked the logger.
+  - **Status:** Fixed in [PR #19](https://github.com/Aeomar999/Croe/pull/19), with a test that uses the real logger.
 
 ---
 
@@ -896,7 +916,7 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
 
 ## 17. Documentation corrections (PROC-03)
 
-- [ ] **T17.1 · Correct Production_manual.md** — `High` `M1` `S`
+- [x] **T17.1 · Correct Production_manual.md** — `High` `M1` `S`
   - **Fix:**
     - §1.1: items 1, 2 and 6 claim no stubs and 285 passing tests. Untick them and link here.
     - §1.4 #1 is ticked but still says it needs a live sandbox test.
@@ -904,15 +924,16 @@ The engineering path to M2 is on the order of **2–4 weeks** of focused work. T
     - §2.1 step 10: "275 tests".
     - §3.1: health endpoints that don't exist (T3.10).
     - §4.2: the automated freeze that doesn't exist (T4.14).
-
-- [ ] **T17.2 · Correct PRODUCTION_READINESS_PLAN.md and PRODUCTION_TASKS.md** — `Medium` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)).
+- [x] **T17.2 · Correct PRODUCTION_READINESS_PLAN.md and PRODUCTION_TASKS.md** — `Medium` `M1` `S`
   - **Fix:** "Code ✅ Complete … zero mocks", `CQ1`/`CQ5` ("already passing"), and `C6` ticked as "Running" are all inaccurate today.
-
-- [ ] **T17.3 · Correct AGENTS.md** — `Medium` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)).
+- [x] **T17.3 · Correct AGENTS.md** — `Medium` `M1` `S`
   - **Fix:** In §13, fix the test counts, "Remote: None configured", and the stale "next step is to begin Phase 1". In §2, change Node 20 to Node 22 (T2.1). Add a pointer to this file.
-
-- [ ] **T17.4 · Update Progress.md** — `Low` `M1` `S`
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)).
+- [x] **T17.4 · Update Progress.md** — `Low` `M1` `S`
   - **Fix:** Record this audit and link to this file.
+  - **Status:** Done ([PR #19](https://github.com/Aeomar999/Croe/pull/19)).
 
 ---
 
@@ -947,12 +968,14 @@ These are **not** engineering tasks, but M3 cannot happen without them. Status l
 
 ### M1 · Sandbox staging live
 
-- [ ] §1: T1.1, T1.2, T1.3, T1.4, T1.5
-- [ ] §2: T2.1, T2.2, T2.3, T2.4, T2.5
-- [ ] §3: T3.1–T3.12
-- [ ] T6.3 (sandbox webhooks), T6.7 (webhook dead letter), T7.1 (trust proxy), T7.3 (password_hash migration), T7.9, T7.21 (CORS validation)
-- [ ] §17: T17.1–T17.4
+- [ ] §1: T1.1 ✅, T1.2 ✅, T1.3 ⏳ *Founder*, T1.4 ✅, T1.5 ✅
+- [ ] §2: T2.1 ✅, T2.2 ✅, T2.3 ⏳ *repo admin*, T2.4 ✅, T2.5 ✅
+- [ ] §3: T3.1 ✅, T3.6 ✅, T3.7 ✅, T3.10 ✅, T3.12 ✅; T3.2–T3.5 code done, verify on first staging deploy; T3.8 ⏳ *infra*, T3.9 ⏳ *repo admin*, T3.11 ⏳ *Founder*
+- [x] T6.3 (sandbox webhooks), T6.7 (webhook dead letter), T7.1 (trust proxy), T7.3 (password_hash migration), T7.9, T7.21 (CORS validation)
+- [x] §17: T17.1–T17.4
 - [ ] **Evidence:** CI green on `main`; staging `/health` returns 200; staff login works on staging; one full P0 lifecycle completed by hand on staging.
+
+**What M1 still needs, all outside the code:** a repo admin (T2.3 branch protection, T3.9 deploy-hook secrets and production approval), infra (T3.8 staging Render services, a staging R2 bucket and an Arkesel key), the Founder (T1.3 visibility, T3.11 domain), and then the evidence run on staging.
 
 ### M2 · Real-money code-ready
 
@@ -1027,9 +1050,9 @@ Separately: **Verify Docker Builds** fails with `ERR_UNKNOWN_BUILTIN_MODULE: nod
 | Severity | M1 | M2 | M3 | Total |
 |----------|----|----|----|-------|
 | Blocker | 11 | 21 | 0 | 32 |
-| High | 9 | 38 | 9 | 56 |
-| Medium | 7 | 22 | 14 | 43 |
+| High | 10 | 39 | 9 | 58 |
+| Medium | 7 | 23 | 14 | 44 |
 | Low | 5 | 4 | 6 | 15 |
-| **Total** | **32** | **85** | **29** | **146** |
+| **Total** | **33** | **87** | **29** | **149** |
 
-*Counts exclude the business gates in §18, which are tracked in PRODUCTION_TASKS.md.*
+*Counts exclude the business gates in §18, which are tracked in PRODUCTION_TASKS.md. Includes three tasks found on 2026-09-26 (T10.15, T11.6, T13.7).*

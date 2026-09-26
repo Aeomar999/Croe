@@ -77,8 +77,15 @@ describe("SandboxPaymentRail", () => {
 
   it("parses a webhook into a rail-agnostic PAID event", () => {
     const parsed = new SandboxPaymentRail().parseWebhook({ amount: "45.00" });
+    expect(parsed?.kind).toBe("DEPOSIT");
     expect(parsed.outcome).toBe("PAID");
     expect(parsed.amount.amount).toBe("45.00");
     expect(parsed.amount.currency).toBe("GHS");
+  });
+
+  it("maps a sandbox FAILED status to a FAILED deposit (task.md T6.3)", () => {
+    const parsed = new SandboxPaymentRail().parseWebhook({ providerRef: "r1", transactionId: "t1", status: "FAILED" });
+    expect(parsed?.kind).toBe("DEPOSIT");
+    expect(parsed?.outcome).toBe("FAILED");
   });
 });

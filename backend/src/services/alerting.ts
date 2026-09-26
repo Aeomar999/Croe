@@ -46,8 +46,9 @@ export function fireAlert(
   activeAlerts.set(source, alert);
   incrementAlertCounter(severity);
 
-  const logFn = severity === "critical" ? logger.error : severity === "warning" ? logger.warn : logger.info;
-  logFn({ alert }, `ALERT: ${source} — ${message}`);
+  // Call through the logger: pino methods need `this` and throw when detached.
+  const level = severity === "critical" ? "error" : severity === "warning" ? "warn" : "info";
+  logger[level]({ alert }, `ALERT: ${source} — ${message}`);
 
   // Auto-clear after 5 minutes
   setTimeout(() => {
@@ -105,5 +106,23 @@ export function alertDiskRetentionFailure(messageCount: number): void {
     "retention_cleanup",
     `Retention cleanup skipped ${messageCount} messages due to active disputes`,
     { messageCount },
+  );
+}
+
+export function alertWebhookDeadLettered(provider: string, providerRef: string, attempts: number, lastError: string): void {
+  fireAlert(
+    "critical",
+    `webhook_dead_letter:${provider}:${providerRef}`,
+    `Webhook ${providerRef} from ${provider} failed ${attempts} times and was dead-lettered; money may be held without a state change`,
+    { provider, providerRef, attempts, lastError },
+  );
+}
+
+export function alertStaleWebhooks(count: number, olderThanMinutes: number): void {
+  fireAlert(
+    "warning",
+    "webhook_inbox_stale",
+    `${count} webhook(s) unprocessed for more than ${olderThanMinutes} minutes`,
+    { count, olderThanMinutes },
   );
 }

@@ -122,6 +122,9 @@ importers:
       multer:
         specifier: ^2.2.0
         version: 2.4.0
+      node-pg-migrate:
+        specifier: ^9.0.0
+        version: 9.0.0(@types/pg@8.23.1)(pg@8.23.0)
       pg:
         specifier: ^8.22.0
         version: 8.23.0
@@ -159,9 +162,6 @@ importers:
       eslint:
         specifier: ^10.10.0
         version: 10.11.0(jiti@2.7.0)
-      node-pg-migrate:
-        specifier: ^9.0.0
-        version: 9.0.0(@types/pg@8.23.1)(pg@8.23.0)
       supertest:
         specifier: ^7.3.0
         version: 7.3.0
