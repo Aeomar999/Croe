@@ -8,6 +8,14 @@ import { RoleSelectScreen } from './RoleSelectScreen';
 import { roleCopy } from './content';
 import { useOnboardingStore } from '../../stores/onboarding';
 
+// Mock the icons module to avoid native module issues
+jest.mock('../../theme/components/icons', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const MockIcon = () => React.createElement(View);
+  return new Proxy({}, { get: () => MockIcon });
+});
+
 jest.mock('@react-navigation/native', () => ({
   useNavigation: jest.fn(),
 }));
