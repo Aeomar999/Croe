@@ -1,12 +1,15 @@
 # Croe Backend — Multi-stage Docker build
-# Stage 1: Build
-FROM node:20-alpine AS builder
+# Node 22 is required: pnpm 11 depends on the node:sqlite builtin (task.md T2.1).
+# Keep the pnpm version pinned; never use pnpm@latest.
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Stage 1: Build
+FROM node:22-alpine AS builder
+
+RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
 COPY tsconfig.json ./
@@ -16,13 +19,15 @@ COPY migrations/ ./migrations/
 RUN pnpm build
 
 # Stage 2: Production
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.1.2 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
+ENV NODE_ENV=production
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/dist ./dist

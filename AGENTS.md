@@ -17,7 +17,7 @@ Croe is a **mobile-first trust and escrow service** for social commerce (WhatsAp
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | Language | TypeScript 5.4 (strict) | noImplicitAny, strictNullChecks everywhere |
-| Runtime | Node.js 20 LTS | Backend API |
+| Runtime | Node.js 22 LTS | Backend API, admin, and all Docker images (pnpm 11 needs `node:sqlite`) |
 | Framework | Express or Fastify | Raw-body capture required for webhook HMAC |
 | Database | PostgreSQL 16+ | uuid-ossp extension, append-only ledger |
 | Cache/Queue | Redis 7.2+ | Rate limiting, idempotency fast gate, session cache |

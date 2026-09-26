@@ -2,6 +2,9 @@
   "name": "croe",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "packageManager": "pnpm@11.1.2",
   "workspaces": [
     "backend",
