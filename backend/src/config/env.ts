@@ -91,7 +91,8 @@ export function loadEnv(source: Source = process.env) {
     S3_ENDPOINT: read("S3_ENDPOINT"),
     S3_ACCESS_KEY: requiredWhen(isProduction, "NODE_ENV=production", "S3_ACCESS_KEY"),
     S3_SECRET_KEY: requiredWhen(isProduction, "NODE_ENV=production", "S3_SECRET_KEY"),
-    CORS_ORIGIN: read("CORS_ORIGIN") || "http://localhost:3000",
+    // Comma-separated exact origins. Default: the admin console dev server.
+    CORS_ORIGIN: read("CORS_ORIGIN") || "http://localhost:3001",
 
     // Rate limiting
     RATE_LIMIT_AUTH_MAX: positiveInt("RATE_LIMIT_AUTH_MAX", 5),

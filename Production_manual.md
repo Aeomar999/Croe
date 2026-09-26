@@ -67,10 +67,18 @@
 | 7 | `AGGREGATOR_BASE_URL` | Platform secret store | [ ] | |
 | 8 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | Platform secret store | [ ] | |
 | 9 | `LLM_URL` / `LLM_MODEL` | Platform secret store | [ ] | |
-| 10 | `CUSTODY_PHASE` | Platform secret store (set to `P1` for pilot) | [ ] | |
+| 10 | `CUSTODY_PHASE` | Platform config (`P0` until M2; `P1` for the pilot) | [ ] | Validated at boot: exactly `P0`–`P3` |
 | 11 | `PAYSTACK_WEBHOOK_SECRET` | Platform secret store (Paystack HMAC-SHA512 key) | [ ] | Must equal the Paystack secret key (`AGGREGATOR_API_KEY`); rotate them together. Used for deposit and transfer webhooks. Paystack webhooks are rejected while it is unset (task.md T1.5) |
-| 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | |
-| 13 | `CORS_ORIGIN` | Platform config (locked to production domain) | [ ] | |
+| 12 | `NODE_ENV` | Platform config (set to `production`) | [ ] | Enforces S3 config and 32+ char secrets at boot |
+| 13 | `CORS_ORIGIN` | Platform config (exact admin origin(s)) | [ ] | Must include the admin console origin, e.g. `https://admin.croe.co` |
+| 14 | `ARKESEL_SMS_API_KEY` | Platform secret store | [ ] | Required when `CUSTODY_PHASE != P0` |
+| 15 | `S3_BUCKET` / `S3_ENDPOINT` / `S3_REGION` | Platform config | [ ] | Required when `NODE_ENV=production`; R2: `S3_REGION=auto` |
+| 16 | `ALERT_WEBHOOK_URL` | Platform secret store | [ ] | On-call channel (task.md T13.2) |
+| 17 | `COMMISSION_BPS` / `BUYER_PROTECTION_FEE_BPS` | Platform config (explicit) | [ ] | Defaults 250/150 apply if unset; decide per task.md T4.5 |
+| 18 | `RETENTION_NOTIFICATION_DAYS` / `RETENTION_SESSION_DAYS` | Platform config (explicit) | [ ] | Values from legal (task.md T8.6) |
+| 19 | `NEXT_PUBLIC_API_URL` (admin) | Platform config (build-time) | [ ] | API origin only, no `/v1` |
+
+> `render.yaml` declares every row above (task.md T3.6, Appendix B). `JWT_SECRET`, `OTP_PEPPER` and `MOMO_WEBHOOK_SECRET` use `generateValue: true`; the rest are `sync: false` or explicit values. Keep `CUSTODY_PHASE=P0` until the M2 gate.
 
 ### 1.4 Security Audit
 
@@ -141,24 +149,31 @@ docker compose down -v   # removes containers + volumes
 
 ### 2.2 Routine Deployment (Post-Launch)
 
+Both services deploy with Render's **Docker runtime** from `render.yaml` (task.md T3.1), so what runs is exactly what CI's "Verify Docker Builds" job built. `autoDeploy` is off: the CI `deploy-staging` / `deploy-prod` jobs call the Render deploy hooks only after every check is green.
+
 | Step | Action | Command / Details |
 |------|--------|-------------------|
-| 1 | Merge phase branch to `main` | Squash-merge after gate (PROC-01, GIT-01) |
-| 2 | CI builds container image | Automated on merge to `main` |
-| 3 | Migrations run | Automated pre-deploy hook |
-| 4 | Rolling deploy | Zero-downtime; old pods drain before new pods start |
-| 5 | Post-deploy smoke | Automated health check + key flow verification |
-| 6 | Monitor | Watch error rates, latency, reconciliation for 30 min |
+| 1 | Merge to `main` | Squash-merge after the gate (PROC-01, GIT-01); CI must be green |
+| 2 | CI triggers the deploy hook | `RENDER_DEPLOY_HOOK_URL_STAGING`, then `RENDER_DEPLOY_HOOK_URL_PROD` after the `production` environment approval |
+| 3 | Render builds the image | `backend/Dockerfile` (context `./backend`), `admin/Dockerfile` (context `.`) |
+| 4 | Migrations run (pre-deploy) | `node node_modules/node-pg-migrate/bin/node-pg-migrate.js up --migrations-dir ./migrations --migrations-table pgmigrations` runs in the new image. A non-zero exit aborts the deploy and the previous version keeps serving (T3.3). Needs a paid instance type. Locally: `pnpm --filter croe-backend db:migrate:prod` (plain env vars, no dotenv) |
+| 5 | Zero-downtime swap | Render routes traffic only after `healthCheckPath: /health/ready` returns 200 (PostgreSQL + Redis) |
+| 6 | Post-deploy smoke | `curl https://<api-host>/health/ready`; admin `/login` loads; key flow check |
+| 7 | Monitor | Watch error rates, latency, reconciliation for 30 min |
+
+> The API validates its configuration at boot (`backend/src/config/env.ts`) and exits with the full list of missing or invalid variables. A deploy that fails its health check with a config error in the logs needs the variable fixed in the Render dashboard, not a code change.
 
 ### 2.3 Deployment (Admin Dashboard)
 
-The `croe-admin` Next.js frontend is configured alongside the API in `render.yaml` for continuous deployment. Alternatively, it can be deployed to Vercel.
+The `croe-admin` Next.js console is defined alongside the API in `render.yaml` and deploys through the same CI deploy hooks, using the Docker runtime.
 
 | Step | Action | Command / Details |
 |------|--------|-------------------|
-| 1 | Render Blueprint Sync | Push to `main` auto-triggers `croe-admin` and `croe-api` builds on Render. |
-| 2 | Next.js Standalone Build | Vercel or Render runs `pnpm build` pulling the workspace deps. |
-| 3 | Container Deploy (Optional) | Build via `admin/Dockerfile` and deploy image to container registry. |
+| 1 | Set the API origin | `NEXT_PUBLIC_API_URL` = API origin only, e.g. `https://api.croe.co` — **no `/v1`**; the client appends it (T3.4) |
+| 2 | Build | `admin/Dockerfile` (context = repo root). Next.js `standalone` output is traced from the monorepo root so the pnpm store is bundled. `NEXT_PUBLIC_*` values are inlined at build time via a Docker build arg: **rebuild after changing them** |
+| 3 | Start | `node admin/server.js` (the image `CMD`; T3.5). Do not use `next start` with `standalone` output |
+| 4 | CORS | The admin origin must be listed in the API's `CORS_ORIGIN` |
+| 5 | Verify | Admin `/login` loads and a staff login succeeds against the API |
 
 ### 2.4 Deployment (Mobile App / Expo EAS)
 

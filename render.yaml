@@ -1,14 +1,35 @@
+# Croe — Render Blueprint
+#
+# Both web services use the Docker runtime (task.md T3.1), so staging and
+# production run exactly the images CI verifies in "Verify Docker Builds".
+# Deploys are triggered by the CI deploy hooks after every check is green
+# (autoDeploy: false avoids double deploys, T3.9).
+#
+# Keep CUSTODY_PHASE=P0 until the M2 gate in task.md §19 is signed off.
+# Variables marked `sync: false` are secrets or per-environment values that
+# must be entered in the Render dashboard; they are never committed.
+# See task.md Appendix B and Production_manual.md §1.3 for the full matrix.
 services:
   - type: web
     name: croe-api
-    env: node
-    buildCommand: cd backend && corepack prepare pnpm@11.1.2 --activate && pnpm install && pnpm build && pnpm db:migrate
-    startCommand: cd backend && pnpm start
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    autoDeploy: false
+    # Readiness: PostgreSQL and Redis must both answer (T3.10).
+    healthCheckPath: /health/ready
+    # Migrations run in the new image before traffic shifts. A failed
+    # migration aborts the deploy and the previous version keeps serving
+    # (T3.3). Pre-deploy commands require a paid instance type.
+    preDeployCommand: node node_modules/node-pg-migrate/bin/node-pg-migrate.js up --migrations-dir ./migrations --migrations-table pgmigrations
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 8080
+      # P0 = sandbox, no real money. Switch to P1 only after M2 (T3.6).
       - key: CUSTODY_PHASE
-        value: P1
+        value: P0
       - key: DATABASE_URL
         fromDatabase:
           name: croe-db
@@ -18,40 +39,90 @@ services:
           type: redis
           name: croe-redis
           property: connectionString
-      - key: PORT
-        value: 8080
-      # These must be set manually in the Render dashboard:
-      # - MOMO_WEBHOOK_SECRET
-      # - PAYSTACK_WEBHOOK_SECRET (must equal the Paystack secret key)
-      # - JWT_SECRET
-      # - OTP_PEPPER
-      # - AGGREGATOR_API_KEY
-      # - AGGREGATOR_BASE_URL
-      # - S3_ACCESS_KEY
-      # - S3_SECRET_KEY
-      # - S3_BUCKET
-      # - S3_ENDPOINT
-      # - CORS_ORIGIN
+
+      # ── Secrets (32+ random bytes; different per environment, T7.8) ──
+      - key: JWT_SECRET
+        generateValue: true
+      - key: OTP_PEPPER
+        generateValue: true
+      # Sandbox (MoMo) webhook HMAC key
+      - key: MOMO_WEBHOOK_SECRET
+        generateValue: true
+
+      # ── Paystack (required once CUSTODY_PHASE != P0) ──
+      # Test keys on staging, live keys only for the supervised pilot.
+      - key: AGGREGATOR_API_KEY
+        sync: false
+      - key: AGGREGATOR_BASE_URL
+        value: https://api.paystack.co
+      # Must equal the Paystack secret key: Paystack signs webhooks with it (T1.5).
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+
+      # ── SMS (Arkesel; required once CUSTODY_PHASE != P0) ──
+      - key: ARKESEL_SMS_API_KEY
+        sync: false
+
+      # ── Evidence storage (Cloudflare R2; required when NODE_ENV=production) ──
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+
+      # ── HTTP ──
+      # Comma-separated exact origins; must include the admin console origin.
+      - key: CORS_ORIGIN
+        value: https://admin.croe.co
+
+      # ── Alerting (T13.2) ──
+      - key: ALERT_WEBHOOK_URL
+        sync: false
+
+      # ── Fees (basis points). Set explicitly; see task.md T4.5 before P1. ──
+      - key: COMMISSION_BPS
+        value: 250
+      - key: BUYER_PROTECTION_FEE_BPS
+        value: 150
+
+      # ── Retention (days). Confirm values with legal before P1 (T8.6). ──
+      - key: RETENTION_NOTIFICATION_DAYS
+        value: 30
+      - key: RETENTION_SESSION_DAYS
+        value: 7
+
+      # LLM_URL / LLM_MODEL are deliberately unset for the pilot, so every
+      # dispute escalates to UNDER_HUMAN_REVIEW (T14.4).
+      # RATE_LIMIT_*_MAX are optional; defaults follow 21-Security-Threat-Model.md §4.
 
   - type: web
     name: croe-admin
-    env: node
-    buildCommand: cd admin && corepack prepare pnpm@11.1.2 --activate && pnpm install && pnpm build
-    startCommand: cd admin && pnpm start
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: ./admin/Dockerfile
+    autoDeploy: false
+    healthCheckPath: /login
     envVars:
-      - key: NODE_ENV
-        value: production
+      # API origin only, no /v1 (T3.4). Inlined at build time: redeploy after changing it.
       - key: NEXT_PUBLIC_API_URL
-        value: https://api.croe.co/v1
+        value: https://api.croe.co
 
   - type: redis
     name: croe-redis
-    plan: free # Change to a paid plan for persistence in production
+    plan: free # Paid plan with persistence before M2 (task.md T14.2)
+    # Idempotency and dedup keys must never be evicted early.
+    maxmemoryPolicy: noeviction
     ipAllowList: []
 
 databases:
   - name: croe-db
     databaseName: croe
     user: croe
-    plan: free # Change to a paid plan for PITR and backups in production
+    postgresMajorVersion: "16"
+    plan: free # Paid plan with PITR and backups before M2 (task.md T14.1)
     ipAllowList: []
