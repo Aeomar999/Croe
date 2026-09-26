@@ -5,6 +5,7 @@
  */
 import type { Request, Response, NextFunction } from "express";
 import { redis } from "../config/redis.js";
+import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import { AppError } from "./error-handler.js";
 
@@ -115,11 +116,13 @@ export function recordRateLimitHit(identifier: string): void {
 }
 
 /**
- * Pre-configured limiters for specific route groups.
+ * Pre-configured limiters for specific route groups. Maximums come from the
+ * RATE_LIMIT_* variables (defaults per 21-Security-Threat-Model.md §4);
+ * windows are fixed.
  */
-export const authRateLimiter = rateLimiter({ maxRequests: 5, windowSeconds: 60 });
-export const otpRateLimiter = rateLimiter({ maxRequests: 3, windowSeconds: 300 });
-export const paymentRateLimiter = rateLimiter({ maxRequests: 10, windowSeconds: 60 });
-export const evidenceRateLimiter = rateLimiter({ maxRequests: 10, windowSeconds: 60 });
-export const disputeRateLimiter = rateLimiter({ maxRequests: 5, windowSeconds: 300 });
-export const adminRateLimiter = rateLimiter({ maxRequests: 20, windowSeconds: 60 });
+export const authRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_AUTH_MAX, windowSeconds: 60 });
+export const otpRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_OTP_MAX, windowSeconds: 300 });
+export const paymentRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_PAYMENT_MAX, windowSeconds: 60 });
+export const evidenceRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_EVIDENCE_MAX, windowSeconds: 60 });
+export const disputeRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_DISPUTE_MAX, windowSeconds: 300 });
+export const adminRateLimiter = rateLimiter({ maxRequests: env.RATE_LIMIT_ADMIN_MAX, windowSeconds: 60 });
