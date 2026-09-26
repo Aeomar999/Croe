@@ -28,16 +28,14 @@ app.set("trust proxy", env.TRUST_PROXY_HOPS);
 // Security
 app.use(helmet());
 
-// CORS — support multiple origins (comma-separated in env)
-const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
+// CORS — exact-match allowlist, validated at boot (task.md T7.21)
+const allowedOrigins = new Set(env.CORS_ORIGINS);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      // Unknown origins get no CORS headers (the browser blocks them); they
+      // are not a server error.
+      callback(null, !origin || allowedOrigins.has(origin));
     },
     credentials: true,
   }),

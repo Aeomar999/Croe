@@ -64,6 +64,27 @@ export function loadEnv(source: Source = process.env) {
   const NODE_ENV = read("NODE_ENV") || "development";
   const isProduction = NODE_ENV === "production";
 
+  // Exact-match CORS allowlist (task.md T7.21): every entry must be a bare
+  // origin (scheme://host[:port]) — no wildcards, paths or trailing slashes —
+  // and https in production.
+  const corsOrigins = (read("CORS_ORIGIN") || "http://localhost:3001")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  for (const origin of corsOrigins) {
+    let parsed: URL | undefined;
+    try {
+      parsed = new URL(origin);
+    } catch {
+      parsed = undefined;
+    }
+    if (origin.includes("*") || !parsed || parsed.origin !== origin) {
+      problems.push(`CORS_ORIGIN entries must be exact origins like https://admin.croe.co (no wildcards, paths or trailing slash), got "${origin}"`);
+    } else if (isProduction && parsed.protocol !== "https:") {
+      problems.push(`CORS_ORIGIN entries must use https in production, got "${origin}"`);
+    }
+  }
+
   const rawPhase = read("CUSTODY_PHASE") || "P0";
   const phaseValid = (CUSTODY_PHASES as readonly string[]).includes(rawPhase);
   if (!phaseValid) {
@@ -109,7 +130,7 @@ export function loadEnv(source: Source = process.env) {
     // An exact count, never `true`, so clients cannot spoof X-Forwarded-For (task.md T7.1).
     TRUST_PROXY_HOPS: hopCount("TRUST_PROXY_HOPS", isProduction),
     // Comma-separated exact origins. Default: the admin console dev server.
-    CORS_ORIGIN: read("CORS_ORIGIN") || "http://localhost:3001",
+    CORS_ORIGINS: corsOrigins,
 
     // Rate limiting
     RATE_LIMIT_AUTH_MAX: positiveInt("RATE_LIMIT_AUTH_MAX", 5),

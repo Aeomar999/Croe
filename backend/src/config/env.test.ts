@@ -19,6 +19,7 @@ const LIVE_CREDENTIALS = {
 
 const STORAGE = {
   TRUST_PROXY_HOPS: "1",
+  CORS_ORIGIN: "https://admin.croe.co",
   S3_BUCKET: "croe-evidence",
   S3_REGION: "auto",
   S3_ACCESS_KEY: "access",
@@ -97,5 +98,32 @@ describe("loadEnv (task.md T3.7)", () => {
 
   it("surfaces an invalid fee rate as a config problem", () => {
     expect(() => loadEnv({ ...BASE, COMMISSION_BPS: "2.5" })).toThrow(/COMMISSION_BPS must be a whole number/);
+  });
+
+  describe("CORS_ORIGIN (task.md T7.21)", () => {
+    it("parses a comma-separated list of exact origins", () => {
+      const env = loadEnv({ ...BASE, CORS_ORIGIN: "https://admin.croe.co, http://localhost:3001" });
+      expect(env.CORS_ORIGINS).toEqual(["https://admin.croe.co", "http://localhost:3001"]);
+    });
+
+    it.each(["https://*.croe.co", "*", "https://admin.croe.co/", "https://admin.croe.co/login", "admin.croe.co"])(
+      "rejects %s",
+      (origin) => {
+        expect(() => loadEnv({ ...BASE, CORS_ORIGIN: origin })).toThrow(/CORS_ORIGIN entries must be exact origins/);
+      },
+    );
+
+    it("requires https origins in production", () => {
+      expect(() =>
+        loadEnv({
+          ...BASE,
+          ...STORAGE,
+          NODE_ENV: "production",
+          JWT_SECRET: STRONG,
+          OTP_PEPPER: STRONG,
+          CORS_ORIGIN: "http://admin.croe.co",
+        }),
+      ).toThrow(/must use https in production/);
+    });
   });
 });
