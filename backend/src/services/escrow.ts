@@ -396,6 +396,20 @@ export async function processDepositWebhook(p: {
       return tx;
     }
 
+    // Replay after the escrow moved on (e.g. a sweeper retry after a crash
+    // between COMMIT and markWebhookProcessed): the deposit is already on the
+    // ledger, so this is a no-op rather than an invalid transition (T6.2).
+    const { rows: deposited } = await client.query(
+      `SELECT 1 FROM transaction_ledger
+       WHERE transaction_id = $1 AND event_type = 'FUNDS_DEPOSITED'
+       LIMIT 1`,
+      [p.transactionId],
+    );
+    if (deposited.length > 0) {
+      await client.query("ROLLBACK");
+      return tx;
+    }
+
     // Validate transition
     validateTransition(tx.current_status, "FUNDS_SECURED");
 

@@ -108,3 +108,21 @@ export function alertDiskRetentionFailure(messageCount: number): void {
     { messageCount },
   );
 }
+
+export function alertWebhookDeadLettered(provider: string, providerRef: string, attempts: number, lastError: string): void {
+  fireAlert(
+    "critical",
+    `webhook_dead_letter:${provider}:${providerRef}`,
+    `Webhook ${providerRef} from ${provider} failed ${attempts} times and was dead-lettered; money may be held without a state change`,
+    { provider, providerRef, attempts, lastError },
+  );
+}
+
+export function alertStaleWebhooks(count: number, olderThanMinutes: number): void {
+  fireAlert(
+    "warning",
+    "webhook_inbox_stale",
+    `${count} webhook(s) unprocessed for more than ${olderThanMinutes} minutes`,
+    { count, olderThanMinutes },
+  );
+}

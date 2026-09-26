@@ -29,7 +29,7 @@
 | 6 | All tests passing: unit, integration, contract, E2E | [x] | 285 backend + 79 frontend |
 | 7 | 50-webhook concurrent race test passes deterministically | [x] | `escrow.integration.test.ts` |
 | 8 | Money-precision tests assert exact equality (zero float drift) | [x] | `payment-precision.test.ts` |
-| 9 | Idempotency survives worker restart | [x] | `idempotency.test.ts` |
+| 9 | Idempotency survives worker restart | [x] | `webhooks.recovery.integration.test.ts`: a failed webhook stays in `webhook_inbox` and the sweeper applies it exactly once (task.md T6.1/T6.2) |
 | 10 | Append-only enforcement verified (app role cannot UPDATE/DELETE `transaction_ledger`) | [x] | Integration tests + migration 002 REVOKE |
 | 11 | No `console.log`/`console.error` in production code — structured logger only | [x] | Grep verified — zero matches in non-test files |
 | 12 | No secrets, API keys, or tokens in source code or logs (SEC-01) | [x] | Grep verified — zero hardcoded secrets |
@@ -388,6 +388,15 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 3. If legitimate flood: check aggregator for retry loops
 4. If attack: temporary IP block at CDN/reverse proxy level
 5. Verify `webhook_inbox` dedup is catching duplicates
+
+### 7.3a Stuck or Dead-Lettered Webhooks
+
+Webhooks are ACKed first, stored in `webhook_inbox`, then applied. If applying fails, the row keeps `processed_at = NULL`, `attempts` and `last_error` are recorded, and the `webhook-sweeper` job (every minute, one instance at a time via advisory lock) retries it with backoff of 1, 2, 4 … 60 minutes. After 8 attempts the row is dead-lettered (`dead_lettered_at` set) and a **critical** `webhook_dead_letter:<provider>:<ref>` alert fires. Rows unprocessed for more than 15 minutes raise a `webhook_inbox_stale` warning (task.md T6.1, T6.2, T6.7).
+
+1. List the backlog: `SELECT webhook_id, provider_ref, attempts, last_error, created_at, dead_lettered_at FROM webhook_inbox WHERE processed_at IS NULL ORDER BY created_at;`
+2. Read `last_error`. A charge for an escrow that is not `AWAITING_DEPOSIT` (expired, cancelled, never initiated) means the buyer paid but the escrow cannot secure funds: treat as a money incident (§4.1) and refund manually until task.md T5.7 lands.
+3. Fix the cause (data, config, or code), then re-queue the row: `UPDATE webhook_inbox SET dead_lettered_at = NULL, attempts = 0, next_attempt_at = NOW() WHERE webhook_id = '<id>';` (never touch `transaction_ledger`, AUD-01). The next sweep applies it idempotently.
+4. Confirm `processed_at` is set and the escrow reached the expected state; record the incident in §10.
 
 ### 7.4 Database Full
 
