@@ -8,6 +8,26 @@
  *  - Error catalog → friendly copy (UI-04)
  */
 
+// ─── Mock expo modules ─────────────────────────────────────────────
+jest.mock('expo-application', () => ({
+  getIosIdForVendorAsync: jest.fn().mockResolvedValue('device-unknown'),
+  getAndroidId: jest.fn().mockReturnValue('device-unknown'),
+  getApplicationIdAsync: jest.fn(),
+  applicationVersion: '1.0.0',
+  nativeApplicationVersion: '1.0.0',
+}));
+
+jest.mock('expo-network', () => ({
+  getNetworkStateAsync: jest.fn().mockResolvedValue({ type: 'UNKNOWN' }),
+}));
+
+jest.mock('react-native', () => ({
+  Platform: {
+    OS: 'ios',
+    select: jest.fn((obj: any) => obj.ios),
+  },
+}));
+
 // ─── Mock axios ──────────────────────────────────────────────────
 const requestInterceptors: Array<(config: any) => any> = [];
 const responseInterceptors: Array<{ onFulfilled: (v: any) => any; onRejected: (e: any) => any }> = [];

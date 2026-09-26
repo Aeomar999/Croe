@@ -2,7 +2,8 @@ import { getTransactionClient } from "../db/pool.js";
 import { AppError } from "../middleware/error-handler.js";
 import { logger } from "../config/logger.js";
 import { custodyProvider } from "../providers/index.js";
-import type { Currency, EscrowState, LedgerEvent } from "../types/domain.js";
+import type { Currency, EscrowState } from "../types/domain.js";
+import type { ForensicContext } from "../middleware/forensic.js";
 import { releaseFunds, refundFunds } from "./escrow.js";
 import { fromMinor, toMinor } from "./money.js";
 
@@ -154,52 +155,38 @@ export async function resolveDispute(
       throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
     }
 
-    let newEscrowStatus: EscrowState;
-    let ledgerEvent: LedgerEvent;
-
-    if (action === "RELEASE_VENDOR") {
-      newEscrowStatus = "FUNDS_RELEASED";
-      ledgerEvent = "FUNDS_RELEASED";
-    } else {
-      newEscrowStatus = "FUNDS_REFUNDED";
-      ledgerEvent = "REFUND_ISSUED";
+    if (escrow.current_status !== "UNDER_HUMAN_REVIEW") {
+      throw new AppError(
+        409,
+        `Cannot resolve dispute: escrow status is ${escrow.current_status} (must be UNDER_HUMAN_REVIEW)`,
+        "INVALID_STATE_TRANSITION",
+      );
     }
 
     await client.query(
-      `UPDATE escrow_transactions SET current_status = $1 WHERE transaction_id = $2`,
-      [newEscrowStatus, dispute.transaction_id],
-    );
-
-    await client.query(
-      `INSERT INTO transaction_ledger
-         (transaction_id, actor_id, event_type, previous_status, new_status,
-          amount_delta, currency, device_metadata)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        dispute.transaction_id,
-        reviewerId,
-        ledgerEvent,
-        escrow.current_status,
-        newEscrowStatus,
-        action === "RELEASE_VENDOR" ? `-${escrow.amount}` : `-${escrow.amount}`,
-        escrow.currency,
-        JSON.stringify({ reason }),
-      ],
-    );
-
-    await client.query(
-      `UPDATE dispute_cases SET status = 'RESOLVED_AUTO', resolved_at = NOW() WHERE dispute_id = $1`,
-      [disputeId],
+      `UPDATE dispute_cases SET status = 'RESOLVED_AUTO', resolved_at = NOW(), resolution_reason = $1 WHERE dispute_id = $2`,
+      [reason, disputeId],
     );
 
     await client.query("COMMIT");
 
     logger.info(
-      { disputeId, reviewerId, action, newEscrowStatus },
-      "Dispute resolved by reviewer",
+      { disputeId, reviewerId, action, reason },
+      "Dispute marked resolved by reviewer; initiating payout",
     );
 
-    return { newStatus: newEscrowStatus };
+    const forensic: ForensicContext = { deviceId: reviewerId, ip: "admin", networkType: "admin" };
+
+    let newStatus: EscrowState;
+    if (action === "RELEASE_VENDOR") {
+      const result = await releaseFunds({ transactionId: dispute.transaction_id, forensic });
+      newStatus = result.current_status;
+    } else {
+      const result = await refundFunds({ transactionId: dispute.transaction_id, forensic });
+      newStatus = result.current_status;
+    }
+
+    return { newStatus };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -545,31 +532,45 @@ export async function getDisputeDetail(disputeId: string) {
 
 export async function retryPayout(transactionId: string, adminId: string) {
   const client = await getTransactionClient();
-  let currentStatus: string;
+  let direction: "RELEASE" | "REFUND" | null = null;
   try {
-    const { rows } = await client.query(
-      `SELECT current_status FROM escrow_transactions WHERE transaction_id = $1`,
-      [transactionId]
+    const { rows } = await client.query<{
+      payout_id: string;
+      direction: string;
+      status: string;
+    }>(
+      `SELECT payout_id, direction, status
+       FROM payouts
+       WHERE transaction_id = $1
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [transactionId],
     );
-    const tx = rows[0];
-    if (!tx) {
-      throw new AppError(404, "Transaction not found", "TRANSACTION_NOT_FOUND");
+
+    if (rows.length === 0) {
+      throw new AppError(404, "No payout found for transaction", "NO_PAYOUT_FOUND");
     }
-    currentStatus = tx.current_status;
+
+    const latestPayout = rows[0];
+    if (latestPayout.status !== "FAILED") {
+      throw new AppError(
+        400,
+        `Cannot retry: latest payout status is ${latestPayout.status} (must be FAILED)`,
+        "INVALID_PAYOUT_STATE",
+      );
+    }
+
+    direction = latestPayout.direction as "RELEASE" | "REFUND";
   } finally {
     client.release();
   }
 
-  if (currentStatus === "FUNDS_RELEASED") {
-    await releaseFunds({ transactionId, forensic: { deviceId: adminId } as any });
-  } else if (currentStatus === "FUNDS_REFUNDED") {
-    await refundFunds({ transactionId, forensic: { deviceId: adminId } as any });
-  } else {
-    throw new AppError(
-      400,
-      "Transaction must be in FUNDS_RELEASED or FUNDS_REFUNDED to retry payout",
-      "INVALID_STATE"
-    );
+  const forensic: ForensicContext = { deviceId: adminId, ip: "admin", networkType: "admin" };
+
+  if (direction === "RELEASE") {
+    await releaseFunds({ transactionId, forensic });
+  } else if (direction === "REFUND") {
+    await refundFunds({ transactionId, forensic });
   }
 
   return { status: "RETRY_INITIATED" };
