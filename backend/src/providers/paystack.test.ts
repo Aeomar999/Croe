@@ -272,6 +272,7 @@ describe("PaystackPaymentRail", () => {
       const result = rail.parseWebhook(payload);
 
       expect(result).not.toBeNull();
+      expect(result?.kind).toBe("DEPOSIT");
       expect(result?.providerRef).toBe("tx-123");
       expect(result?.transactionId).toBe("tx-123");
       expect(result?.outcome).toBe("PAID");
@@ -294,6 +295,7 @@ describe("PaystackPaymentRail", () => {
       const result = rail.parseWebhook(payload);
 
       expect(result).not.toBeNull();
+      expect(result?.kind).toBe("PAYOUT");
       expect(result?.providerRef).toBe("rel-tx-123");
       expect(result?.transactionId).toBe("rel-tx-123");
       expect(result?.outcome).toBe("PAID");
@@ -315,6 +317,7 @@ describe("PaystackPaymentRail", () => {
       const result = rail.parseWebhook(payload);
 
       expect(result).not.toBeNull();
+      expect(result?.kind).toBe("PAYOUT");
       expect(result?.outcome).toBe("FAILED");
       expect(result?.amount.amount).toBe("100.00");
     });

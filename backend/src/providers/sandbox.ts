@@ -1,6 +1,6 @@
 import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport } from "../types/domain.js";
 import type { CustodyProvider } from "./custody-provider.js";
-import type { PaymentRail } from "./payment-rail.js";
+import type { ParsedWebhook, PaymentRail } from "./payment-rail.js";
 import { pool } from "../db/pool.js";
 import { compareAmounts, subtractAmounts } from "../services/money.js";
 
@@ -139,18 +139,16 @@ export class SandboxPaymentRail implements PaymentRail {
     return true;
   }
 
-  parseWebhook(payload: unknown): {
-    providerRef: string;
-    transactionId: string;
-    outcome: "PAID" | "FAILED" | "CANCELLED";
-    amount: Money;
-  } | null {
+  parseWebhook(payload: unknown): ParsedWebhook | null {
     const p = payload as Record<string, unknown>;
-    // Sandbox only simulates PAID outcomes
+    // Sandbox payouts settle synchronously in SandboxCustodyProvider, so every
+    // sandbox callback is a deposit. `status` defaults to a successful payment.
+    const outcome = p.status === "FAILED" ? "FAILED" : p.status === "CANCELLED" ? "CANCELLED" : "PAID";
     return {
+      kind: "DEPOSIT",
       providerRef: String(p.providerRef ?? `SANDBOX-WEBHOOK-${Date.now()}`),
       transactionId: String(p.transactionId ?? ""),
-      outcome: "PAID",
+      outcome,
       amount: {
         amount: String(p.amount ?? "0.00"),
         currency: "GHS",

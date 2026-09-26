@@ -3,7 +3,7 @@ import { logger } from "../config/logger.js";
 import crypto from "crypto";
 import type { Carrier, Currency, DisbursementResult, Money, ReconciliationReport } from "../types/domain.js";
 import type { CustodyProvider } from "./custody-provider.js";
-import type { PaymentRail } from "./payment-rail.js";
+import type { ParsedWebhook, PaymentRail } from "./payment-rail.js";
 import { toMinor, fromMinor } from "../services/money.js";
 
 interface PaystackBalanceResponse {
@@ -184,7 +184,7 @@ export class PaystackPaymentRail implements PaymentRail {
     return true;
   }
 
-  parseWebhook(payload: unknown): { providerRef: string; transactionId: string; outcome: "PAID" | "FAILED" | "CANCELLED"; amount: Money } | null {
+  parseWebhook(payload: unknown): ParsedWebhook | null {
     const p = payload as PaystackWebhookPayload;
     const data = p.data ?? {};
     const event = p.event;
@@ -195,6 +195,7 @@ export class PaystackPaymentRail implements PaymentRail {
       const amountFormatted = fromMinor(amountInPesewas);
 
       return {
+        kind: "DEPOSIT",
         providerRef: data.reference ?? String(Date.now()),
         transactionId: data.reference ?? "",
         outcome: "PAID",
@@ -218,6 +219,7 @@ export class PaystackPaymentRail implements PaymentRail {
       }
 
       return {
+        kind: "PAYOUT",
         providerRef: data.reference ?? data.transfer_code ?? String(Date.now()),
         transactionId: data.reference ?? "",
         outcome,

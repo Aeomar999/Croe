@@ -54,10 +54,8 @@ router.post(
         return;
       }
 
-      // 5. Process based on event type
-      const event = (req.body as Record<string, any>)?.event;
-
-      if (event === "charge.success" && parsed.outcome === "PAID") {
+      // 5. Process based on the rail-agnostic event kind (task.md T6.3)
+      if (parsed.kind === "DEPOSIT" && parsed.outcome === "PAID") {
         // Deposit webhook
         await processDepositWebhook({
           transactionId: parsed.transactionId,
@@ -73,7 +71,7 @@ router.post(
           { transactionId: parsed.transactionId, providerRef: parsed.providerRef },
           "Deposit webhook processed successfully",
         );
-      } else if (event === "transfer.success" || event === "transfer.failed" || event === "transfer.reversed") {
+      } else if (parsed.kind === "PAYOUT") {
         // Transfer webhook (payout completion)
         const direction = parsed.providerRef.startsWith("rel-") ? "RELEASE" : "REFUND";
 
@@ -95,7 +93,7 @@ router.post(
         );
       } else {
         logger.warn(
-          { outcome: parsed.outcome, transactionId: parsed.transactionId, event },
+          { kind: parsed.kind, outcome: parsed.outcome, transactionId: parsed.transactionId },
           "Non-processable webhook outcome, marking processed without state change",
         );
         await markWebhookProcessed({
