@@ -42,6 +42,7 @@ Croe/
   Production_manual.md       <- Go-live checklist (keep updated per PROC-03)
   GO-TO-MARKET.md            <- Business/GTM tracker: entity, licensing, ops, pilot (keep updated)
   PRODUCTION_READINESS_PLAN.md <- Deep production readiness plan with phased task list
+  task.md                    <- Engineering task list and launch gates (keep updated per PROC-03)
   .env.example               <- All required env vars with comments
   .gitignore
   for_agents/                <- THE SPEC PACKAGE (28 docs, sequential numbering)
@@ -342,6 +343,7 @@ These files MUST be updated as development progresses:
 | Production_manual.md | Any change affecting production readiness (new secret, endpoint, service, migration, dependency) | PROC-03 |
 | PRODUCTION_READINESS_PLAN.md | When production readiness milestones change, gaps are closed, or timeline shifts | PROC-03 |
 | 27-Roadmap.md | When phase status changes ([ ] to [/] to [x]) | PROC-01 |
+| task.md | Every engineering task completion, milestone gate, or production-readiness change | PROC-03 |
 
 ---
 
@@ -393,6 +395,9 @@ These files MUST be updated as development progresses:
 | See the reconciliation job spec | 23-Observability-and-Reconciliation.md |
 | Check security threats | 21-Security-Threat-Model.md |
 | Find infrastructure details | 22-Infra-and-Deployment.md |
+| Find the current engineering task list and launch gates | task.md |
+| See what blocks M1/M2/M3 milestones | task.md §19 |
+| Check if a security finding has a tracked fix | task.md §7 |
 
 ---
 
