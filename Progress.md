@@ -9,12 +9,12 @@
 | | |
 |---|---|
 | **Specification phase** | Complete (28 docs, design system) |
-| **Implementation phase** | ✅ All 8 phases complete (P0 sandbox ready) |
+| **Implementation phase** | Phases 1–8 built; production-readiness audit 2026-09-26 found gaps before real money. Engineering tasks and launch gates: [`task.md`](task.md) |
 | **Business readiness** | ⬜ Not started — tracked in [`GO-TO-MARKET.md`](GO-TO-MARKET.md) (entity, licensing, aggregator, ops, pilot) |
 | **Custody phase** | P0 (sandbox) |
-| **Test suite** | 285 backend tests passing (25 files) — `tsc --noEmit` clean |
+| **Test suite** | 410 backend (40 files) + 81 mobile + 24 admin passing; `tsc --noEmit` clean; CI green since 2026-09-26 (PR #19) |
 | **Active branch** | `main` |
-| **Last updated** | 2026-09-20 |
+| **Last updated** | 2026-09-26 |
 | **Follow-up fixes (2026-09-20)** | **Frontend Mock Removal:** `KycScreen` and `DisputeStatusScreen` created. `HomeScreen`, `LinksScreen`, `WalletScreen`, and `TransactionStatusScreen` wired up to use `useEscrowList` and `useEscrow` instead of hardcoded mock data. `ProfileScreen` uses `useUserProfile` and `useKycStatus`. |
 | **Follow-up fixes (2026-09-12)** | Retention purge targets `auth_sessions`+`notifications`; `/health` mounted at root; ledger-integrity introspects checksum column (23 §6, skipped when absent); reconciliation + admin report source custody balances via `CustodyProvider.getBalance` (23 §1); sandbox pooled sum reads `amount_delta`. Live boot verified: all 3 jobs run clean, `/health` + `/v1/health` → 200. |
 | **Tooling (2026-09-12)** | `lint` now runs: ESLint 10 + typescript-eslint 8 flat config (`backend/eslint.config.mjs`), `typescript` pinned to 6.0.3 (typescript-eslint rejects TS 7), script updated to `eslint src`. Gate: 0 errors / 34 warnings (`no-unused-vars` + explicit `any` backlog); Express type augmentation allowed via `no-namespace` with `allowDeclarations`. |
@@ -490,6 +490,8 @@ fix(api): handle 23505 trap in processDepositWebhook
 | 2026-07-25 | Phase 1–5 complete | — | 111 tests passing across 7 files; state machine, escrow CRUD, webhooks, HMAC, idempotency, evidence SHA-256, heuristics, AI triage with P0 mock sandbox |
 | 2026-07-25 | Phase 6 complete | — | 174 tests passing across 11 files; OTP auth (JWT+refresh), KYC tier enforcement, trust-score deterministic model, notification matrix, admin RBAC, 2 migrations (004, 005) |
 | 2026-09-19 | P1 Paystack Integration | Agent | Implemented PaystackPaymentRail and PaystackCustodyProvider, updated webhook HMAC for Paystack signatures, configured dynamic P1 swapping based on CUSTODY_PHASE. |
+| 2026-09-26 | Production-readiness audit | Agent | 146 engineering tasks and M1/M2/M3 launch gates recorded in [`task.md`](task.md). CI had been red on `main` since at least 2026-09-24 (9 failing backend tests, Docker build broken on Node 20). |
+| 2026-09-26 | M1 engineering tasks (PR #19) | Agent | Security hygiene (T1.1, T1.2, T1.4, T1.5); CI green (T2.1, T2.2); Docker-runtime Render blueprint with pre-deploy migrations, boot-time config validation, `/health/ready` (T3.1–T3.7, T3.10, T3.12); trust proxy, `password_hash` migration + staff provisioning, OTP log redaction, CORS validation (T7.1, T7.3, T7.9, T7.21); webhook retry sweeper + dead letter (T6.1, T6.2, T6.3, T6.7). Also fixed: admin image could not start, admin session refresh, reconciliation `'0'` crash, every alert throwing. Remaining M1 items need repo-admin or infra access (task.md §19). |
 
 ---
 

@@ -21,18 +21,18 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [x] | 285 tests passing, `f346315` |
-| 2 | All acceptance criteria met for every subsystem doc (`for_agents/`) | [x] | All checklist items in Progress.md checked |
+| 1 | All 8 phases implemented to spec (no stubs, mocks, or `TODO`s) | [ ] | Not yet: payouts use a placeholder `"unknown"` MSISDN, the buyer's MoMo number is hard-coded in the app, and pay links cannot be resolved. Open items in [`task.md`](task.md) §4, §5, §10 |
+| 2 | All acceptance criteria met for every subsystem doc (`for_agents/`) | [ ] | Not yet: e.g. KYC tier limits not enforced (T8.1), notifications never sent (T9.1), no auto-release or deposit-expiry timers (T5.5, T5.6). See [`task.md`](task.md) |
 | 3 | TypeScript strict mode — zero `any` types in production code | [x] | Only `catch (e: any)` in trust-score.ts and Express rawBody cast (standard patterns) |
 | 4 | `pnpm typecheck` passes with zero errors | [x] | Verified |
 | 5 | `pnpm lint` passes with zero warnings | [ ] | ESLint 10 + typescript-eslint 8 configured (flat config); 0 errors, 34 warnings backlog (unused vars / explicit `any`) |
-| 6 | All tests passing: unit, integration, contract, E2E | [x] | 285 backend + 79 frontend |
+| 6 | All tests passing: unit, integration, contract, E2E | [ ] | Unit + integration green in CI since 2026-09-26 (backend 410, mobile 81, admin 24; PR #19). Mobile Detox E2E never runs (task.md T2.8) |
 | 7 | 50-webhook concurrent race test passes deterministically | [x] | `escrow.integration.test.ts` |
 | 8 | Money-precision tests assert exact equality (zero float drift) | [x] | `payment-precision.test.ts` |
 | 9 | Idempotency survives worker restart | [x] | `webhooks.recovery.integration.test.ts`: a failed webhook stays in `webhook_inbox` and the sweeper applies it exactly once (task.md T6.1/T6.2) |
-| 10 | Append-only enforcement verified (app role cannot UPDATE/DELETE `transaction_ledger`) | [x] | Integration tests + migration 002 REVOKE |
-| 11 | No `console.log`/`console.error` in production code — structured logger only | [x] | Grep verified — zero matches in non-test files |
-| 12 | No secrets, API keys, or tokens in source code or logs (SEC-01) | [x] | Grep verified — zero hardcoded secrets |
+| 10 | Append-only enforcement verified (app role cannot UPDATE/DELETE `transaction_ledger`) | [ ] | Not enforced: migration 002's REVOKE is a no-op unless `app_user` exists, and the app connects as the table owner. Needs a trigger + least-privilege role (task.md T7.2) |
+| 11 | No `console.log`/`console.error` in production code — structured logger only | [ ] | Backend clean since T1.4. Mobile and admin still call `console.*` (task.md T10.5) |
+| 12 | No secrets, API keys, or tokens in source code or logs (SEC-01) | [x] | Seed admin credentials removed (task.md T1.1) and OTPs no longer logged outside dev (T7.9). The old credentials remain in git history: rotate anywhere reused |
 | 13 | `docker-compose up` brings full stack up locally | [x] | `docker-compose.yml` verified |
 
 ### 1.2 Infrastructure Readiness
@@ -85,10 +85,10 @@
 
 | # | Item | Status | Notes |
 |---|------|--------|-------|
-| 1 | Webhook HMAC verification tested against live aggregator sandbox | [x] | `webhook-hmac.test.ts` — code verified; needs live sandbox test |
+| 1 | Webhook HMAC verification tested against live aggregator sandbox | [ ] | Unit/middleware tests pass (`webhook-hmac*.test.ts`); the live Paystack test-mode run is task.md T16.1 |
 | 2 | Replay defense tested (expired timestamp rejected) | [x] | `verify-webhook.ts:60` — 300s window enforced |
 | 3 | Auth brute-force lockout verified (5 failed OTPs → lock) | [x] | `auth.ts:97` — MAX_FAILED_ATTEMPTS=5, tested |
-| 4 | IDOR test: `/escrow/:id` returns 401 for unauthorized party | [x] | `authenticate` middleware on all escrow routes, tested |
+| 4 | IDOR test: `/escrow/:id` returns 401 for unauthorized party | [ ] | Authentication exists, but actor checks do not: any logged-in user can refund, release, or take over a funded escrow via deposit (task.md T5.1–T5.4) |
 | 5 | SQL injection test: all endpoints tested, parameterized queries only | [x] | All queries use pg parameterized `$1` syntax |
 | 6 | Prompt injection test: user text cannot influence LLM instructions | [x] | LLM prompt is static; user data passed as structured context only |
 | 7 | Admin RBAC: non-admin cannot access `/admin/*` endpoints | [x] | `requireRole` on all admin routes, tested |
@@ -135,10 +135,10 @@
 | 4 | Wait for healthy | `docker compose ps` — both should show `healthy` | [ ] |
 | 5 | Run migrations | `cd backend && pnpm db:migrate` | [ ] |
 | 6 | Verify migration state | `docker exec croe-postgres psql -U croe -d croe -c "SELECT * FROM pgmigrations ORDER BY id;"` | [ ] |
-| 7 | Verify ledger revocation | `docker exec croe-postgres psql -U croe -d croe -c "SELECT grant_type FROM information_schema.role_table_grants WHERE table_name='transaction_ledger' AND grantee='croe';"` — should show only SELECT | [ ] |
+| 7 | Verify ledger append-only enforcement | **Not enforced yet** (task.md T7.2): the app connects as the table owner, which ignores grants, and migration 002's REVOKE only applies to an `app_user` role that does not exist. After T7.2 lands, verify that `UPDATE transaction_ledger SET ...` fails when run as the runtime role | [ ] |
 | 8 | Start app | `docker compose up -d app` | [ ] |
 | 9 | Health check | `curl http://localhost:8080/health` — should return `200 OK` | [ ] |
-| 10 | Run full test suite | `cd backend && pnpm test` — 275 tests should pass | [ ] |
+| 10 | Run full test suite | `cd backend && pnpm test` — every test must pass (410 at 2026-09-26) | [ ] |
 | 11 | Configure LLM (optional for P0) | `docker compose up -d ollama` then `docker exec croe-ollama ollama pull <model>` | [ ] |
 | 12 | Smoke test: create escrow | `curl -X POST http://localhost:8080/v1/escrow -H 'Content-Type: application/json' -d '{"vendor_id":"...","buyer_id":"...","amount":"100.00","currency":"GHS"}'` | [ ] |
 | 13 | Verify reconciliation job | Check logs for daily reconciliation run; no mismatch on fresh data | [ ] |
@@ -280,7 +280,7 @@ Mobile builds are not continuous; they are cut intentionally via Expo Applicatio
 
 | Step | Action |
 |------|--------|
-| 1 | **Freeze new disbursements** (automated by reconciliation job) |
+| 1 | **Freeze new disbursements** — **manual today**: the reconciliation job only alerts; there is no automated freeze yet (task.md T4.14). Stop admin payout retries and releases by hand until it is built |
 | 2 | **Investigate** — compare pooled balance, sub-ledger sum, and aggregator statement line by line |
 | 3 | **Identify discrepancy** — missing ledger entry, double-write, or aggregator error |
 | 4 | **Correct** — append corrective ledger entries (never UPDATE the ledger) |
