@@ -27,6 +27,10 @@ services:
         value: production
       - key: PORT
         value: 8080
+      # Exact reverse-proxy hop count for req.ip (T7.1): 1 = Render only,
+      # 2 once Cloudflare is in front (T14.5). Never "true".
+      - key: TRUST_PROXY_HOPS
+        value: 1
       # P0 = sandbox, no real money. Switch to P1 only after M2 (T3.6).
       - key: CUSTODY_PHASE
         value: P0

@@ -77,6 +77,7 @@
 | 17 | `COMMISSION_BPS` / `BUYER_PROTECTION_FEE_BPS` | Platform config (explicit) | [ ] | Defaults 250/150 apply if unset; decide per task.md T4.5 |
 | 18 | `RETENTION_NOTIFICATION_DAYS` / `RETENTION_SESSION_DAYS` | Platform config (explicit) | [ ] | Values from legal (task.md T8.6) |
 | 19 | `NEXT_PUBLIC_API_URL` (admin) | Platform config (build-time) | [ ] | API origin only, no `/v1` |
+| 20 | `TRUST_PROXY_HOPS` | Platform config | [ ] | Exact proxy hop count: `1` behind Render, `2` once Cloudflare is in front (task.md T7.1, T14.5). Wrong value = every user shares one IP (OTP limits and Sybil heuristics break) or clients can spoof `X-Forwarded-For` |
 
 > `render.yaml` declares every row above (task.md T3.6, Appendix B). `JWT_SECRET`, `OTP_PEPPER` and `MOMO_WEBHOOK_SECRET` use `generateValue: true`; the rest are `sync: false` or explicit values. Keep `CUSTODY_PHASE=P0` until the M2 gate.
 

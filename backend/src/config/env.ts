@@ -37,6 +37,20 @@ export function loadEnv(source: Source = process.env) {
     if (condition && !value) problems.push(`${name} is required when ${reason}`);
     return value;
   };
+  const hopCount = (name: string, requiredInProduction: boolean): number => {
+    const raw = read(name);
+    if (!raw) {
+      if (requiredInProduction) {
+        problems.push(`${name} is required when NODE_ENV=production (1 behind Render, 2 behind Cloudflare + Render)`);
+      }
+      return 0;
+    }
+    if (!/^\d$/.test(raw)) {
+      problems.push(`${name} must be the exact number of trusted proxy hops (0-9), got "${raw}"`);
+      return 0;
+    }
+    return Number(raw);
+  };
   const positiveInt = (name: string, fallback: number): number => {
     const raw = read(name);
     if (!raw) return fallback;
@@ -91,6 +105,9 @@ export function loadEnv(source: Source = process.env) {
     S3_ENDPOINT: read("S3_ENDPOINT"),
     S3_ACCESS_KEY: requiredWhen(isProduction, "NODE_ENV=production", "S3_ACCESS_KEY"),
     S3_SECRET_KEY: requiredWhen(isProduction, "NODE_ENV=production", "S3_SECRET_KEY"),
+    // Reverse proxies in front of the API: 1 = Render, 2 = Cloudflare + Render.
+    // An exact count, never `true`, so clients cannot spoof X-Forwarded-For (task.md T7.1).
+    TRUST_PROXY_HOPS: hopCount("TRUST_PROXY_HOPS", isProduction),
     // Comma-separated exact origins. Default: the admin console dev server.
     CORS_ORIGIN: read("CORS_ORIGIN") || "http://localhost:3001",
 

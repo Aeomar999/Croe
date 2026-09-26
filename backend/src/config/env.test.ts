@@ -18,6 +18,7 @@ const LIVE_CREDENTIALS = {
 };
 
 const STORAGE = {
+  TRUST_PROXY_HOPS: "1",
   S3_BUCKET: "croe-evidence",
   S3_REGION: "auto",
   S3_ACCESS_KEY: "access",
@@ -64,6 +65,13 @@ describe("loadEnv (task.md T3.7)", () => {
     expect(() => loadEnv({ ...BASE, ...STORAGE, NODE_ENV: "production" })).toThrow(
       /JWT_SECRET must be at least 32 characters in production/,
     );
+  });
+
+  it("requires an explicit TRUST_PROXY_HOPS in production (task.md T7.1)", () => {
+    const { TRUST_PROXY_HOPS: _omit, ...storageWithoutHops } = STORAGE;
+    expect(() =>
+      loadEnv({ ...BASE, ...storageWithoutHops, NODE_ENV: "production", JWT_SECRET: STRONG, OTP_PEPPER: STRONG }),
+    ).toThrow(/TRUST_PROXY_HOPS is required when NODE_ENV=production/);
   });
 
   it("accepts a complete P0 production (staging) config", () => {

@@ -19,6 +19,12 @@ import usersRoutes from "./routes/users.js";
 
 const app: Application = express();
 
+// Behind Render (and later Cloudflare) every connection comes from the proxy.
+// Trust exactly TRUST_PROXY_HOPS so req.ip is the real client for rate limits,
+// Sybil heuristics and forensics (AUD-02), and a client-supplied extra
+// X-Forwarded-For hop is ignored (task.md T7.1).
+app.set("trust proxy", env.TRUST_PROXY_HOPS);
+
 // Security
 app.use(helmet());
 
